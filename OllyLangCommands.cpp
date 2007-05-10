@@ -1613,7 +1613,9 @@ bool OllyLang::DoGMI(string args)
 		}
 		else if(str == "NAME")
 		{
-			variables["$RESULT"] = (char[SHORTLEN])mod->name;
+			variables["$RESULT"] = (char*)mod->name;
+			if (variables["$RESULT"].str.length() >	SHORTLEN)
+				variables["$RESULT"].str = variables["$RESULT"].str.substr(0,SHORTLEN);
 			return true;
 		}
 		else if(str == "PATH")
