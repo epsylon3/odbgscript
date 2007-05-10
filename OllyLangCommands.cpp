@@ -24,6 +24,16 @@ bool OllyLang::DoADD(string args)
 		return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
+		&& GetDWOpValue(ops[1], dw2))
+	{
+		//concate string with ultoa or buffer with hex value
+		var v1=str1, v2=dw2;
+		v1+=v2;
+
+		args = ops[0] + ", \"" + v1.str +"\"";
+	    return DoMOV(args);
+	}
+	else if (GetSTROpValue(ops[0], str1) 
 		     && GetANYOpValue(ops[1], str2, false))
 	{
 		//Class var for buffer/str concate support

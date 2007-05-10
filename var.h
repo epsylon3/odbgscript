@@ -31,6 +31,8 @@ public:
 	int compare(const long double& rhs) const; 
 
 	string strclean();
+	string strbuffhex();
+	string strbuff();
 
 	var& operator=(const var& rhs);
 	var& operator=(const string& rhs);

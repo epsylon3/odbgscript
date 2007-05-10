@@ -131,17 +131,13 @@ var& var::operator=(const long double& rhs)
 
 var& var::operator+=(const var& rhs)
 {
-	if(vt == rhs.vt)
-	{
-		if(vt == DW)
-			dw += rhs.dw;
-		if(vt == FLT)
-			flt += rhs.flt;
-		if(vt == STR) {
-			//operator+=(const string& rhs)
-
-			*this+=rhs.str;
-		}
+	if(rhs.vt == DW)
+		*this+=rhs.dw;
+	else if(rhs.vt == FLT)
+		*this+=rhs.flt;
+	else if(rhs.vt == STR) {
+		//operator+=(const string& rhs)
+		*this+=rhs.str;
 	}
 	return *this;
 }
@@ -179,6 +175,16 @@ var& var::operator+=(const string& rhs)
 			}
 		}
 
+	} else if(vt == DW) {
+		var v=(string)rhs;
+		
+		if (v.isbuf) {
+			string s=v.strbuff();
+			//need to be tested
+			dw+=(DWORD) ((DWORD*)s.c_str())[0];
+		} else {
+			dw+=(DWORD) ((DWORD*)str.c_str())[0];
+		}
 	}
 
 	return *this;
@@ -188,6 +194,24 @@ var& var::operator+=(const DWORD& rhs)
 {
 	if(vt == DW)
 		dw += rhs;
+	else if(vt == FLT)
+		flt += rhs;
+	else if(vt == STR) {
+		char dwbuf[10];
+		string s;
+		if (isbuf) {
+			//Concate Num Dword to a buffer (4 octets)
+			s = strbuffhex();
+			sprintf(dwbuf, "%08X",rhs);
+			*this = "#"+s+dwbuf+"#";
+		} else {
+			//Add Number to a String
+			s = strupr(ultoa(rhs, dwbuf, 16));
+			//s.assign(dwbuf);
+			str += s;
+			size += s.length();
+		}
+	}
 	return *this;
 }
 
@@ -195,6 +219,11 @@ var& var::operator+=(const int& rhs)
 {
 	if(vt == DW)
 		dw += (DWORD)rhs;
+	else if(vt == FLT)
+		flt += rhs;
+	else if(vt == STR)
+		*this+=(DWORD) rhs;
+
 	return *this;
 }
 
@@ -279,4 +308,20 @@ int var::compare(const long double& rhs) const
 
 string var::strclean() {
 	return CleanString(str);
+}
+
+string var::strbuffhex() {
+	//#001122# to "001122"
+	return str.substr(1,str.length()-2);
+}
+
+string var::strbuff() {
+	//#303132~# to "012"
+	string s=strbuffhex();
+	string tmp=s.substr(0,size);
+//	char* buf = (char*)malloc(size+1);
+	Str2Rgch(s,(char*)tmp.c_str(),size);
+	s=tmp;//,size);
+//	free(buf);
+	return s;
 }
