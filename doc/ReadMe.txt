@@ -60,10 +60,14 @@ Known Problems:
 1.54.3 (10 May 2007)
 + GMI new constants added, (imports, exports, reloc, name, version) see documentation
 + Added Length Information and Hex value to String Variables in Context Menu
++ Enhanced Internal Buffer/String Concatenation : mov test, ##+"123" give #313233# in test
++ Compare Buffer/String is now working
+* Internal compare between different types (except buf/str) returns error -2
 * Better support in Log Window and Context menu of strings containing "\0"
 * removed 00 prefix of dword values in LOG and EVAL commands (%8X to %X)
 * OPENTRACE now also opens trace window if not opened
 * READSTR documentation update, but this function could be renamed/removed
+* FIND commands fix, bad address parameter results 0
 
 1.53.3 (9 May 2007)
 + WRTA has now a third parameter for separator (default \n)

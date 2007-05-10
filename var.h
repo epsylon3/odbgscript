@@ -11,6 +11,7 @@ public:
 	string str;
 	long double flt;
 	vtype vt;
+	bool isbuf;
 	int size;
 
 	var();

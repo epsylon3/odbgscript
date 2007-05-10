@@ -20,14 +20,18 @@ bool OllyLang::DoADD(string args)
 	{
 		args = ops[0] + ", " + ultoa(dw1 + dw2, buffer, 16);
 	    tmp = strupr(ultoa(dw1 + dw2, buffer, 16));
-		setProgLineValue(script_pos+1,tmp);
+		//setProgLineValue(script_pos+1,tmp);
 		return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
 		     && GetANYOpValue(ops[1], str2, false))
 	{
-		args = ops[0] + ", " + "\"" + str1 + str2 + "\"";
-		setProgLineValue(script_pos+1,(str1+str2));
+		//Class var for buffer/str concate support
+		var v1=str1, v2=str2;
+		v1+=v2;
+
+		args = ops[0] + ", " + "\"" + v1.str + "\"";
+		//setProgLineValue(script_pos+1,(str1+str2));
 		return DoMOV(args);
 	}
 	return false;
@@ -572,7 +576,7 @@ bool OllyLang::DoCMP(string args)
 			zf = 0;
 			cf = 0;
 		}
-		else // if(dw1 < dw2)
+		else if(dw1 < dw2)
 		{
 			zf = 0;
 			cf = 1;
@@ -582,7 +586,8 @@ bool OllyLang::DoCMP(string args)
 	else if(GetANYOpValue(ops[0], s1, false) 
 		    && GetANYOpValue(ops[1], s2, false))
 	{
-		int res = s1.compare(s2);
+		var v1=s1,v2=s2;
+		int res = v1.compare(v2); //Error if -2 (type mismatch)
 		if(res == 0)
 		{
 			zf = 1;
@@ -593,7 +598,7 @@ bool OllyLang::DoCMP(string args)
 			zf = 0;
 			cf = 0;
 		}
-		else //if(res < 0)
+		else if(res < 0)
 		{
 			zf = 0;
 			cf = 1;
@@ -1051,11 +1056,19 @@ bool OllyLang::DoFIND(string args)
 
 	if(GetDWOpValue(ops[0], addr) && is_hexwild(finddata))
 	{
+
+		t_memory* tmem = Findmemory(addr);
+
+		if (tmem==NULL) {
+			// search in current mem block
+			variables["$RESULT"] = 0;
+			return true;
+		}
+
 		if(finddata.find('?') != -1)
 		{
 			// Wildcard search
 			char *membuf = 0;
-			t_memory* tmem = Findmemory(addr);
 			int memlen = tmem->size - (addr - tmem->base);
 			membuf = new char[memlen];
 
@@ -1080,7 +1093,6 @@ bool OllyLang::DoFIND(string args)
 		{
 			// Regular search
 			char *membuf = 0;
-			t_memory* tmem = Findmemory(addr);
 			int memlen = tmem->size - (addr - tmem->base);
 
 			int len = Str2Rgch(finddata, buffer, sizeof(buffer));

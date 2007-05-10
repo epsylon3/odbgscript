@@ -502,7 +502,7 @@ bool OllyLang::Step(int forceStep)
 			else if (variables["$RESULT"].vt == FLT)
 				setProgLineResultFloat(script_pos+1,variables["$RESULT"].flt);
 			else {
-				if(variables["$RESULT"].str.length())
+				if(variables["$RESULT"].str.length() && !variables["$RESULT"].isbuf)
 					setProgLineResult(script_pos+1,"\""+variables["$RESULT"].str+"\"");
 				else {
 					setProgLineResult(script_pos+1,variables["$RESULT"].str);
@@ -659,8 +659,10 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 		int p;
 		DWORD dw,result=0;
 		long double flt=0, fltresult=0;
-		string str,strresult="";
-		string var,op,oper="";
+		string str;
+		string svar,op,oper="";
+
+		var vResult;
 
 		for(uint i = 0; i < len; i++) 
 		{
@@ -673,12 +675,12 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 					if (op.find_first_of("\"") != string::npos || preferstr)
 						goto try_str_operation;
 					
-					var=trim(op.substr(0,p));
+					svar=trim(op.substr(0,p));
 
 					var_logging=false;
-					if (!GetFLTOpValue(var,flt)) 
+					if (!GetFLTOpValue(svar,flt)) 
 						//Convert integer to float (but not for first operand)
-						if (oper.length()!=0 && GetDWOpValue(var,dw))
+						if (oper.length()!=0 && GetDWOpValue(svar,dw))
 							flt = dw;
 						else
 							goto try_dw_operation;
@@ -701,11 +703,11 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 
 				} while ( (p=getFLTOperatorPos(op)) != string::npos);
 
-				var=trim(op);
+				svar=trim(op);
 				var_logging=false;
-				if (!GetFLTOpValue(var,flt)) 
+				if (!GetFLTOpValue(svar,flt)) 
 					//Convert integer to float (but not for first operand)
-					if (oper.length()!=0 && GetDWOpValue(var,dw))
+					if (oper.length()!=0 && GetDWOpValue(svar,dw))
 						flt = dw;
 					else
 						goto operation_failed;
@@ -746,10 +748,10 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 					if (op.find_first_of("\"") != string::npos || preferstr)
 						goto try_str_operation;
 					
-					var=trim(op.substr(0,p));
+					svar=trim(op.substr(0,p));
 
 					var_logging=false;
-					if (!GetDWOpValue(var,dw)) 
+					if (!GetDWOpValue(svar,dw)) 
 						goto try_str_operation;
 
 					if (oper.length()==0)
@@ -780,9 +782,9 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 
 				} while ( (p=getDWOperatorPos(op)) != string::npos);
 
-				var=trim(op);
+				svar=trim(op);
 				var_logging=false;
-				if (!GetDWOpValue(var,dw)) 
+				if (!GetDWOpValue(svar,dw)) 
 					goto operation_failed;
 
 				if (oper[0]=='+')
@@ -821,38 +823,41 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				while ((p = getStringOperatorPos(op)) != string::npos) 
 				{
 					
-					var=trim(op.substr(0,p));
+					svar=trim(op.substr(0,p));
 					var_logging=false;
-					if (!GetSTROpValue(var,str)) 
+					if (!GetSTROpValue(svar,str)) 
 						goto operation_failed;
-					
+
 					if (oper.length()==0)
 						//first value
-						strresult = str;
+						vResult = str;
 					else if (oper[0]=='+')
-						strresult += str; 
+						vResult += str; 
 
 					oper = op[p];
 
 					op.erase(0,p+1);
 				} 
 
-				var=trim(op);
+				svar=trim(op);
 
 				var_logging=false;
-				if (!GetSTROpValue(var,str)) 
+				if (!GetSTROpValue(svar,str)) 
 					goto operation_failed;
 				
 				if (oper.length()==0)
 					//first value
-					strresult = str;
+					vResult = str;
 				if (oper[0]=='+')
-					strresult += str;
+					vResult += str;
 
-				ops[i]="\""+strresult+"\"";
+				if (!vResult.isbuf)
+					ops[i]="\""+vResult.str+"\"";
+				else
+					ops[i]=vResult.str;
 
 				if (!sub_operand) 
-					setProgLineValue(script_pos+1,"\""+strresult+"\"");
+					setProgLineValue(script_pos+1,ops[i]);
 				goto operation_ok;
 
 			operation_failed:
@@ -880,8 +885,8 @@ bool OllyLang::CreateOp(string &args, string ops[], uint len, bool preferstr)
 		int p;
 		DWORD dw,result=0;
 		long double flt=0, fltresult=0;
-		string str,strresult="";
-		string var,op,oper="";
+		string str,vResult="";
+		string op,oper="";
 
 		for(uint i = 0; i < len; i++)
 		{
@@ -1016,8 +1021,13 @@ values_ok:
 	return true;
 
 values_ok_str:
-	if (var_logging)
-		setProgLineValue(script_pos+1,"\""+value+"\"");
+	if (var_logging) {
+		var val=value;
+		if(val.isbuf) 
+			setProgLineValue(script_pos+1,value);
+		else
+			setProgLineValue(script_pos+1,"\""+value+"\"");
+	}
 	return true;
 
 }
@@ -1098,8 +1108,8 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 
 values_ok2:
 	if (var_logging) {
-		string val=value;
-		if(UnquoteString(val, '#', '#')) 
+		var val=value;
+		if(val.isbuf) 
 			setProgLineValue(script_pos+1,value);
 		else
 			setProgLineValue(script_pos+1,"\""+value+"\"");
@@ -1463,16 +1473,31 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
 		AppendMenu(mVars,MF_POPUP,(DWORD) menu,p.first.c_str());
 		if (p.second.vt == STR) {
 
-			str = CleanString(p.second.str);
-			AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
+			str=p.second.str;
+			if (UnquoteString(str, '#', '#')) {
 
-			Str2Hex((string) p.second.str,str,p.second.size);
-			str="0x"+str;
-			AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
-			strcpy(buffer,"Length: ");
-			itoa(p.second.str.length(),&buffer[8],10);
-			strcat(buffer,".");
-			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
+				//Buffer String
+				AppendMenu(menu,MF_STRING,cmdIndex,p.second.str.c_str());
+				strcpy(buffer,"Length: ");
+				itoa(str.length()/2,&buffer[8],10);
+				strcat(buffer,".");
+				AppendMenu(menu,MF_STRING,cmdIndex,buffer);
+
+			} else {
+
+				//Standard String
+				str = CleanString(p.second.str);
+				AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
+
+				Str2Hex((string) p.second.str,str,p.second.size);
+				str="0x"+str;
+				AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
+				strcpy(buffer,"Length: ");
+				itoa(p.second.str.length(),&buffer[8],10);
+				strcat(buffer,".");
+				AppendMenu(menu,MF_STRING,cmdIndex,buffer);
+
+			}
 
 		} else if (p.second.vt == FLT) {
 		
