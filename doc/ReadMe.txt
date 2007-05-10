@@ -58,12 +58,12 @@ Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
 1.54.3 (10 May 2007)
-+ GMI new constants added, (imports, exports, reloc) see documentation
++ GMI new constants added, (imports, exports, reloc, name, version) see documentation
 + Added Length Information and Hex value to String Variables in Context Menu
 * Better support in Log Window and Context menu of strings containing "\0"
 * removed 00 prefix of dword values in LOG and EVAL commands (%8X to %X)
 * OPENTRACE now also opens trace window if not opened
-* READSTR doc modified
+* READSTR documentation update, but this function could be renamed/removed
 
 1.53.3 (9 May 2007)
 + WRTA has now a third parameter for separator (default \n)
@@ -721,8 +721,9 @@ GMI addr, info
 Gets information about a module to which the specified address belongs.
 "info" can be :
 MODULEBASE, MODULESIZE, CODEBASE, CODESIZE, MEMBASE, MEMSIZE, 
-ENTRY, NSECT, VERSION, DATABASE, RELOCTABLE, RELOCSIZE
+ENTRY, NSECT, DATABASE, RELOCTABLE, RELOCSIZE
 RESBASE, RESSIZE, IDATABASE, IDATATABLE, EDATATABLE, EDATASIZE
+and strings NAME, PATH, VERSION
  (if you want other info in the future versions plz tell me).
 Sets the reserved $RESULT variable (0 if data not found).
 Example:

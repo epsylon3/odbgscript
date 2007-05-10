@@ -1531,89 +1531,99 @@ bool OllyLang::DoGMI(string args)
 
 		transform(str.begin(), str.end(), str.begin(), toupper);
 		
-		if(str == "MODULEBASE" && mod != NULL)
+		if(mod == NULL)
+		{
+			variables["$RESULT"] = 0;
+			return true;
+		}
+		else if(str == "MODULEBASE")
 		{ 
 			variables["$RESULT"] = (DWORD)mod->base;
 			return true;
 		}
-		else if(str == "MODULESIZE" && mod != NULL)
+		else if(str == "MODULESIZE")
 		{
 			variables["$RESULT"] = (DWORD)mod->size;
 			return true;
 		}
-		else if(str == "CODEBASE" && mod != NULL)
+		else if(str == "CODEBASE")
 		{
 			variables["$RESULT"] = (DWORD)mod->codebase;
 			return true;
 		}
-		else if(str == "CODESIZE" && mod != NULL)
+		else if(str == "CODESIZE")
 		{
 			variables["$RESULT"] = (DWORD)mod->origcodesize;
 			return true;
 		}
-		else if(str == "ENTRY" && mod != NULL)
+		else if(str == "ENTRY")
 		{
 			variables["$RESULT"] = (DWORD)mod->entry;
 			return true;
 		}
-		else if(str == "NSECT" && mod != NULL)
+		else if(str == "NSECT")
 		{
 			variables["$RESULT"] = (DWORD)mod->nsect;
 			return true;
 		}
-		else if(str == "DATABASE" && mod != NULL)
+		else if(str == "DATABASE")
 		{
 			variables["$RESULT"] = (DWORD)mod->database;
 			return true;
 		}
-		else if(str == "EDATATABLE" && mod != NULL)
+		else if(str == "EDATATABLE")
 		{
 			variables["$RESULT"] = (DWORD)mod->edatatable;
 			return true;
 		}
-		else if(str == "EDATASIZE" && mod != NULL)
+		else if(str == "EDATASIZE")
 		{
 			variables["$RESULT"] = (DWORD)mod->edatasize;
 			return true;
 		}
-		else if(str == "IDATABASE" && mod != NULL)
+		else if(str == "IDATABASE")
 		{
 			variables["$RESULT"] = (DWORD)mod->idatabase;
 			return true;
 		}
-		else if(str == "IDATATABLE" && mod != NULL)
+		else if(str == "IDATATABLE")
 		{
 			variables["$RESULT"] = (DWORD)mod->idatatable;
 			return true;
 		}
-		else if(str == "RESBASE" && mod != NULL)
+		else if(str == "RESBASE")
 		{
 			variables["$RESULT"] = (DWORD)mod->resbase;
 			return true;
 		}
-		else if(str == "RESSIZE" && mod != NULL)
+		else if(str == "RESSIZE")
 		{
 			variables["$RESULT"] = (DWORD)mod->ressize;
 			return true;
 		}
-		else if(str == "RELOCTABLE" && mod != NULL)
+		else if(str == "RELOCTABLE")
 		{
 			variables["$RESULT"] = (DWORD)mod->reloctable;
 			return true;
 		}
-		else if(str == "RELOCSIZE" && mod != NULL)
+		else if(str == "RELOCSIZE")
 		{
 			variables["$RESULT"] = (DWORD)mod->relocsize;
 			return true;
 		}
-		else if(str == "VERSION" && mod != NULL)
+		else if(str == "NAME")
 		{
-			variables["$RESULT"] = (DWORD)mod->version;
+			variables["$RESULT"] = (char[SHORTLEN])mod->name;
 			return true;
 		}
-		else if(mod == NULL)
+		else if(str == "PATH")
 		{
-			variables["$RESULT"] = 0;
+			variables["$RESULT"] = (char[MAX_PATH])mod->path;
+			return true;
+		}
+		else if(str == "VERSION")
+		{
+			variables["$RESULT"] = (char*)mod->version;
 			return true;
 		}
 		else
