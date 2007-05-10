@@ -7,6 +7,7 @@ var::var()
 	dw = 0;
 	flt = 0;
 	str = "";
+	size = 0;
 }
 
 var::var(const var& rhs)
@@ -15,6 +16,7 @@ var::var(const var& rhs)
 	dw = rhs.dw;
 	flt = rhs.flt;
 	str = rhs.str;
+	size = rhs.size;
 }
 
 var::var(string& rhs)
@@ -23,6 +25,7 @@ var::var(string& rhs)
 	dw = 0;
 	flt = 0;
 	str = rhs;
+	size = rhs.length();
 }
 
 var::var(DWORD rhs)
@@ -31,6 +34,7 @@ var::var(DWORD rhs)
 	dw = rhs;
 	flt = 0;
 	str = "";
+	size = sizeof(rhs);
 }
 
 var::var(int rhs)
@@ -39,6 +43,7 @@ var::var(int rhs)
 	dw = (DWORD)rhs;
 	flt = 0;
 	str = "";
+	size = sizeof(rhs);
 }
 
 var::var(long double rhs)
@@ -47,6 +52,7 @@ var::var(long double rhs)
 	flt = rhs;
 	dw = 0;
 	str = "";
+	size = sizeof(rhs);
 }
 
 
@@ -56,6 +62,7 @@ var& var::operator=(const var& rhs)
 	dw = rhs.dw;
 	str = rhs.str;
 	flt = rhs.flt;
+	size = rhs.size;
 	return *this;
 }
 
@@ -65,6 +72,7 @@ var& var::operator=(const string& rhs)
 	dw = 0;
 	flt = 0;
 	str = rhs;
+	size = rhs.length();
 	return *this;
 }
 
@@ -74,6 +82,7 @@ var& var::operator=(const DWORD& rhs)
 	dw = rhs;
 	flt = 0;
 	str = "";
+	size = sizeof(rhs);
 	return *this;
 }
 
@@ -83,6 +92,7 @@ var& var::operator=(const int& rhs)
 	dw = (DWORD)rhs;
 	flt = 0;
 	str = "";
+	size = sizeof(rhs);
 	return *this;
 }
 
@@ -92,6 +102,7 @@ var& var::operator=(const long double& rhs)
 	dw = 0;
 	flt = (long double)rhs;
 	str = "";
+	size = sizeof(rhs);
 	return *this;
 }
 
@@ -103,16 +114,20 @@ var& var::operator+=(const var& rhs)
 			dw += rhs.dw;
 		if(vt == FLT)
 			flt += rhs.flt;
-		if(vt == STR)
+		if(vt == STR) {
 			str += rhs.str;
+			size += rhs.size;
+		}
 	}
 	return *this;
 }
 
 var& var::operator+=(const string& rhs)
 {
-	if(vt == STR)
+	if(vt == STR) {
 		str += rhs;
+		size += rhs.length();
+	}
 	return *this;
 }
 
@@ -189,4 +204,8 @@ int var::compare(const long double& rhs) const
 {
 	var tmp(rhs);
 	return compare(tmp);
+}
+
+string var::strclean() {
+	return CleanString(str);
 }

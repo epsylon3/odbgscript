@@ -2222,13 +2222,13 @@ bool OllyLang::DoLOG(string args)
 					if (prefix.compare("DEFAULT") == 0) 
 					{
 						if (variables[ops[0]].str.length()+ops[0].length() < 4094)
-							sprintf(buffer, "%s: %s", ops[0].c_str(), variables[ops[0]].str.c_str());
+							sprintf(buffer, "%s: %s", ops[0].c_str(), variables[ops[0]].strclean().c_str());
 						else
-							strncpy(buffer, variables[ops[0]].str.c_str(), TEXTLEN-1);
+							strncpy(buffer, variables[ops[0]].strclean().c_str(), TEXTLEN-1);
 					} 
 					else 
 					{
-						prefix = prefix + str;
+						prefix = prefix + CleanString(str);
 						strncpy(buffer, prefix.c_str(), TEXTLEN-1);
 					}
 				}

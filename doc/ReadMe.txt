@@ -59,6 +59,9 @@ Known Problems:
 
 1.54.3 (10 May 2007)
 + GMI new constants added, (imports, exports, reloc) see documentation
++ Added Length Information and Hex value to String Variables in Context Menu
+* Better support in Log Window and Context menu of strings containing "\0"
+* removed 00 prefix of dword values in LOG and EVAL commands (%8X to %X)
 * OPENTRACE now also opens trace window if not opened
 * READSTR doc modified
 
@@ -882,7 +885,7 @@ Example:
 	MSG "Script paused"
 
 MSGYN message
------------
+-------------
 Display a message box with specified message and YES and NO buttons.
 Sets the reserved $RESULT variable to 1 if YES is selected and 0 otherwise.
 Example:

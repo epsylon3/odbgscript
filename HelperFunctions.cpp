@@ -193,6 +193,20 @@ void ReplaceString(string &s, char* what, char* with)
 	}
 } 
 
+//Remove characters in string for display
+string CleanString(string &s)
+{
+	string str=s;
+	size_t p;
+	for (p=0; p<s.length(); p++)
+		if (str[p]==0)
+			str[p]=' ';
+	//while ((p = str_display.find_first_of("\0")) != string::npos)
+	//	str_display[p]=' ';
+	return str;
+}
+
+
 bool is_hexwild(string& s)
 {
 	string s2=s;

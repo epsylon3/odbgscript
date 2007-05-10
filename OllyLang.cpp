@@ -1378,9 +1378,6 @@ bool OllyLang::is_register(string s)
 	if(reg_names.find(s) != reg_names.end())
 		return true;
 
-	if(reg_names.find("e"+s) != reg_names.end())
-		return true;
-
 	return false;
 }
 
@@ -1429,7 +1426,7 @@ string OllyLang::ResolveVarsForExec(string in)
 		else if(in[i] == '}')
 		{
 			in_var = false;
-			GetANYOpValue(varname, varname, true);
+			GetANYOpValue(varname, varname, false);
 			out += varname;
 			varname = "";
 		}
@@ -1455,6 +1452,7 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
 	HMENU menu;
 
 	char buffer[32];
+	string str;
 
 	pair<string, var> p;
 	while(iter != variables.end())
@@ -1463,11 +1461,20 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
 		menu = CreateMenu();
 		Popups.push_back(menu);
 		AppendMenu(mVars,MF_POPUP,(DWORD) menu,p.first.c_str());
-		if (p.second.vt == STR)
-		
-			AppendMenu(menu,MF_STRING,cmdIndex,p.second.str.c_str());
-		
-		else if (p.second.vt == FLT) {
+		if (p.second.vt == STR) {
+
+			str = CleanString(p.second.str);
+			AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
+
+			Str2Hex((string) p.second.str,str,p.second.size);
+			str="0x"+str;
+			AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
+			strcpy(buffer,"Length: ");
+			itoa(p.second.str.length(),&buffer[8],10);
+			strcat(buffer,".");
+			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
+
+		} else if (p.second.vt == FLT) {
 		
 			sprintf(buffer,"%.2f",p.second.flt);
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);

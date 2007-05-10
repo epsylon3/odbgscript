@@ -616,7 +616,7 @@ int setProgLineValue(int line, string  &value)
 
 	string values;
 
-	values = value;
+	values = CleanString(value);
 
 	//Variable History
 	if (strcmp(ppl->values,"")) {
@@ -665,7 +665,7 @@ int setProgLineResult(int line, string& result)
 	if (ppl->command[strlen(ppl->command)-1] == ':')
 		return 1;
 
-	strncpy(ppl->result,result.c_str(),PROG_RES_LEN);
+	strncpy(ppl->result,CleanString(result).c_str(),PROG_RES_LEN);
 	if (strcmp(ppl->values,"")) 
 	{
 		if (ppl->values[0] != ',') 

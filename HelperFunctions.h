@@ -24,6 +24,7 @@ int Str2Hex(string &s, string &dst, ulong size);
 long double strtof(string &s);
 int Int2Hex(DWORD dw, string &dst);
 void ReplaceString(string &s, char* what, char* with);
+string CleanString(string &s);
 
 bool ESPRun(void);
 

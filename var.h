@@ -11,6 +11,7 @@ public:
 	string str;
 	long double flt;
 	vtype vt;
+	int size;
 
 	var();
 	var(const var& rhs); 
@@ -27,6 +28,8 @@ public:
 	int compare(const DWORD& rhs) const; 
 	int compare(const int& rhs) const; 
 	int compare(const long double& rhs) const; 
+
+	string strclean();
 
 	var& operator=(const var& rhs);
 	var& operator=(const string& rhs);
