@@ -3,7 +3,7 @@
 using namespace std;
 
 #define VERSIONHI      1               // High plugin version
-#define VERSIONLO      53             // Low plugin version
+#define VERSIONLO      54             // Low plugin version
 
 
 ///long

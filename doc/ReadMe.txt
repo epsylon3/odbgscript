@@ -57,6 +57,11 @@ TODO:
 Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
+1.54.3 (10 May 2007)
++ GMI new constants added, (imports, exports, reloc) see documentation
+* OPENTRACE now also opens trace window if not opened
+* READSTR doc modified
+
 1.53.3 (9 May 2007)
 + WRTA has now a third parameter for separator (default \n)
 * ASK dlg is now TOPMOST
@@ -93,7 +98,7 @@ ADD doesnt supports dw+string itoa concatenation
   *GN
   *LEN bad operand fix
   +DIV,MUL commands
-  +READSTR to read data at addr. (was possible in MOV command too)
+  +READSTR to copy a string (it is possible with MOV too)
   +NEG,NOT asm commands (real asm code)
   +ROL,ROR asm commands but looks like same as SHL, SHR
   *RTU
@@ -711,7 +716,10 @@ Example:
 GMI addr, info
 --------------
 Gets information about a module to which the specified address belongs.
-"info" can be MODULEBASE, MODULESIZE, CODEBASE, CODESIZE, MEMBASE, MEMSIZE, DATABASE, RESBASE, RESSIZE
+"info" can be :
+MODULEBASE, MODULESIZE, CODEBASE, CODESIZE, MEMBASE, MEMSIZE, 
+ENTRY, NSECT, VERSION, DATABASE, RELOCTABLE, RELOCSIZE
+RESBASE, RESSIZE, IDATABASE, IDATATABLE, EDATATABLE, EDATASIZE
  (if you want other info in the future versions plz tell me).
 Sets the reserved $RESULT variable (0 if data not found).
 Example:
@@ -938,9 +946,9 @@ PUSH dw
 -------
 Add dword to stack
 
-READSTR addr, length
+READSTR str, len
 -------
-Read String into $RESULT
+Copy len chars of str into $RESULT
 
 REF addr
 --------

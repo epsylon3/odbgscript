@@ -1551,9 +1551,39 @@ bool OllyLang::DoGMI(string args)
 			variables["$RESULT"] = (DWORD)mod->origcodesize;
 			return true;
 		}
+		else if(str == "ENTRY" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->entry;
+			return true;
+		}
+		else if(str == "NSECT" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->nsect;
+			return true;
+		}
 		else if(str == "DATABASE" && mod != NULL)
 		{
 			variables["$RESULT"] = (DWORD)mod->database;
+			return true;
+		}
+		else if(str == "EDATATABLE" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->edatatable;
+			return true;
+		}
+		else if(str == "EDATASIZE" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->edatasize;
+			return true;
+		}
+		else if(str == "IDATABASE" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->idatabase;
+			return true;
+		}
+		else if(str == "IDATATABLE" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->idatatable;
 			return true;
 		}
 		else if(str == "RESBASE" && mod != NULL)
@@ -1564,6 +1594,21 @@ bool OllyLang::DoGMI(string args)
 		else if(str == "RESSIZE" && mod != NULL)
 		{
 			variables["$RESULT"] = (DWORD)mod->ressize;
+			return true;
+		}
+		else if(str == "RELOCTABLE" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->reloctable;
+			return true;
+		}
+		else if(str == "RELOCSIZE" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->relocsize;
+			return true;
+		}
+		else if(str == "VERSION" && mod != NULL)
+		{
+			variables["$RESULT"] = (DWORD)mod->version;
 			return true;
 		}
 		else if(mod == NULL)
