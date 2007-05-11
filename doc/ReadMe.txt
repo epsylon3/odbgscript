@@ -63,6 +63,7 @@ Known Problems:
 + Enhanced Internal Buffer/String Concatenation : mov test, ##+"123" give #313233# in test
 + Compare Buffer/String is now working
 + Begin Buffer+DW and String+DW (function ADD)
++ Buffer/String Variable Editor is now Binary editor
 * Internal compare between different types (except buf/str) returns error -2
 * Better support in Log Window and Context menu of strings containing "\0"
 * removed 00 prefix of dword values in LOG and EVAL commands (%8X to %X)

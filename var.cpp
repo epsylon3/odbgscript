@@ -311,17 +311,24 @@ string var::strclean() {
 }
 
 string var::strbuffhex() {
-	//#001122# to "001122"
-	return str.substr(1,str.length()-2);
+	if (isbuf)
+		//#001122# to "001122"
+		return str.substr(1,str.length()-2);
+	else {
+		string s;
+		Str2Hex(str,s,size);
+		return s;
+	}
 }
 
 string var::strbuff() {
-	//#303132~# to "012"
-	string s=strbuffhex();
-	string tmp=s.substr(0,size);
-//	char* buf = (char*)malloc(size+1);
-	Str2Rgch(s,(char*)tmp.c_str(),size);
-	s=tmp;//,size);
-//	free(buf);
-	return s;
+	if (isbuf) {
+		//#303132~# to "012"
+		string s=strbuffhex();
+		string tmp=s.substr(0,size);
+		Str2Rgch(s,(char*)tmp.c_str(),size);
+		s=tmp;
+		return s;
+	} else
+		return str;
 }

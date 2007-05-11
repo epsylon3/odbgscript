@@ -1541,14 +1541,26 @@ bool OllyLang::editVariable(int nVar) {
 			p = *iter;
 			if (p.second.vt == STR) {
 				
-				char buffer[TEXTLEN]={0};
-				strncpy(buffer,p.second.str.c_str(),TEXTLEN);
+				t_hexstr hexbuf;
+				hexbuf.n=min(p.second.size,TEXTLEN);
+				ZeroMemory(hexbuf.data,TEXTLEN);
+				ZeroMemory(hexbuf.mask,TEXTLEN);
+				FillMemory(hexbuf.mask,hexbuf.n,0xFF);
+				memcpy(hexbuf.data,p.second.strbuff().c_str(),hexbuf.n);
 				int font = Plugingetvalue(VAL_WINDOWFONT);
 
-				if (Gettextxy("Edit variable...",buffer, 0, 200, font, Rect.left,Rect.bottom)!=-1) {
+				if (Gethexstringxy("Edit variable...",&hexbuf, DIA_DEFHEX, font, 0, Rect.left,Rect.bottom)!=-1) {
 
-					variables[p.first] = buffer;
+					if (variables[p.first].isbuf) {
+						string s;
+						s.assign((char*) hexbuf.data,hexbuf.n);
+						var v = s;
+						variables[p.first] = "#"+v.strbuffhex()+"#";
+					} else {
+						variables[p.first] = (char*) hexbuf.data;
+					}
 				}
+
 			} else if (p.second.vt == DW) {
 
 				Getlongxy("Edit variable...",&p.second.dw, 4, 0, 0, Rect.left,Rect.bottom);
