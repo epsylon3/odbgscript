@@ -74,7 +74,7 @@ OllyLang::OllyLang()
 	commands["bpmc"] = &OllyLang::DoBPMC;
 	commands["bprm"] = &OllyLang::DoBPRM;
 	commands["bpwm"] = &OllyLang::DoBPWM;
-	commands["bpx"] =&OllyLang::DoBPX;
+	commands["bpx"] = &OllyLang::DoBPX;
 	commands["buf"] = &OllyLang::DoBUF;
 	commands["cmp"] = &OllyLang::DoCMP;
 	commands["cmt"] = &OllyLang::DoCMT;
@@ -921,7 +921,7 @@ bool OllyLang::ParseLabels()
 
 bool OllyLang::GetANYOpValue(string op, string &value)
 {
-	if(variables.find(op) != variables.end())
+	if(is_variable(op))
 	{
 		// We have a declared variable
 		if(variables[op].vt == STR)
@@ -1033,7 +1033,7 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 //	if (size>0)
 //		DbgMsg(size,op);
 
-	if(variables.find(op) != variables.end())
+	if(is_variable(op))
 	{
 		// We have a declared variable
 		if(variables[op].vt == STR)

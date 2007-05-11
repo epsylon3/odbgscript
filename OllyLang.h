@@ -139,7 +139,7 @@ private:
 	bool DoBPRM(string args);
 	bool DoBPWM(string args);
 	bool DoBPX(string args);
-	bool DoBUFFER(string args);
+	bool DoBUF(string args);
 	bool DoCMP(string args);
 	bool DoCMT(string args);
 	bool DoCOB(string args);

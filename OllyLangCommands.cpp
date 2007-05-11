@@ -597,7 +597,7 @@ bool OllyLang::DoBUF(string args)
 			variables[op[0]]=v;
 
 			return true;
-			
+
 		}
 	}
 	return false;
@@ -2337,7 +2337,7 @@ bool OllyLang::DoMOV(string args)
 	retry_DoMOV:
 
 	// Check destination
-	if(variables.find(ops[0]) != variables.end())
+	if(is_variable(ops[0]))
 	{
 		// Dest is variable
 		if(GetDWOpValue(ops[1], dw) && maxsize <= 4)
