@@ -19,7 +19,7 @@ bool OllyLang::DoADD(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 + dw2, buffer, 16);
-	    tmp = strupr(ultoa(dw1 + dw2, buffer, 16));
+	    //tmp = strupr(ultoa(dw1 + dw2, buffer, 16));
 		//setProgLineValue(script_pos+1,tmp);
 		return DoMOV(args);
 	}

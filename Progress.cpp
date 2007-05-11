@@ -320,11 +320,11 @@ void initProgTable() {
     ollylang->wndProg.bar.mode[3]=BAR_NOSORT;
 
     ollylang->wndProg.bar.name[4]="Values <---";
-    ollylang->wndProg.bar.defdx[4]=100;
+    ollylang->wndProg.bar.defdx[4]=60;
     ollylang->wndProg.bar.mode[4]=BAR_NOSORT;
 
 	ollylang->wndProg.bar.name[5]="Comments";
-	ollylang->wndProg.bar.defdx[5]=80;
+	ollylang->wndProg.bar.defdx[5]=40;
 	ollylang->wndProg.bar.mode[5]=BAR_NOSORT;
 
 	ollylang->wndProg.bar.nbar=6;

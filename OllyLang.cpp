@@ -1550,14 +1550,14 @@ bool OllyLang::editVariable(int nVar) {
 				int font = Plugingetvalue(VAL_WINDOWFONT);
 
 				if (Gethexstringxy("Edit variable...",&hexbuf, DIA_DEFHEX, font, 0, Rect.left,Rect.bottom)!=-1) {
+					string s;
+					s.assign((char*) hexbuf.data,hexbuf.n);
 
 					if (variables[p.first].isbuf) {
-						string s;
-						s.assign((char*) hexbuf.data,hexbuf.n);
 						var v = s;
 						variables[p.first] = "#"+v.strbuffhex()+"#";
 					} else {
-						variables[p.first] = (char*) hexbuf.data;
+						variables[p.first] = s;
 					}
 				}
 
