@@ -575,7 +575,7 @@ bool OllyLang::DoBPX(string args)
    return false;
 }
 
-bool OllyLang::DoBUFFER(string args)
+bool OllyLang::DoBUF(string args)
 {
 	string op[1];
 
@@ -589,6 +589,15 @@ bool OllyLang::DoBUFFER(string args)
 				variables[op[0]] = "#"+variables[op[0]].strbuffhex()+"#";
 
 			return true;
+
+		} else if (variables[op[0]].vt == DW) {
+
+			var v; v="##";
+			v+=variables[op[0]].dw;
+			variables[op[0]]=v;
+
+			return true;
+			
 		}
 	}
 	return false;
@@ -3194,6 +3203,15 @@ bool OllyLang::DoSTR(string args)
 				variables[op[0]] = variables[op[0]].strbuff();
 
 			return true;
+
+		} else if (variables[op[0]].vt == DW) {
+
+			var v; v="##";
+			v+=variables[op[0]].dw;
+			variables[op[0]]=v.strbuff();
+
+			return true;
+			
 		}
 	}
 	return false;

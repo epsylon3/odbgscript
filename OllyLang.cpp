@@ -75,7 +75,7 @@ OllyLang::OllyLang()
 	commands["bprm"] = &OllyLang::DoBPRM;
 	commands["bpwm"] = &OllyLang::DoBPWM;
 	commands["bpx"] =&OllyLang::DoBPX;
-	commands["buffer"] = &OllyLang::DoBUFFER;
+	commands["buf"] = &OllyLang::DoBUF;
 	commands["cmp"] = &OllyLang::DoCMP;
 	commands["cmt"] = &OllyLang::DoCMT;
 	commands["cob"] = &OllyLang::DoCOB;
