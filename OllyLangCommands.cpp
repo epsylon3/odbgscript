@@ -34,7 +34,18 @@ bool OllyLang::DoADD(string args)
 	    return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
-		     && GetANYOpValue(ops[1], str2, false))
+		     && GetANYOpValue(ops[1], str2))
+	{
+		//Class var for buffer/str concate support
+		var v1=str1, v2=str2;
+		v1+=v2;
+
+		args = ops[0] + ", " + "\"" + v1.str + "\"";
+		//setProgLineValue(script_pos+1,(str1+str2));
+		return DoMOV(args);
+	}
+	else if (GetANYOpValue(ops[0], str1) 
+		     && GetANYOpValue(ops[1], str2))
 	{
 		//Class var for buffer/str concate support
 		var v1=str1, v2=str2;
@@ -564,6 +575,26 @@ bool OllyLang::DoBPX(string args)
    return false;
 }
 
+bool OllyLang::DoBUFFER(string args)
+{
+	string op[1];
+
+	if(!CreateOp(args, op, 1))
+		return false;
+
+	if (is_variable(op[0])) {
+		if (variables[op[0]].vt == STR) {
+
+			if (!variables[op[0]].isbuf)
+				variables[op[0]] = "#"+variables[op[0]].strbuffhex()+"#";
+
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool OllyLang::DoCMP(string args)
 {
 	string ops[2];
@@ -593,8 +624,8 @@ bool OllyLang::DoCMP(string args)
 		}
 		return true;
 	}
-	else if(GetANYOpValue(ops[0], s1, false) 
-		    && GetANYOpValue(ops[1], s2, false))
+	else if(GetANYOpValue(ops[0], s1) 
+		    && GetANYOpValue(ops[1], s2))
 	{
 		var v1=s1,v2=s2;
 		int res = v1.compare(v2); //Error if -2 (type mismatch)
@@ -1014,9 +1045,6 @@ bool OllyLang::DoFIND(string args)
 			errorstr = "Hex string must have an even number of characters!";
 			return false;
 		}
-//	   GetANYOpValue(ops[1], data, false);
-//	   UnquoteString(data, '#', '#');
-//       finddata=data;
 		finddata=ops[1];
 	}
 	else if (UnquoteString(ops[1], '"', '"'))
@@ -1040,7 +1068,7 @@ bool OllyLang::DoFIND(string args)
 	}
 	else if(is_variable(ops[1]))
 	{   
-        GetANYOpValue(ops[1], data, false);
+        GetANYOpValue(ops[1], data);
 		if (UnquoteString(data, '#', '#'))
 		{
 		  finddata=data;	
@@ -1260,7 +1288,7 @@ bool OllyLang::DoFINDOP(string args)
 	}
 	else if(is_variable(ops[1]))
 	{   
-        GetANYOpValue(ops[1], data, false);
+        GetANYOpValue(ops[1], data);
 		if (UnquoteString(data, '#', '#'))
 		{
 		  ops[1]=data;	
@@ -2232,8 +2260,9 @@ bool OllyLang::DoLOG(string args)
 		if (vt==STR || vt==EMP) {		
 			if(GetSTROpValue(ops[0], str))
 			{
-				
-				if(UnquoteString(str, '#', '#')) {
+				var v=str;
+
+				if(v.isbuf) {
 
 					//log a buffer
 					if (prefix.compare("DEFAULT") == 0) 
@@ -2304,18 +2333,17 @@ bool OllyLang::DoMOV(string args)
 		// Dest is variable
 		if(GetDWOpValue(ops[1], dw) && maxsize <= 4)
 		{
+			if (maxsize==0) maxsize=4;
 			dw = resizeDW(dw,maxsize);
-			variables[ops[0]].vt = DW;
 			variables[ops[0]] = dw;
+			variables[ops[0]].size = maxsize;
 		}
 		else if(GetSTROpValue(ops[1], str, maxsize))
 		{
-			variables[ops[0]].vt = STR;
 			variables[ops[0]] = str;
 		}
 		else if(GetFLTOpValue(ops[1], flt))
 		{
-			variables[ops[0]].vt = FLT;
 			variables[ops[0]] = flt;
 		}
 		else 
@@ -2355,8 +2383,10 @@ bool OllyLang::DoMOV(string args)
 					}
 				} 
 				else
-					//R32
-					pt->reg.r[regnr] = dw;
+				{
+						//R32
+						pt->reg.r[regnr] = dw;
+				}
 			}
 			else
 				if(ops[0] == "eip")
@@ -2428,7 +2458,7 @@ bool OllyLang::DoMOV(string args)
 	else if(UnquoteString(ops[0], '[', ']'))
 	{
 		// Dest is memory address
-		int len;
+		//int len;
 		if(tmpops.find('+')!=-1)
 		{
 		    GetAddrOpValue(tmpops,addr);
@@ -2437,34 +2467,28 @@ bool OllyLang::DoMOV(string args)
 		if(GetDWOpValue(ops[0], addr))
 		{
 ok:
-			if(ops[1].length() % 2 == 0 && UnquoteString(ops[1], '#', '#'))
+			if (addr==0)
 			{
-				len = Str2Rgch(ops[1], buffer, sizeof(buffer));	   //BUGFIX	sizeof(buffer)		
-				Writememory(buffer, addr, len, MM_DELANAL|MM_SILENT);
-				Broadcast(WM_USER_CHALL, 0, 0);
+				DoLOG("\"WARNING: writing to address 0 !\"");
+				return true;
 			}
-			else if(GetDWOpValue(ops[1], dw) && maxsize <= 4)
+
+			if (GetDWOpValue(ops[1], dw) && maxsize <= 4)
 			{
 				if (maxsize==0) maxsize=4;
 				dw = resizeDW(dw,maxsize);
 				Writememory(&dw, addr, maxsize, MM_DELANAL|MM_SILENT);
 				Broadcast(WM_USER_CHALL, 0, 0);
 			}
-			else if(GetSTROpValue(ops[1], str, maxsize))
+			else if (GetSTROpValue(ops[1], str, maxsize))
 			{
-				if (UnquoteString(str, '#', '#')) 
-				{
-					len = Str2Rgch(str, buffer, sizeof(buffer));	// bugfix sizeof(buffer)			
-					Writememory(buffer, addr, len, MM_DELANAL|MM_SILENT);			
-				} 
-				else 
-				{
-					strcpy(buffer, str.c_str());
-					Writememory(buffer, addr, str.length(), MM_DELANAL|MM_SILENT);
-				}
+				var v=str;
+				if (maxsize==0) maxsize=v.size;
+				maxsize=min(maxsize,v.size);
+				Writememory((void*)v.strbuff().c_str(), addr, maxsize, MM_DELANAL|MM_SILENT);			
 				Broadcast(WM_USER_CHALL, 0, 0);
 			}
-			else if(GetFLTOpValue(ops[1], flt))
+			else if (GetFLTOpValue(ops[1], flt))
 			{
 				Writememory(&flt, addr, 8, MM_DELANAL|MM_SILENT);				
 				Broadcast(WM_USER_CHALL, 0, 0);
@@ -2502,7 +2526,7 @@ bool OllyLang::DoMSG(string args)
 		return false;
 
 	string msg;
-	if(GetANYOpValue(ops[0], msg, false))
+	if(GetANYOpValue(ops[0], msg))
 	{
 		if (wndProg.hw!=NULL)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
@@ -2779,7 +2803,7 @@ bool OllyLang::DoREADSTR(string args)
 		GetDWOpValue(ops[1], maxsize);
         GetSTROpValue(ops[0], str, maxsize);
 
-        variables["$RESULT"] = str;   
+        variables["$RESULT"] = str;
 		return true;
 	}
     return false;
@@ -3156,6 +3180,25 @@ bool OllyLang::DoSTO(string args)
 	return true;
 }
 
+bool OllyLang::DoSTR(string args)
+{
+	string op[1];
+
+	if(!CreateOp(args, op, 1))
+		return false;
+
+	if (is_variable(op[0])) {
+		if (variables[op[0]].vt == STR) {
+
+			if (variables[op[0]].isbuf)
+				variables[op[0]] = variables[op[0]].strbuff();
+
+			return true;
+		}
+	}
+	return false;
+}
+
 bool OllyLang::DoSUB(string args)
 {
 	string ops[2];
@@ -3351,7 +3394,7 @@ bool OllyLang::DoWRT(string args)
 	string filename,data;
 
 	if(GetSTROpValue(ops[0], filename) 
-		&& GetANYOpValue(ops[1], data, false))
+		&& GetANYOpValue(ops[1], data))
 	{
         if (filename.find(":\\") != string::npos)
 		  path = filename;
@@ -3392,7 +3435,7 @@ bool OllyLang::DoWRTA(string args)
 	string filename,data;
 
 	if(GetSTROpValue(ops[0], filename) 
-		&& GetANYOpValue(ops[1], data, false))
+		&& GetANYOpValue(ops[1], data))
 	{
         if (filename.find(":\\") != string::npos)
 		  path = filename;

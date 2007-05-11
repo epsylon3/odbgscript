@@ -30,14 +30,16 @@ public:
 	int compare(const int& rhs) const; 
 	int compare(const long double& rhs) const; 
 
-	string strclean();
-	string strbuffhex();
-	string strbuff();
+	string strclean(void);
+	string strbuffhex(void);
+	string strbuff(void);
 
 	var& operator=(const var& rhs);
 	var& operator=(const string& rhs);
 	var& operator=(const DWORD& rhs);
 	var& operator=(const int& rhs);
+	var& operator=(unsigned short& rhs);
+	var& operator=(unsigned char& rhs);
 	var& operator=(const long double& rhs);
 
 	var& operator+=(const var& rhs);

@@ -75,6 +75,7 @@ OllyLang::OllyLang()
 	commands["bprm"] = &OllyLang::DoBPRM;
 	commands["bpwm"] = &OllyLang::DoBPWM;
 	commands["bpx"] =&OllyLang::DoBPX;
+	commands["buffer"] = &OllyLang::DoBUFFER;
 	commands["cmp"] = &OllyLang::DoCMP;
 	commands["cmt"] = &OllyLang::DoCMT;
 	commands["cob"] = &OllyLang::DoCOB;
@@ -157,6 +158,7 @@ OllyLang::OllyLang()
 	commands["shr"] = &OllyLang::DoSHR;
 	commands["sti"] = &OllyLang::DoSTI;
 	commands["sto"] = &OllyLang::DoSTO;
+	commands["str"] = &OllyLang::DoSTR;
 	commands["sub"] = &OllyLang::DoSUB;
 	commands["tc"] = &OllyLang::DoTC;
 	commands["test"] = &OllyLang::DoTEST;
@@ -917,7 +919,7 @@ bool OllyLang::ParseLabels()
 	return false;
 }
 
-bool OllyLang::GetANYOpValue(string op, string &value, bool hex8char)
+bool OllyLang::GetANYOpValue(string op, string &value)
 {
 	if(variables.find(op) != variables.end())
 	{
@@ -925,16 +927,13 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8char)
 		if(variables[op].vt == STR)
 		{
 			// It's a string var, return value
-			value = variables[op].str;			
+			value = variables[op].str;
 			goto values_ok_str;
 		}
 		else if(variables[op].vt == DW)
 		{
-			char buffer[255] = {0};
-			if(hex8char)
-				sprintf(buffer, "%08X", variables[op].dw);
-			else
-				sprintf(buffer, "%X", variables[op].dw);
+			char buffer[12] = {0};
+			sprintf(buffer, "%X", variables[op].dw);
 			value = buffer;
 			goto values_ok;
 		}
@@ -1004,11 +1003,8 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8char)
 		DWORD dw=0;
 		if (GetDWOpValue(op,dw)) 
 		{
-			char buffer[255] = {0};
-			if(hex8char)
-				sprintf(buffer, "0%08X", dw);
-			else
-				sprintf(buffer, "%X", dw);
+			char buffer[12] = {0};
+			sprintf(buffer, "%X", dw);
 			value = buffer;
 			goto values_ok;
 		}
@@ -1043,19 +1039,28 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 		if(variables[op].vt == STR)
 		{
 			// It's a string var, return value
-			value = variables[op].str;
+			if (size<variables[op].size && (size != 0))
+				value = variables[op].strbuff().substr(0,size);
+			else
+				value = variables[op].str;
 			goto values_ok2;
 		}
 		return false;
 	}
 	else if(UnquoteString(op, '"', '"')) 
 	{
-		value = op;
+		if (size<op.length() && (size != 0))
+			value = op.substr(0,size);
+		else
+			value = op;
 		return true; 
 	}
 	else if(UnquoteString(op, '#', '#')) 
 	{
-		value = "#"+op+"#";
+		if ((size*2)<op.length() && (size != 0))
+			value = "#"+op.substr(0,size*2)+"#";
+		else
+			value = "#"+op+"#";
 		return true;
 	}
 	else if(UnquoteString(op, '[', ']'))
@@ -1083,12 +1088,12 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 				Readmemory(buffer, addr, size, MM_SILENT);
 				buffer[size] = 0;
 				value.assign(buffer,size);
+				if (strlen(buffer) != size) {
+					var v=value;
+					value="#"+v.strbuffhex()+"#";
+				}
 				delete[] buffer;
-/*				string hex;
-				Str2Hex(value,hex,size);
-				if (hex.find('00') != string::npos)
-					value = "#"+hex+"#";
-*/
+
 			} else {
 				char buffer[STRING_READSIZE] = {0};
 				Readmemory(buffer, addr, STRING_READSIZE, MM_SILENT);
@@ -1436,7 +1441,7 @@ string OllyLang::ResolveVarsForExec(string in)
 		else if(in[i] == '}')
 		{
 			in_var = false;
-			GetANYOpValue(varname, varname, false);
+			GetANYOpValue(varname, varname);
 			out += varname;
 			varname = "";
 		}
@@ -1473,31 +1478,17 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
 		AppendMenu(mVars,MF_POPUP,(DWORD) menu,p.first.c_str());
 		if (p.second.vt == STR) {
 
-			str=p.second.str;
-			if (UnquoteString(str, '#', '#')) {
-
-				//Buffer String
-				AppendMenu(menu,MF_STRING,cmdIndex,p.second.str.c_str());
-				strcpy(buffer,"Length: ");
-				itoa(str.length()/2,&buffer[8],10);
-				strcat(buffer,".");
-				AppendMenu(menu,MF_STRING,cmdIndex,buffer);
-
+			if (p.second.size < 50) {
+				AppendMenu(menu,MF_STRING,cmdIndex,("\""+p.second.strclean()+"\"").c_str());
+				AppendMenu(menu,MF_STRING,cmdIndex,("#"+p.second.strbuffhex()+"#").c_str());
 			} else {
-
-				//Standard String
-				str = CleanString(p.second.str);
-				AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
-
-				Str2Hex((string) p.second.str,str,p.second.size);
-				str="0x"+str;
-				AppendMenu(menu,MF_STRING,cmdIndex,str.c_str());
-				strcpy(buffer,"Length: ");
-				itoa(p.second.str.length(),&buffer[8],10);
-				strcat(buffer,".");
-				AppendMenu(menu,MF_STRING,cmdIndex,buffer);
-
+				AppendMenu(menu,MF_STRING,cmdIndex,("\""+p.second.strclean().substr(0,50)+"...").c_str());
+				AppendMenu(menu,MF_STRING,cmdIndex,("#"+p.second.strbuffhex().substr(0,50)+"...").c_str());
 			}
+			strcpy(buffer,"Length: ");
+			itoa(p.second.size,&buffer[8],10);
+			strcat(buffer,".");
+			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
 
 		} else if (p.second.vt == FLT) {
 		

@@ -139,6 +139,7 @@ private:
 	bool DoBPRM(string args);
 	bool DoBPWM(string args);
 	bool DoBPX(string args);
+	bool DoBUFFER(string args);
 	bool DoCMP(string args);
 	bool DoCMT(string args);
 	bool DoCOB(string args);
@@ -221,6 +222,7 @@ private:
 	bool DoSHR(string args);
 	bool DoSTI(string args);
 	bool DoSTO(string args);
+	bool DoSTR(string args);
 	bool DoSUB(string args);
 	bool DoTC(string args);
 	bool DoTEST(string args);
@@ -247,7 +249,7 @@ private:
 	bool GetAddrOpValue(string op, DWORD &value);
 	bool GetFLTOpValue(string op, long double &value);
 	bool GetSTROpValue(string op, string &value, int size=0);
-	bool GetANYOpValue(string op, string &value, bool hex8char);
+	bool GetANYOpValue(string op, string &value);
 	void LogRegNr(string& name);
 	int GetRegNr(string& name);
 	bool is_register(string s);

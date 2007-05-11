@@ -242,7 +242,7 @@ int Str2Hex(string &s, string &dst, ulong size)
 	dst="";
 	while(i < size)
 	{
-		sprintf(c,"%02x",s[i]);
+		sprintf(c,"%02X",s[i]);
 		dst.append(c);
 		i++;
 	}
@@ -252,7 +252,7 @@ int Str2Hex(string &s, string &dst, ulong size)
 int Int2Hex(DWORD dw, string &dst) 
 {
 	char buffer [9];
-	dw = sprintf("%x",buffer,dw);
+	dw = sprintf("%X",buffer,dw);
 	dst = buffer; 
 	return dw;
 }

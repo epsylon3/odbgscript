@@ -58,6 +58,7 @@ Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
 1.54.3 (10 May 2007)
++ BUFFER, STR commands added to convert string to buffer or buffer to string
 + GMI new constants added, (imports, exports, reloc, name, version) see documentation
 + Added Length Information and Hex value to String Variables in Context Menu
 + Enhanced Internal Buffer/String Concatenation : mov test, ##+"123" give #313233# in test
@@ -510,6 +511,10 @@ BPWM addr, size
 Set memory breakpoint on write. Size is size of memory in bytes.
 Example:
 	bpwm 401000, FF
+
+BUFFER var
+----------
+Converts variable to a Buffer
 
 CMP dest, src
 -------------
@@ -1073,6 +1078,10 @@ STO
 Execute F8 in OllyDbg. STep Over.
 Example:
 	sto
+
+STR var
+-------
+Converts variable to a String
 
 SUB dest, src
 -------------
