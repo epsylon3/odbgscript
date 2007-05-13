@@ -57,7 +57,7 @@ TODO:
 Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
-1.54.3 (10 May 2007)
+1.54.3 (13 May 2007)
 + BUF, STR commands added to convert string to buffer or buffer to string
 + GMI new constants added, (imports, exports, reloc, name, version) see documentation
 + Added Length Information and Hex value to String Variables in Context Menu
@@ -65,6 +65,7 @@ Known Problems:
 + Compare Buffer/String is now working
 + Begin Buffer+DW and String+DW (function ADD)
 + Buffer/String Variable Editor is now Binary editor
+- Removed MRU menu and some commands from Main Olly Menu
 * Internal compare between different types (except buf/str) returns error -2
 * Better support in Log Window and Context menu of strings containing "\0"
 * removed 00 prefix of dword values in LOG and EVAL commands (%8X to %X)

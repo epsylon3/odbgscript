@@ -41,6 +41,7 @@ void mruAddFile(char* szFilePath) {
 }
 
 //ON MAIN MENU, ITS CALLED ONCE
+/*
 int  mruGetMenu(char* buf) {
 
 	char buf2[4096] = {0};
@@ -90,6 +91,7 @@ int  mruGetMenu(char* buf) {
 
 	return p;
 }
+*/
 
 //ON DISASM WINDOW, ITS CALLED ON CONTEXT MENU
 int mruGetCurrentMenu(char* buf) {

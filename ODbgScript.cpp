@@ -156,17 +156,17 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
 	case PM_MAIN:
 	//MRU Menu content, actions are 21..25
 		ZeroMemory(buff, sizeof(buff));
-		strcpy(buff, "Run &Script{0 Open...|");
-		mruGetMenu(&buff[strlen(buff)]);
+		//strcpy(buff, "Run &Script{0 Open...|");
+		//mruGetMenu(&buff[strlen(buff)]);
 		strcpy(&buff[strlen(buff)],
-		"}|"
+/*		"}|"
 		"1 Abort"
 		",2 Pause"
 		",3 Resume"
 		",4 Step"
 		"|"
-		"30 Script &Window..."
-		",31 Script &Log..."
+*/		"30 Script &Window..."
+		",31 &Log Window..."
 		"|"
 		"10 &About"
 //		",11 TEST"
@@ -316,15 +316,15 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		break;
 
     case 10:
-		sprintf(s,"ODbgScript plugin v%i.%i\n"
+		sprintf(s,"ODbgScript plugin v%i.%i.%i\n"
 			      "by Epsylon3@gmail.com\n\n"
 				  "From OllyScript 0.92 written by SHaG\n"
-				  "and chinese enhancements from hnuqiong\n\n"
+				  "and chinese enhancements from hnhuqiong\n\n"
 				  "PE dumper by R@dier\n"
 				  "Byte replacement algo by Hex\n\n"
 				  "http://www.woodmann.com/forum/ \n\n"
 				  "Compiled %s %s",
-			VERSIONHI,VERSIONLO, __DATE__, __TIME__);
+			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
 		MessageBox(hwmain,s,"ODbgScript",MB_OK|MB_ICONINFORMATION);
 		break;
 	case 21: // MRU List
