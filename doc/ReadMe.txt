@@ -1,5 +1,6 @@
 -------------------------------
 ODbgScript English plugin by E3
+($Revision$)
 
 From
 OllyScript plugin v0.92 by SHaG
