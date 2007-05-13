@@ -64,6 +64,7 @@ x BPHWS second parameter is now optional (default "x")
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
 * Resume on Breakpoint fixed (SPACE)
+* eip could now be affected without problems
 
 Note: GAPI function could be deleted, hnhu... has not finished the code
 

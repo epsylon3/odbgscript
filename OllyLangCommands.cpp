@@ -2477,8 +2477,12 @@ bool OllyLang::DoMOV(string args)
 				}
 			}
 			else
-				if(ops[0] == "eip")
+				if(ops[0] == "eip") {
 					pt->reg.ip = dw;
+					//synch disasm window position
+					Setdisasm(dw,1,CPU_ASMHIST);
+				}
+
 			pt->reg.modified = 1;
 			pt->regvalid = 1;
 			Broadcast(WM_USER_CHREG, 0, 0);
