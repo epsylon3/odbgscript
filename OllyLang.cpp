@@ -515,8 +515,21 @@ bool OllyLang::Step(int forceStep)
 		}
 		
 		script_pos++;
-		pgr_scriptpos=script_pos+1;
 		
+		// Check for a label after
+		if(script_pos < script.size()) {
+			
+			codeLine = trim(script[script_pos]);
+		
+			while(codeLine[codeLine.length() - 1] == ':' && script_pos < script.size())
+			{
+				script_pos++;
+				codeLine = trim(script[script_pos]);
+			}
+		}
+
+		pgr_scriptpos=script_pos+1;
+
 		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);			
 		
