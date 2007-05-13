@@ -34,6 +34,9 @@ public:
 
 	//to know if dialog is opened, to destroy on reset
 	HWND hwndinput;
+	
+	//last breakpoint reason
+	int break_reason;
 
 	// Constructor & destructor
 	OllyLang();
@@ -55,7 +58,7 @@ public:
 	bool jumpToLine(int number);
 
 	// "Events"
-	bool OnBreakpoint();
+	bool OnBreakpoint(int reason, int details);
 	bool OnException(DWORD ExceptionCode);
 
 	// Variables that exist
@@ -166,6 +169,8 @@ private:
 	bool DoFINDMEM(string args);
 	bool DoFREE(string args);
 	bool DoGAPI(string args);
+	bool DoGBPR(string args);
+	bool DoGCI(string args);
 	bool DoGCMT(string args);
 	bool DoGMEMI(string args);
 	bool DoGMI(string args);
@@ -174,6 +179,7 @@ private:
 	bool DoGPA(string args);
 	bool DoGPP(string args);
 	bool DoGPI(string args);
+	bool DoGRO(string args);
 	bool DoHANDLE(string args);
 	bool DoINC(string args);
 	bool DoITOA(string args);

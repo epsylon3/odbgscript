@@ -58,8 +58,14 @@ Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
 1.55.1 (13 May 2007)
+x BPHWS second parameter is now optional (default "x")
++ Added GCI Command to Get info on disasm command
++ Added GRO Command Get Relative Offset ("procedure+offset")
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
+* Resume on Breakpoint fixed (SPACE)
+
+Note: GAPI function could be deleted, hnhu... has not finished the code
 
 1.54.3 (13 May 2007)
 + BUF, STR commands added to convert string to buffer or buffer to string
@@ -499,9 +505,9 @@ Delete hardware breakpoint at a specified address
 Example:
 	bphwc 401000
 	
-BPHWS addr, mode
-----------------
-Set hardware breakpoint. Mode can be "r" - read, "w" - write or "x" - execute.
+BPHWS addr, [mode]
+------------------
+Set hardware breakpoint. Mode can be "r" - read, "w" - write or "x" - execute (default).
 Example:
 	bphws 401000, "x"
 
@@ -705,9 +711,9 @@ Example
     alloc 1000
 	free $RESULT, 1000
 
-GAPI addr
+GAPI addr #BETA#
 ---------
-Chenese Translation:
+## Chinese Translation ## 
 Obtains the code place API call information
 The API information saves in preservation variable $RESULT.
 If the symbolic name is a API function, then
@@ -715,6 +721,7 @@ $RESULT saves the API information
 $RESULT_1 save link base/storehouse (for instance kernel32)
 $RESULT_2 save symbolic name (for instance ExitProcess).
 $RESULT_3 save calling location (for instance call xxxxx)
+$RESULT_4 save destination
 
 Notice: This and the GN difference is GN must point to the IAT address
 But GAPI gives the code address to be possible directly to obtain API
@@ -723,6 +730,18 @@ If here does not clear here the software break point, will create this not to be
 Example:
 	GAPI 401000 (call kernel32.ExitProcess)
 	GAPI the EIP // examined whether the current code is API calls, is not then returns to 0
+
+GBPR
+----
+Gets last breakpoint reason, affects $RESULT with dword value
+(see plugin.h PP_EVENT for values...)
+
+GCI addr, info
+--------------
+Gets information about asm command
+"info" can be DESTINATION for Destination of jump/call/return
+Example:
+	GCI eip, DESTINATION
 
 GCMT addr
 ---------
@@ -772,9 +791,14 @@ Example:
 	gpa "MessageBoxA", "user32.dll" // After this $RESULT is the address of MessageBoxA and you can do "bp $RESULT".
 
 GPI key
--------------
+-------
 Gets process information, one of :
 HPROCESS,PROCESSID,HMAINTHREAD,MAINTHREADID,MAINBASE,PROCESSNAME,EXEFILENAME,CURRENTDIR,SYSTEMDIR
+
+GRO addr
+--------
+Get Relative Offset
+When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
 
 HANDLE x, y, class
 ---------------------

@@ -100,7 +100,7 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 	{
 		EXCEPTION_DEBUG_INFO edi = debugevent->u.Exception;
 		if(edi.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
-			ollylang->OnBreakpoint();
+			ollylang->OnBreakpoint(PP_EXCEPTION,EXCEPTION_DEBUG_EVENT);
 		else if(edi.ExceptionRecord.ExceptionCode != EXCEPTION_SINGLE_STEP)
 			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
 		else
@@ -114,7 +114,7 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 				GetThreadContext(t->thread, &context);
 
 				if(t->reg.ip == context.Dr0 || t->reg.ip == context.Dr1 || t->reg.ip == context.Dr2 || t->reg.ip == context.Dr3) {
-					ollylang->OnBreakpoint();
+					ollylang->OnBreakpoint(PP_HWBREAK,t->reg.ip);
 				}
 
 			}
@@ -222,7 +222,7 @@ extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_
 		case PP_INT3BREAK:
 		case PP_HWBREAK:
 		case PP_MEMBREAK:
-			ollylang->OnBreakpoint();
+			ollylang->OnBreakpoint(reasonex,dummy);
 			break;
 		case PP_EXCEPTION:
 		case PP_ACCESS:
@@ -506,6 +506,22 @@ extc void _export cdecl ODBG_Pluginreset()
 	} 
 	else 
 		ollylang->Reset();
+}
+
+int ODBG_Plugincmd(int reason,t_reg *reg,char *cmd)
+/*
+OllyDbg will call it each time the debugged application pauses on conditional logging breakpoint that specifies commands to be passed to plugins
+
+reason - reason why program was paused, currently always PP_EVENT;
+reg - pointer to registers of thread that caused application to pause, may be NULL;
+cmd - null-terminated command to plugin.
+*/
+{
+#ifdef _DEBUG
+			Addtolist(0, -1, cmd);
+			return 0;
+#endif
+	return 0; //dont stop to other plugins
 }
 
 // OllyDbg calls this optional function when user wants to terminate OllyDbg.

@@ -378,8 +378,11 @@ bool OllyLang::DoBPHWS(string args)
 {
 	string ops[2];
 
-	if(!CreateOperands(args, ops, 2))
-		return false;
+	if(!CreateOperands(args, ops, 2)){
+		if(!CreateOperands(args, ops, 1))
+			return false;
+		else ops[1]="\"x\"";
+	}
 
 	DWORD dw1;
 	string str1;
@@ -1472,7 +1475,7 @@ bool OllyLang::DoGAPI(string args)
 				variables["$RESULT_4"] = disasm.jmpaddr; 
 
 			}
-			}
+		}
 		if (test!=NULL)   {
 			t_disasm disasm;
 			size=Disasm(buffer,size,addr,NULL,&disasm,DISASM_CODE,NULL);
@@ -1498,6 +1501,53 @@ bool OllyLang::DoGAPI(string args)
 		return true;
 	}
     return false;
+}
+
+//Get Breakpoint Reason
+bool OllyLang::DoGBPR(string args)
+{
+	string ops[1];
+	DWORD addr;
+
+	if(!CreateOperands(args, ops, 1))
+	{
+
+		variables["$RESULT"] = break_reason;
+
+	}
+	return true;
+//	return false;
+}
+
+//Get Code Information
+bool OllyLang::DoGCI(string args)
+{
+    string ops[2], param;
+	DWORD addr,size;
+
+	if(!CreateOp(args, ops, 2))
+		return false;
+
+	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", param)){
+
+		transform(param.begin(), param.end(), param.begin(), toupper);
+
+		byte buffer[MAXCMDSIZE];
+		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+
+		if (size>0) {
+			t_disasm disasm;
+			size=Disasm(buffer,size,addr,NULL,&disasm,DISASM_DATA,NULL);
+
+			if (size<=0)
+				return false;
+			else if (param == "DESTINATION") {
+				variables["$RESULT"] = disasm.jmpaddr; 
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool OllyLang::DoGCMT(string args)
@@ -1910,6 +1960,35 @@ bool OllyLang::DoGPP(string args)
 		}
 	}
 	return true;
+}
+
+//Get Relative Offset
+bool OllyLang::DoGRO(string args)
+{
+	string ops[1];
+	DWORD addr;
+
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	if(GetDWOpValue(ops[0], addr))
+	{
+		char sym[4096] = {0};
+
+		int size = Decoderelativeoffset(addr, ADC_NONTRIVIAL, sym, 4096);
+		if (size > 0)
+		{
+			variables["$RESULT"] = sym;
+		}
+		else
+		{
+			variables["$RESULT"] = 0;
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 bool OllyLang::DoHANDLE(string args)

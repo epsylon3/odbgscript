@@ -102,6 +102,8 @@ OllyLang::OllyLang()
 	commands["findmem"] = &OllyLang::DoFINDMEM;
 	commands["free"] = &OllyLang::DoFREE;
 	commands["gapi"] = &OllyLang::DoGAPI;
+	commands["gbpr"] = &OllyLang::DoGBPR;
+	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
 	commands["gmemi"] = &OllyLang::DoGMEMI;
 	commands["gmi"] = &OllyLang::DoGMI;
@@ -110,6 +112,7 @@ OllyLang::OllyLang()
 	commands["gpa"] = &OllyLang::DoGPA;
 	commands["gpi"] = &OllyLang::DoGPI;
 	commands["gpp"] = &OllyLang::DoGPP;
+	commands["gro"] = &OllyLang::DoGRO;
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["inc"] = &OllyLang::DoINC;
 	commands["itoa"] = &OllyLang::DoITOA;
@@ -525,8 +528,14 @@ bool OllyLang::Step(int forceStep)
 	return true;
 }
 
-bool OllyLang::OnBreakpoint()
+bool OllyLang::OnBreakpoint(int reason, int details)
 {
+	break_reason=reason;
+	
+		//debug hint
+		if(reason&&!PP_HWBREAK)
+		break_reason=reason;
+
 	if(EOB_row > -1)
 	{
 		script_pos = EOB_row;
