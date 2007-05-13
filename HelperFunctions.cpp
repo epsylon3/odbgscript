@@ -217,6 +217,9 @@ bool is_hexwild(string& s)
 bool UnquoteString(string &s, char cstart, char cend)
 {
 	//using namespace regex;
+	if(s.length() == 0)
+		return false;
+
 	if( s.at(0) == cstart && s.at(s.length() - 1) == cend)
 	{
 		s = s.substr(1, s.length() - 2);

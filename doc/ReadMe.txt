@@ -63,8 +63,9 @@ x BPHWS second parameter is now optional (default "x")
 + Added GRO Command Get Relative Offset ("procedure+offset")
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
-* Resume on Breakpoint fixed (SPACE)
+* negative values fixed
 * eip could now be affected without problems
+* Resume on Breakpoint fixed (SPACE)
 
 Note: GAPI function could be deleted, hnhu... has not finished the code
 
