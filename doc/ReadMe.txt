@@ -57,6 +57,10 @@ TODO:
 Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
+1.55.1 (13 May 2007)
++ Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
++ Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
+
 1.54.3 (13 May 2007)
 + BUF, STR commands added to convert string to buffer or buffer to string
 + GMI new constants added, (imports, exports, reloc, name, version) see documentation

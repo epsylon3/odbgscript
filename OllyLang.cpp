@@ -355,13 +355,8 @@ bool OllyLang::LoadScript(LPSTR file)
 
 bool OllyLang::Pause()
 {
-//	if(script_state == SS_RUNNING || script_state == SS_LOADED)
-//	{
-		script_state = SS_PAUSED;
-		return true;
-//	}
-
-//	return false;
+	script_state = SS_PAUSED;
+	return true;
 }
 
 bool OllyLang::Reset()
@@ -385,13 +380,10 @@ bool OllyLang::Reset()
 
 bool OllyLang::Resume()
 {
-//	if(script_state == SS_PAUSED)
-//	{
-		script_state = SS_RUNNING;
-		return true;
-//	}
-
-//	return false;
+	Pause();
+	Step(1);
+	script_state = SS_RUNNING;
+	return true;
 }
 
 bool OllyLang::Step(int forceStep)

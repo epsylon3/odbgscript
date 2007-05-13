@@ -66,7 +66,7 @@ t_wndprog_data *ppl;
 				AppendMenu(menu,MF_DEFAULT,31,"&Follow\tEnter");
 				AppendMenu(menu,MF_STRING, 32,"Toggle Script BP\tF2");
 				AppendMenu(menu,MF_STRING, 36,"Run until cursor\tF4");
-				AppendMenu(menu,MF_STRING, 33,"Step\tS");
+				AppendMenu(menu,MF_STRING, 33,"Step\tTAB");
 				
 				if (script_state==SS_PAUSED)
 					AppendMenu(menu,MF_STRING, 34,"Resume\tSPC");
@@ -239,7 +239,7 @@ t_wndprog_data *ppl;
                    ollylang->Resume();
 				}
             }
-			else if (wp=='S') 
+			else if (wp==VK_TAB || wp=='S') 
 			{
 			
 				// Step

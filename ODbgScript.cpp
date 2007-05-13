@@ -185,8 +185,9 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
 		strcpy(buff, "# Run Scri&pt{0 Open...|");
 		mruGetCurrentMenu(&buff[strlen(buff)]);
  		strcpy(&buff[strlen(buff)],
-			"}|"
+			"}"
 			"30  Script &Window...\t"
+			",5  Pause Script\tPAUSE"
 
 		);
 		
@@ -315,7 +316,13 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		script_state = ollylang->GetState();
 		break;
 
-    case 10:
+	case 5: // Force Pause (like Pause Key)
+		focusonstop=4;
+		ollylang->Pause();
+		script_state = ollylang->GetState();
+    	break;
+
+	case 10:
 		sprintf(s,"ODbgScript plugin v%i.%i.%i\n"
 			      "by Epsylon3@gmail.com\n\n"
 				  "From OllyScript 0.92 written by SHaG\n"
@@ -445,10 +452,19 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 extc int ODBG_Pluginshortcut(int origin,int ctrl,int alt,int shift,int key,void *item) {
 
 	switch (origin) {
-		case PM_MAIN:
+	case PM_MAIN:
+		if (key==VK_PAUSE) {
+			//will pause when running on give focus to script window
+			focusonstop=4;
+			ollylang->Pause();
+			script_state = ollylang->GetState();
+		//	SetForegroundWindow(ollylang->wndProg.hw);
+		//	SetFocus(ollylang->wndProg.hw);
+		}
+		break; //This function is usually called twice
+	case PM_DISASM:
 
-			break; //This function is usually called twice
-
+		break; 
 /*
 PM_MAIN	item is always NULL	Main window
 PM_DUMP	(t_dump *)	Any Dump window
@@ -465,7 +481,7 @@ PM_CPUDUMP	(t_dump *)	CPU Dump
 PM_CPUSTACK	(t_dump *)	CPU Stack
 PM_CPUREGS	(t_reg *)	CPU Registers
 */
-		default:
+	default:
 			//if (key==VK_F8 && shift==0 && ctrl==0) {
 #ifdef _DEBUG
 			char* data = new char[256];
