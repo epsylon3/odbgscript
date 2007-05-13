@@ -1,6 +1,5 @@
 -------------------------------
 ODbgScript English plugin by E3
-($Revision$)
 
 From
 OllyScript plugin v0.92 by SHaG
@@ -64,7 +63,7 @@ x BPHWS second parameter is now optional (default "x")
 + Added GRO Command Get Relative Offset ("procedure+offset")
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
-* label highlight fix
+* label script position fixed
 * negative values crash fixed
 * eip could now be affected without problems
 * Resume on Breakpoint fixed (SPACE)

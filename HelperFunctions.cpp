@@ -138,34 +138,32 @@ bool split(vector<string> &vec, const string &str, const char delim)
 
 bool is_hex(string& s)
 {
-//	for(uint i = 0; i < s.length(); i++)
-//	{
-//		if( (s[i] < '0' || s[i] > '9') && (s[i] < 'a' || s[i] > 'f') && (s[i] < 'A' || s[i] > 'F'))
-		
-        if(s.find_first_not_of("0123456789abcdefABCDEF-")!=string::npos)
-		   return false;
+    if(s.find_first_not_of("0123456789abcdefABCDEF-")!=string::npos)
+		return false;
 
 	return true;
 }
 
 bool is_dec(string &s) 
 {
+	int len=s.length();
 
-	if (s[s.length()-1] != '.')
+	if (len<2)
 		return false;
 
-	for(uint i = 0; i < s.length()-1; i++)
+	if (s[len-1] != '.')
+		return false;
+
+	for(uint i = 0; i < len-1; i++)
 	{
 		if (s[i] < '0' || s[i] > '9')
 			return false;
 	}
-
 	return true;
 }
 
 bool is_float(string &s) 
 {
-
 	int p=s.find('.');
 	if (p == string::npos || p == s.length()-1)
 		return false;
@@ -175,7 +173,6 @@ bool is_float(string &s)
 		if ((s[i] < '0' && s[i] != '.' ) || s[i] > '9')
 			return false;
 	}
-
 	return true;
 }
 

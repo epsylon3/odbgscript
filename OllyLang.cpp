@@ -516,11 +516,10 @@ bool OllyLang::Step(int forceStep)
 		
 		script_pos++;
 		
-		// Check for a label after
+		// Check for label after (skip it/them)
 		if(script_pos < script.size()) {
 			
 			codeLine = trim(script[script_pos]);
-		
 			while(codeLine[codeLine.length() - 1] == ':' && script_pos < script.size())
 			{
 				script_pos++;

@@ -1084,25 +1084,24 @@ bool OllyLang::DoFIND(string args)
 		if (UnquoteString(data, '#', '#'))
 		{
 		  finddata=data;	
-		 }
+		}
    	    else if(GetSTROpValue(ops[1],data))
 		{
 		  Str2Hex(data,finddata);
 		}
         else if(GetDWOpValue(ops[1], dw))
 		{
-		DoREV(ops[1]);
-		itoa(variables["$RESULT"].dw,buffer,16);
-		string data1=buffer;
-		while(data1.length() < data.length())
-			data1.insert(0,"0");
-		while (data1.length() > data.length())
-			data1.erase(data1.length()-1,1);
+			DoREV(ops[1]);
+			itoa(variables["$RESULT"].dw,buffer,16);
+			string data1=buffer;
+			while(data1.length() < data.length())
+				data1.insert(0,"0");
+			while (data1.length() > data.length())
+				data1.erase(data1.length()-1,1);
 
-		finddata=data1;
+			finddata=data1;
 		}
 	}
-
 
 	if(GetDWOpValue(ops[0], addr) && is_hexwild(finddata))
 	{
@@ -1125,13 +1124,11 @@ bool OllyLang::DoFIND(string args)
 			memlen = Readmemory(membuf, addr, memlen, MM_RESILENT);
             int pos;
 
-			if(maxsize)
-			{
+			if (maxsize && maxsize <= memlen)
 				pos = FindWithWildcards(membuf, finddata.c_str(), maxsize);
-			}
-			else {
+			else
 				pos = FindWithWildcards(membuf, finddata.c_str(), memlen);
-			}
+
 			delete [] membuf;
 
 			if(pos > -1)
@@ -1146,12 +1143,12 @@ bool OllyLang::DoFIND(string args)
 			int memlen = tmem->size - (addr - tmem->base);
 
 			int len = Str2Rgch(finddata, buffer, sizeof(buffer));
-            if (maxsize)
+            if (maxsize && maxsize <= memlen)
 			{
 				memlen = maxsize;
 			}
 			membuf = new char[memlen];
-			Readmemory(membuf, addr, memlen, MM_RESILENT);
+			memlen = Readmemory(membuf, addr, memlen, MM_RESILENT);
 			char *p = search(membuf, membuf + memlen, buffer, buffer + len);
 
 			delete[] membuf;
