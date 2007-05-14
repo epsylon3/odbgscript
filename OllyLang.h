@@ -112,6 +112,8 @@ private:
 	int EOE_row;
 	string errorstr;
 
+	unsigned char * search_buffer;
+
 	// Pseudo-flags to emulate CMP
 	BYTE zf, cf;
 	HWND hwmain;
@@ -130,6 +132,7 @@ private:
 	bool DoASMTXT(string args);
 	bool DoATOI(string args);
 	bool DoBC(string args);
+	bool DoBEGINSEARCH(string args);
 	bool DoBP(string args);
 	bool DoBPCND(string args);
 	bool DoBPD(string args);
@@ -155,6 +158,7 @@ private:
 	bool DoDMA(string args);
 	bool DoDPE(string args);
 	bool DoENDE(string args);
+	bool DoENDSEARCH(string args);
 	bool DoEOB(string args);
 	bool DoEOE(string args);
 	bool DoESTI(string args);
@@ -255,7 +259,7 @@ private:
 	bool GetAddrOpValue(string op, DWORD &value);
 	bool GetFLTOpValue(string op, long double &value);
 	bool GetSTROpValue(string op, string &value, int size=0);
-	bool GetANYOpValue(string op, string &value);
+	bool GetANYOpValue(string op, string &value, bool hex8forExec=false);
 	void LogRegNr(string& name);
 	int GetRegNr(string& name);
 	bool is_register(string s);
@@ -266,7 +270,7 @@ private:
 	bool ParseLabels();
 	bool Process(string& codeLine);
 
-	string ResolveVarsForExec(string in);
+	string ResolveVarsForExec(string in,bool hex8forExec);
 
 	// Debug functions
 	void DumpVars();

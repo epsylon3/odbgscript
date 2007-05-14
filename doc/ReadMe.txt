@@ -57,12 +57,14 @@ TODO:
 Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
-1.55.1 (13 May 2007)
+1.55.1 (14 May 2007)
++ Added BEGINSEARCH and ENDSEARCH to optimize "find commands"
 x BPHWS second parameter is now optional (default "x")
 + Added GCI Command to Get info on disasm command
 + Added GRO Command Get Relative Offset ("procedure+offset")
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
+* EXEC/END dword variables fixed
 * label script position fixed
 * negative values crash fixed
 * eip could now be affected without problems
@@ -469,6 +471,25 @@ Example:
 	bc x
 	bc eip
 
+BEGINSEARCH [start]
+-------------------
+Create a Copy of Debugged App Memory, Find commands will use this data faster.
+You need to use ENDSEARCH before writing to memory and to free this memory copy.
+Example:
+	mov count, 0
+	mov start, 0
+	beginsearch start
+  next:
+	findmem #003300#, start
+	cmp $RESULT,0
+	je end
+	mov start, $RESULT+1
+	add count, 1
+	jmp next
+  end:
+	endsearch
+	msg count
+
 BP addr
 --------
 Set unconditional breakpoint at addr.
@@ -540,6 +561,7 @@ Works with strings too (case sensitive)
 Example: 
 	cmp y, x
 	cmp eip, 401000
+	je label
 
 CMT addr, text
 --------------
@@ -634,28 +656,27 @@ Sets the reserved $RESULT variable
 Example:
 	var x
 	mov x, 1000
-	eval "The value of x is {x}" // after this $RESULT is "The value of x is 00001000"
+	eval "The value of x is {x}" // after this $RESULT is "The value of x is 1000"
 
 EXEC/ENDE
 ---------
 Executes instructions between EXEC and ENDE in the context of the target process.
 Values in curly braces {} are replaced by their values.
-Example:
-// This does some movs
-var x
-var y
-mov x, "eax"
-mov y, "0DEADBEEF"
-exec
-mov {x}, {y} // mov eax, 0DEADBEEF will be executed
-mov ecx, {x} // mov ecx, eax will be executed
-ende
-// This calls ExitProcess in the debugged application
-exec
-push 0
-call ExitProcess
-ende
-ret
+Examples:
+	// This does some movs
+	mov x, "eax"
+	mov y, DEADBEEF
+	exec
+		mov {x}, {y} // mov eax, 0DEADBEEF will be executed
+		mov ecx, {x} // mov ecx, eax will be executed
+	ende
+
+	// This calls ExitProcess in the debugged application
+	exec
+		push 0
+		call ExitProcess
+	ende
+	ret
 
 FILL addr, len, value
 ---------------------

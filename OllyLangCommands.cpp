@@ -289,6 +289,52 @@ bool OllyLang::DoBC(string args)
 	return false;
 }
 
+bool OllyLang::DoBEGINSEARCH(string args)
+{
+	string ops[1];
+	DWORD start;
+
+	if (!CreateOperands(args, ops, 1))
+		start=0;
+	else
+		if (!GetDWOpValue(ops[0], start)) 
+			return false;
+
+	t_memory* tm;
+	t_table* tt;
+
+	tt=(t_table*) Plugingetvalue(VAL_MEMORY);
+	if (tt==NULL)
+		return false;
+
+	if (start==0) {
+		//get first mem block addr.
+		tm=(t_memory*) Getsortedbyselection(&tt->data, 0);
+		if (tm==NULL)
+			return false;
+		start=tm->base;
+	}
+
+	tm=(t_memory*) Getsortedbyselection(&tt->data, tt->data.n-1);
+	if (tm==NULL)
+		return false;
+
+	int fullsize = tm->base+tm->size - start;
+
+	search_buffer = new unsigned char[fullsize];
+	Havecopyofmemory(search_buffer,start,fullsize);
+
+	return true;
+}
+
+bool OllyLang::DoENDSEARCH(string args)
+{
+	Havecopyofmemory(NULL,0,0);
+	delete [] search_buffer;
+	search_buffer=NULL;
+	return true;
+}
+
 bool OllyLang::DoBP(string args)
 {
 	string ops[1];
@@ -954,7 +1000,7 @@ bool OllyLang::DoEVAL(string args)
 
 	if (GetSTROpValue(ops[0], to_eval))
 	{
-		string res = ResolveVarsForExec(to_eval);
+		string res = ResolveVarsForExec(to_eval,false);
 		variables["$RESULT"] = res;
 		return true;
 	}
@@ -971,6 +1017,7 @@ bool OllyLang::DoEXEC(string args)
 	char buffer[255] = {0};
 	// Bytes assembled
 	int len = 0, totallen = 0;
+	bool res = true;
 	// Temp storage
 	string tmp;
 
@@ -988,18 +1035,36 @@ bool OllyLang::DoEXEC(string args)
 	// Assemble and write code to memory (everything between EXEC and ENDE)
 	while(ToLower(script[script_pos]) != "ende")
 	{
-		tmp = ResolveVarsForExec(script[script_pos]);
+		tmp = ResolveVarsForExec(script[script_pos],true);
 		sprintf(buffer, tmp.c_str());
 		len = Assemble(buffer, (ulong)pmemforexec + totallen, &model, 0, 0, error);
-		WriteProcessMemory(hDebugee, (LPVOID)((ulong)pmemforexec + totallen), model.code, len, 0);
-		totallen += len;
+		if (len < 0) {
+			errorstr = tmp+"\n"+error;
+			return false;
+		} else {
+			WriteProcessMemory(hDebugee, (LPVOID)((ulong)pmemforexec + totallen), model.code, len, 0);
+			totallen += len;
+		}
 		script_pos++;
+
+		if (script_pos>script.size()) {
+			DoENDE("");
+			errorstr = "EXEC needs ENDE command !";
+			return false;
+		}
 	}
+
+	//return before ENDE command
+	script_pos--;
 
 	// Assemble and write jump to original EIP
 	sprintf(buffer, "JMP %lX", eip);
 	len = Assemble(buffer, (ulong)pmemforexec + totallen, &model, 0, 0, error);
-	WriteProcessMemory(hDebugee, (LPVOID)((ulong)pmemforexec + totallen), model.code, len, 0);
+	if (len < 0) {
+		errorstr = error;
+	} else {
+		WriteProcessMemory(hDebugee, (LPVOID)((ulong)pmemforexec + totallen), model.code, len, 0);
+	}
 
 	// Set new eip and run to the original one
 	thr->reg.ip = (ulong)pmemforexec;
@@ -1007,7 +1072,7 @@ bool OllyLang::DoEXEC(string args)
 	thr->regvalid = 1;
 	Broadcast(WM_USER_CHREG, 0, 0);
 	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
-	script_pos--;                      //fix *script_pos
+	
 	return true;
 }
 
@@ -1304,21 +1369,20 @@ bool OllyLang::DoFINDOP(string args)
 		 }
    	    else if(GetSTROpValue(ops[1],data))
 		{
-         errorstr = "findop第二操作数如果是变量,将不能搜索\"\"之内的字符串,请使用##的字符常量!";
-	     return false;
-		 // Str2Hex(data,ops[1]);
+			errorstr = "findop: incorrect data !";
+			return false;
 		}
         else if(GetDWOpValue(ops[1], dw))
 		{
-//		DoREV(ops[1]);
-		itoa(dw,buffer,16);
-		string data1=buffer;
-		while(data1.length() < data.length())
-			data1.insert(0,"0");
-		while (data1.length() > data.length())
-			data1.erase(data1.length()-1,1);
-		
-		ops[1]=data1;
+	//		DoREV(ops[1]);
+			itoa(dw,buffer,16);
+			string data1=buffer;
+			while(data1.length() < data.length())
+				data1.insert(0,"0");
+			while (data1.length() > data.length())
+				data1.erase(data1.length()-1,1);
+			
+			ops[1]=data1;
 		}
 	}
 
@@ -1330,29 +1394,27 @@ bool OllyLang::DoFINDOP(string args)
 		t_memory* tmem = Findmemory(addr);
 		char cmd[MAXCMDSIZE] = {0};
 
-		if(maxsize)
+		if(maxsize && maxsize <= tmem->size)
 		{
-			tmem->size = maxsize;
 			tmem->base = addr;
+			tmem->size = maxsize;
 		}
 
 		do 
 		{
 
-		DWORD nextaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
+			DWORD nextaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
 //			endaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
 			ok = Readcommand(addr, cmd);
 
 			addrsize = nextaddr -addr;
             addr=nextaddr;
 
-			if(addr == tmem->base + tmem->size)
+			if(addr >= tmem->base + tmem->size)
 				ok = 0;
 
 			if(ok)
 				result = FindWithWildcards(cmd, ops[1].c_str(),addrsize);
-
-     
 
 		} while(result != 0 && ok != 0);
 	}
@@ -1395,11 +1457,11 @@ bool OllyLang::DoFINDMEM(string args)
 	if (!GetDWOpValue(ops[1], start))
 		return false;
 
-
 	for (int m=0; m < tt->data.n; m++) {
 		tm=(t_memory*) Getsortedbyselection(&tt->data, m);
-		if (tm==NULL)
+		if (tm==NULL) {
 			return false;
+		}
 
 		itoa(tm->base,szBase,16);
 
@@ -1424,6 +1486,7 @@ bool OllyLang::DoFINDMEM(string args)
 			var_logging=false;
 		}
 	}
+
 	var_logging=true;
 	variables["$RESULT"] = 0;
 	return true;

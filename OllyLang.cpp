@@ -63,6 +63,7 @@ OllyLang::OllyLang()
     commands["asmtxt"] = &OllyLang::DoASMTXT;	
 	commands["atoi"] = &OllyLang::DoATOI;
 	commands["bc"] = &OllyLang::DoBC;
+	commands["beginsearch"] = &OllyLang::DoBEGINSEARCH;
 	commands["bp"] = &OllyLang::DoBP;
 	commands["bpcnd"] = &OllyLang::DoBPCND;
 	commands["bpd"] = &OllyLang::DoBPD;
@@ -88,6 +89,7 @@ OllyLang::OllyLang()
 	commands["dma"] = &OllyLang::DoDMA;
 	commands["dpe"] = &OllyLang::DoDPE;
 	commands["ende"] = &OllyLang::DoENDE;
+	commands["endsearch"] = &OllyLang::DoENDSEARCH;
 	commands["esti"] = &OllyLang::DoESTI;
 	commands["esto"] = &OllyLang::DoESTO;
 	commands["eob"] = &OllyLang::DoEOB;
@@ -183,8 +185,9 @@ OllyLang::OllyLang()
 	zf = 0;
 	cf = 0;
 	enable_logging = true;
-
 	var_logging = true;
+
+	search_buffer=NULL;
 
 	hwmain = hwndOllyDbg();
 	hwndinput = 0;
@@ -192,6 +195,9 @@ OllyLang::OllyLang()
 
 OllyLang::~OllyLang()
 {
+	if (search_buffer!=NULL)
+		DoENDSEARCH("");
+
 	labels.clear();
 	script.clear();
 	clearProgLines();
@@ -932,7 +938,7 @@ bool OllyLang::ParseLabels()
 	return false;
 }
 
-bool OllyLang::GetANYOpValue(string op, string &value)
+bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 {
 	if(is_variable(op))
 	{
@@ -946,7 +952,11 @@ bool OllyLang::GetANYOpValue(string op, string &value)
 		else if(variables[op].vt == DW)
 		{
 			char buffer[12] = {0};
-			sprintf(buffer, "%X", variables[op].dw);
+			if (hex8forExec)
+				//For Assemble Command (EXEC/ENDE) ie "0DEADBEEF"
+				sprintf(buffer, "%09X", variables[op].dw);
+			else 
+				sprintf(buffer, "%X", variables[op].dw);
 			value = buffer;
 			goto values_ok;
 		}
@@ -954,7 +964,10 @@ bool OllyLang::GetANYOpValue(string op, string &value)
 	} 
 	if(is_hex(op))
 	{
-		value = op;
+		if (hex8forExec)
+			value = "0"+op;
+		else
+			value = op;
 		return true;
 	}
 	else if(UnquoteString(op, '"', '"')) 
@@ -992,22 +1005,24 @@ bool OllyLang::GetANYOpValue(string op, string &value)
 
 		if(GetDWOpValue(op, addr)) 
 		{
+			if (addr!=0) {
 
-			//Pointer Mark in Values column
-			setProgLineValue(script_pos+1,(string) "®");
-			
-			char buffer[STRING_READSIZE] = {0};
-			Readmemory(&buffer[0], addr, STRING_READSIZE, MM_SILENT);
+				//Pointer Mark in Values column
+				setProgLineValue(script_pos+1,(string) "®");
+				
+				char buffer[STRING_READSIZE] = {0};
+				Readmemory(&buffer[0], addr, STRING_READSIZE, MM_SILENT);
 
-			if (strlen(buffer) >= STRING_READSIZE-1) 
-			{
-				buffer[STRING_READSIZE-1] = 0;
-			}
+				if (strlen(buffer) >= STRING_READSIZE-1) 
+				{
+					buffer[STRING_READSIZE-1] = 0;
+				}
 
-			value="";
-			value.append(buffer);
+				value.assign(buffer);
+			} else 
+				value = "0";
+
 			goto values_ok_str;
-
 		}
 		
 	}
@@ -1017,7 +1032,10 @@ bool OllyLang::GetANYOpValue(string op, string &value)
 		if (GetDWOpValue(op,dw)) 
 		{
 			char buffer[12] = {0};
-			sprintf(buffer, "%X", dw);
+			if (hex8forExec)
+				sprintf(buffer, "%09X", dw);
+			else 
+				sprintf(buffer, "%X", dw);
 			value = buffer;
 			goto values_ok;
 		}
@@ -1439,7 +1457,7 @@ bool OllyLang::is_variable(string &s)
 	return false;
 }
 
-string OllyLang::ResolveVarsForExec(string in)
+string OllyLang::ResolveVarsForExec(string in, bool hex8forExec)
 {
 	string out, varname;
 	bool in_var = false;
@@ -1454,7 +1472,7 @@ string OllyLang::ResolveVarsForExec(string in)
 		else if(in[i] == '}')
 		{
 			in_var = false;
-			GetANYOpValue(varname, varname);
+			GetANYOpValue(varname, varname, hex8forExec);
 			out += varname;
 			varname = "";
 		}
