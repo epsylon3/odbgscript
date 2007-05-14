@@ -290,7 +290,11 @@ t_wndprog_data *ppl;
             InvalidateRect(hw, NULL, FALSE);
             return 0;
         case WM_PAINT:
-            Painttable(hw, &ollylang->wndProg, wndprog_get_text);
+			if (!ollylang->painting) {
+				ollylang->painting=1;
+				Painttable(hw, &ollylang->wndProg, wndprog_get_text);
+				ollylang->painting=0;
+			}
 			return 0;
 		default:
 		break;
@@ -619,7 +623,8 @@ int setProgLineValue(int line, string  &value)
 	values = CleanString(value);
 
 	//Variable History
-	if (strcmp(ppl->values,"")) {
+
+	if (ollylang->showVarHistory && strcmp(ppl->values,"")) {
 		if ( values.length() < PROG_VAL_LEN-2) {
 			if (ppl->values[0] != ',' && ppl->values[0] != '®' && value.compare("®") != 0)
 				values += " ";

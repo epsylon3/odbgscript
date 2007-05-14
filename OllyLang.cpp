@@ -116,6 +116,7 @@ OllyLang::OllyLang()
 	commands["gpp"] = &OllyLang::DoGPP;
 	commands["gro"] = &OllyLang::DoGRO;
 	commands["handle"] = &OllyLang::DoHANDLE;
+	commands["history"] = &OllyLang::DoHISTORY;
 	commands["inc"] = &OllyLang::DoINC;
 	commands["itoa"] = &OllyLang::DoITOA;
 	commands["ja"] = &OllyLang::DoJA;
@@ -168,6 +169,7 @@ OllyLang::OllyLang()
 	commands["tc"] = &OllyLang::DoTC;
 	commands["test"] = &OllyLang::DoTEST;
 	commands["ti"] = &OllyLang::DoTI;
+	commands["tick"] = &OllyLang::DoTICK;
 	commands["ticnd"] = &OllyLang::DoTICND;
 	commands["to"] = &OllyLang::DoTO;
 	commands["tocnd"] = &OllyLang::DoTOCND;
@@ -191,6 +193,9 @@ OllyLang::OllyLang()
 
 	hwmain = hwndOllyDbg();
 	hwndinput = 0;
+
+	showVarHistory=true;
+	painting=0;
 }
 
 OllyLang::~OllyLang()
@@ -399,11 +404,19 @@ bool OllyLang::Step(int forceStep)
 {
 	require_ollyloop = 0;
 	t_dump *cpuasm;
+	PFCOMMAND func;
+	DWORD dwtick;
+	int refresh=1;
+	char lastchar;
+	bool jumped;
+	int old_pos;
 
 	t_status st = Getstatus();
 
 	while(!require_ollyloop && Getstatus() == STAT_STOPPED && (script_state == SS_RUNNING || script_state == SS_LOADED || (forceStep && script_state == SS_PAUSED)))
 	{		
+		jumped=false;
+
 		if (pgr_scriptpos==1) {
 			cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 			setProgLineEIP(pgr_scriptpos,cpuasm->sel0);
@@ -466,10 +479,18 @@ bool OllyLang::Step(int forceStep)
 
 		// Find command and execute it
 		if(commands.find(command) != commands.end())
-		{			
+		{
 			// Command found, execute it
-			PFCOMMAND func = commands[command];
+			func = commands[command];
+			dwtick = GetTickCount();
+			old_pos = script_pos;
 			result = (this->*func)(args);
+			dwtick = GetTickCount()-dwtick;
+			this->tickcount = dwtick;
+			if (old_pos>script_pos || old_pos+1<script_pos) {
+				jumped=true;
+			}
+
 		}
 		else 
 		{
@@ -526,20 +547,36 @@ bool OllyLang::Step(int forceStep)
 		if(script_pos < script.size()) {
 			
 			codeLine = trim(script[script_pos]);
-			while(codeLine[codeLine.length() - 1] == ':' && script_pos < script.size())
+			lastchar = codeLine[codeLine.length() - 1];
+			while(lastchar == ':' && script_pos < script.size())
 			{
 				script_pos++;
 				codeLine = trim(script[script_pos]);
+				lastchar = codeLine[codeLine.length() - 1];
 			}
 		}
 
 		pgr_scriptpos=script_pos+1;
 
+		if (jumped) { 
+			if(++refresh % 128 == 0) {
+				//refresh every xxxx jumps (loop anti freeze)
+				if (wndProg.hw) {
+					Selectandscroll(&wndProg,pgr_scriptpos,2);
+					//refresh only on proc exit
+					InvalidateRect(wndProg.hw, NULL, FALSE);
+				}
+				return true; 
+				//will continue after main loop...
+			}
+		}
+
 		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);			
-		
+
 		if(forceStep == 1)
 			break;
+
 	}
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);

@@ -58,17 +58,18 @@ Known Problems:
   MRU FROM Main Menu is static, so updated only on OllyDbg Restart
 
 1.55.1 (14 May 2007)
++ Added HISTORY command to enable/disable value History (run faster)
 + Added BEGINSEARCH and ENDSEARCH to optimize "find commands"
-x BPHWS second parameter is now optional (default "x")
 + Added GCI Command to Get info on disasm command
 + Added GRO Command Get Relative Offset ("procedure+offset")
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
-* EXEC/END dword variables fixed
+x BPHWS second parameter is now optional (default "x")
+* EXEC/END hex dword variables with letter as first char fixed
 * label script position fixed
 * negative values crash fixed
 * eip could now be affected without problems
-* Resume on Breakpoint fixed (SPACE)
+* Resume on Script breakpoint fixed (SPACE)
 
 Note: GAPI function could be deleted, hnhu... has not finished the code
 
@@ -83,7 +84,7 @@ Note: GAPI function could be deleted, hnhu... has not finished the code
 - Removed MRU menu and some commands from Main Olly Menu
 * Internal compare between different types (except buf/str) returns error -2
 * Better support in Log Window and Context menu of strings containing "\0"
-* removed 00 prefix of dword values in LOG and EVAL commands (%8X to %X)
+* removed 0 prefix of dword values in LOG and EVAL commands (%8X to %X)
 * OPENTRACE now also opens trace window if not opened
 * READSTR documentation update, but this function could be renamed/removed
 * FIND commands fix, bad address parameter results 0
@@ -475,12 +476,13 @@ BEGINSEARCH [start]
 -------------------
 Create a Copy of Debugged App Memory, Find commands will use this data faster.
 You need to use ENDSEARCH before writing to memory and to free this memory copy.
+Optimization time is 20% for 5000 loops... but could maybe be optimized
 Example:
 	mov count, 0
-	mov start, 0
+	mov start, eip
 	beginsearch start
   next:
-	findmem #003300#, start
+	find #00#, start
 	cmp $RESULT,0
 	je end
 	mov start, $RESULT+1
@@ -827,6 +829,10 @@ HANDLE x, y, class
 ---------------------
 Returns the handle of child window of specified class at point x,y (remember: in hex values).
 
+HISTORY (0,1)
+--------------
+Enables or Disables Value history in Script Progress Window, could optimize loops
+
 INC var
 -------
 Adds 1 to variable
@@ -1163,6 +1169,10 @@ TI
 Executes "Trace into" in OllyDbg, CTRL-F7 in OllyDbg.
 Example:
 	ti
+
+TICK var
+--------
+Set variable with last command execution time (msec)
 
 TICND cond
 ----------

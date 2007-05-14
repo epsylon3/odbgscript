@@ -313,17 +313,25 @@ bool OllyLang::DoBEGINSEARCH(string args)
 		if (tm==NULL)
 			return false;
 		start=tm->base;
+	} else {
+		//get block at addr
+		tm=(t_memory*) Findmemory(start);
+		if (tm==NULL)
+			return false;
 	}
+
+	//Last Memory Bloc
 
 	tm=(t_memory*) Getsortedbyselection(&tt->data, tt->data.n-1);
 	if (tm==NULL)
 		return false;
-
+ 
 	int fullsize = tm->base+tm->size - start;
 
 	search_buffer = new unsigned char[fullsize];
+	fullsize = Readmemory(search_buffer,start,fullsize,MM_SILENT);
 	Havecopyofmemory(search_buffer,start,fullsize);
-
+	//Havecopyofmemory(search_buffer,tm->base,tm->size);
 	return true;
 }
 
@@ -2086,6 +2094,22 @@ bool OllyLang::DoINC(string args)
 	return DoADD(ops[0] + ", 1");
 }
 
+bool OllyLang::DoHISTORY(string args)
+{
+	string ops[1];
+	DWORD dw;
+
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	if(GetDWOpValue(ops[0], dw)) {
+		showVarHistory=(dw!=0);
+		return true;
+	}
+
+	return false;
+}
+
 bool OllyLang::DoITOA(string args)
 {
 	string ops[2];
@@ -2684,7 +2708,7 @@ bool OllyLang::DoMSG(string args)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 		
 		//hwndOllyDbg() or 0: modal or not
-		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST);
+		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
 		if(ret == IDCANCEL) {
 			return Pause();
 		} 
@@ -3416,6 +3440,15 @@ bool OllyLang::DoTI(string args)
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F11); 
 	require_ollyloop = 1;
 	return true;
+}
+
+bool OllyLang::DoTICK(string args)
+{
+	if (is_variable(args)) {
+		variables[args] = this->tickcount;
+		return true;
+	}
+	return false;
 }
 
 bool OllyLang::DoTICND(string args)

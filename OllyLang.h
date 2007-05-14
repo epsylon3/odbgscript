@@ -66,6 +66,9 @@ public:
 	// The script that is being executed
 	vector<string> script;
 
+	bool showVarHistory;
+	bool painting;
+
 private:
 	
 	typedef bool (OllyLang::*PFCOMMAND)(string);
@@ -98,8 +101,6 @@ private:
 		} bitFlags;
 	};
 
-
-
 	bool require_ollyloop;
 	bool enable_logging;
 	uint script_pos;
@@ -110,7 +111,10 @@ private:
 	int script_state;
 	int EOB_row;
 	int EOE_row;
+	
 	string errorstr;
+
+	DWORD tickcount;
 
 	unsigned char * search_buffer;
 
@@ -185,6 +189,7 @@ private:
 	bool DoGPI(string args);
 	bool DoGRO(string args);
 	bool DoHANDLE(string args);
+	bool DoHISTORY(string args);
 	bool DoINC(string args);
 	bool DoITOA(string args);
 	bool DoJA(string args);
@@ -237,6 +242,7 @@ private:
 	bool DoTC(string args);
 	bool DoTEST(string args);
 	bool DoTI(string args);
+	bool DoTICK(string args);
 	bool DoTICND(string args);
 	bool DoTO(string args);
 	bool DoTOCND(string args);
