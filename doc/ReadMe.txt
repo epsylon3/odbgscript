@@ -51,11 +51,7 @@ which has taken a lot of time. Sorry about that.
 2.1 What's new?
 ---------------
 TODO:
-  "FOLLOW const" to see any dword data usage (log every command which use it)
-  A DLL call function
-
-Known Problems:
-  MRU FROM Main Menu is static, so updated only on OllyDbg Restart
+	Script Comments Problem when // in /*block*/
 
 1.55.1 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -832,6 +828,9 @@ Returns the handle of child window of specified class at point x,y (remember: in
 HISTORY (0,1)
 --------------
 Enables or Disables Value history in Script Progress Window, could optimize loops
+Example:
+	history 0 //disable
+	history 1 //enable
 
 INC var
 -------
