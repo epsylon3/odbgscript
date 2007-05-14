@@ -90,8 +90,9 @@ OllyLang::OllyLang()
 	commands["dpe"] = &OllyLang::DoDPE;
 	commands["ende"] = &OllyLang::DoENDE;
 	commands["endsearch"] = &OllyLang::DoENDSEARCH;
+	commands["erun"] = &OllyLang::DoERUN;
 	commands["esti"] = &OllyLang::DoESTI;
-	commands["esto"] = &OllyLang::DoESTO;
+	commands["esto"] = &OllyLang::DoERUN;
 	commands["eob"] = &OllyLang::DoEOB;
 	commands["eoe"] = &OllyLang::DoEOE;
 	commands["eval"] = &OllyLang::DoEVAL;

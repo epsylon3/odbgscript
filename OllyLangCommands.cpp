@@ -951,16 +951,16 @@ bool OllyLang::DoENDE(string args)
 	return true;
 }
 
-bool OllyLang::DoESTI(string args)
+bool OllyLang::DoERUN(string args)
 {
-	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F7); 
+	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F9); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoESTO(string args)
+bool OllyLang::DoESTI(string args)
 {
-	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F9); 
+	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F7); 
 	require_ollyloop = 1;
 	return true;
 }

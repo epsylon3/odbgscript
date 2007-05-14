@@ -51,8 +51,11 @@ which has taken a lot of time. Sorry about that.
 
 TODO:Nothing more in mind...
 
-2.1 What's new?
+2.1 What's new? 
 ---------------
+
+1.56.1
++ Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
 
 1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -636,6 +639,12 @@ Transfer execution to some label on next exception.
 Example:
 	eob SOME_LABEL
 
+ERUN
+----
+Executes SHIFT-F9 in OllyDbg. Run with Ignore Exceptions
+Example:
+	erun
+
 ESTI
 ----
 Executes SHIFT-F7 in OllyDbg.
@@ -644,7 +653,7 @@ Example:
 
 ESTO
 ----
-Executes SHIFT-F9 in OllyDbg.
+Executes SHIFT-F9 in OllyDbg. (OLD COMMAND, COULD BE REMOVED, USE ERUN)
 Example:
 	esto
 

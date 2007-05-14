@@ -326,10 +326,10 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		sprintf(s,"ODbgScript plugin v%i.%i.%i\n"
 			      "by Epsylon3@gmail.com\n\n"
 				  "From OllyScript 0.92 written by SHaG\n"
-				  "and chinese enhancements from hnhuqiong\n\n"
+				  "and some enhancements from hnhuqiong\n\n"
 				  "PE dumper by R@dier\n"
 				  "Byte replacement algo by Hex\n\n"
-				  "http://www.woodmann.com/forum/ \n\n"
+				  "http://odbgscript.sf.net/ \n\n"
 				  "Compiled %s %s",
 			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
 		MessageBox(hwmain,s,"ODbgScript",MB_OK|MB_ICONINFORMATION);

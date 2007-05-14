@@ -165,8 +165,8 @@ private:
 	bool DoENDSEARCH(string args);
 	bool DoEOB(string args);
 	bool DoEOE(string args);
+	bool DoERUN(string args);
 	bool DoESTI(string args);
-	bool DoESTO(string args);
 	bool DoEVAL(string args);
 	bool DoEXEC(string args);
 	bool DoFILL(string args);
