@@ -24,6 +24,8 @@ void initProgTable();
 int wndprog_sort_function(const t_sortheader *p1,const t_sortheader *p2,const int sort);
 int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int column);
 
+void InvalidateProgWindow(void);
+
 int addProgLine(int line, string & command);
 int setProgLineEIP(int line, int eip);
 int setProgLineValue(int line, string& value);

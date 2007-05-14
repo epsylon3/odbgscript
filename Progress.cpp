@@ -550,6 +550,12 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
   return ret;
 }
 
+void InvalidateProgWindow(void)
+{
+	if (ollylang->wndProg.hw!=NULL)	
+		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+}
+
 int addProgLine(int line, string & command) 
 {
 
@@ -568,7 +574,7 @@ int addProgLine(int line, string & command)
 
 	Addsorteddata(&(ollylang->wndProg.data),&(ollylang->tProgLines.back()));
 	
-	if (ollylang->wndProg.hw!=NULL)	InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+	InvalidateProgWindow();
 
 	return 1;
 }
@@ -593,7 +599,7 @@ int setProgLineEIP(int line, int eip)
 	if (ollylang->wndProg.hw!=NULL)	
 	{
 		Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
-		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+		InvalidateProgWindow();
 	}
 
 	return 1;
@@ -636,7 +642,7 @@ int setProgLineValue(int line, string  &value)
 
 	ppl->values[PROG_VAL_LEN-1] = 0;
  
-	if (ollylang->wndProg.hw!=NULL)	InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+	InvalidateProgWindow();
 
 	return 1;
 }
@@ -681,11 +687,7 @@ int setProgLineResult(int line, string& result)
 		}
 	}
 
-	if (ollylang->wndProg.hw!=NULL)
-	{
-		//Selectandscroll(&ollylang->wndProg,line,1);
-		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
-	}
+	InvalidateProgWindow();
 	return 1;
 }
 
@@ -719,7 +721,7 @@ void clearProgLines()
 	{
 		Deletesorteddatarange(&(ollylang->wndProg.data),0,0xffffffff);
 		ollylang->tProgLines.clear();
-		if (ollylang->wndProg.hw!=NULL)	InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+		InvalidateProgWindow();
 	}
 }
 
@@ -744,7 +746,7 @@ void resetProgLines()
 		line++;
 		iter++;
 	}
-	if (ollylang->wndProg.hw!=NULL)	InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+	InvalidateProgWindow();
 }
 
 int isProgLineBP(int line) 

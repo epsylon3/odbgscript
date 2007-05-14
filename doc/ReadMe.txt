@@ -1,8 +1,6 @@
 -------------------------------
-ODbgScript English plugin by E3
-
-From
-OllyScript plugin v0.92 by SHaG
+ODbgScript english plugin by E3
+site : http://odbgscript.sf.net
 -------------------------------
 
 1. About OllyScript
@@ -39,6 +37,9 @@ using my plugin you can write a script once and for all.
 2. Status
 ----------------------------
 
+v1.54
+ODbgScript has a new site and SVN system : http://odbgscript.sf.net
+
 v1.0
 OllyScript becomes ODbgScript with the new GUI Window
 
@@ -48,12 +49,12 @@ scripting power flowing down the optic cable veins of the Internet. Not bad if y
 The development of the plugin has been a bit slow, I've got a job programming xray systems
 which has taken a lot of time. Sorry about that.
 
+TODO:Nothing more in mind...
+
 2.1 What's new?
 ---------------
-TODO:
-	Script Comments Problem when // in /*block*/
 
-1.55.1 (14 May 2007)
+1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
 + Added BEGINSEARCH and ENDSEARCH to optimize "find commands"
 + Added GCI Command to Get info on disasm command
@@ -61,6 +62,7 @@ TODO:
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
 x BPHWS second parameter is now optional (default "x")
+* Comments // in /**/ bloc fixed
 * EXEC/END hex dword variables with letter as first char fixed
 * label script position fixed
 * negative values crash fixed

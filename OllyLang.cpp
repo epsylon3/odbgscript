@@ -270,7 +270,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			scriptline.erase(p,scriptline.find("*/")-p+2);
 		}
 		// Check for comments at the end of rows and erase those
-		else if(scriptline.find("//")!=string::npos) 
+		else if(scriptline.find("//")!=string::npos && !is_comment) 
 		{
 			p=scriptline.find("//");
 			if (scriptline.find("\"")!=string::npos) {
