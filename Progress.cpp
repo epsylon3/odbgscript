@@ -1,6 +1,6 @@
 LRESULT CALLBACK wndprog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp) {
 int i,m,shiftkey,controlkey;
-HMENU menu,mLoad,mCmd,mRun,mVars=NULL;
+HMENU menu,mLoad,mCmd,mRun,mLabels=NULL,mVars=NULL;
 t_wndprog_data *ppl;
 
 	switch (msg) 
@@ -76,7 +76,14 @@ t_wndprog_data *ppl;
 				AppendMenu(menu,MF_STRING, 35,"Abort\tESC");
 
 			};
-			
+			if (ollylang->labels.size() > 0) 
+			{
+				mLabels=CreatePopupMenu();
+				AppendMenu(menu,MF_SEPARATOR,0,"-");
+				AppendMenu(menu,MF_POPUP,(DWORD) mLabels,"Scroll to Label"); 
+				ollylang->menuListLabels(mLabels,0x100);
+			}
+
 			if (ollylang->variables.size() > 0) 
 			{
 				mVars=CreatePopupMenu();
@@ -97,6 +104,7 @@ t_wndprog_data *ppl;
 			if (mLoad!=NULL) DestroyMenu(mLoad);
 			//if (mCmd!=NULL) DestroyMenu(mCmd);
 			if (mRun!=NULL) DestroyMenu(mRun);
+			if (mLabels!=NULL) DestroyMenu(mLabels);
 			if (mVars!=NULL) DestroyMenu(mVars);
 			
 			if (i>10 && i<=15 || i>20 && i<=25) 
@@ -126,10 +134,16 @@ t_wndprog_data *ppl;
 				}
 				return 1;
 			} 
-			else if (i>=40 && i<500) 
+			else if (i>=40 && i<0x100) 
 			{
 				if (ollylang->editVariable(i-40))
 					InvalidateRect(hw, NULL, FALSE);
+				return 1;
+			} 
+			else if (i>=0x100 && i<0x200) 
+			{
+				Selectandscroll(&ollylang->wndProg,i-0xFE,2);
+				InvalidateRect(hw, NULL, FALSE);
 				return 1;
 			} 
 			else

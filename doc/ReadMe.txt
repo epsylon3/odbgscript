@@ -49,13 +49,17 @@ scripting power flowing down the optic cable veins of the Internet. Not bad if y
 The development of the plugin has been a bit slow, I've got a job programming xray systems
 which has taken a lot of time. Sorry about that.
 
-TODO:Nothing more in mind...
+TODO:
+After Error Cursor
+Edit Line
 
 2.1 What's new? 
 ---------------
 
 1.56.1
++ LOGBUF command to log string or buffer variable like a memory dump (wrapped)
 + Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
++ Scroll to Label (in context menu)
 
 1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -766,7 +770,15 @@ Example:
 GBPR
 ----
 Gets last breakpoint reason, affects $RESULT with dword value
-(see plugin.h PP_EVENT for values...)
+Example:
+	GBPR
+	cmp $RESULT, 10
+	je SelectNormalBP
+	cmp $RESULT, 20
+	je SelectMemBP
+	cmp $RESULT, 40
+	je SelectHwBP
+	jmp NextBP
 
 GCI addr, info
 --------------
@@ -947,6 +959,10 @@ Example:
 	mov x, 10
 	log x // The string "x: 00000010" is logged.
 	log x, "" // The string "00000010" is logged.
+
+LOGBUF var [,linecount [,separator]]
+------------------------------------
+Logs a string or buffer like a memory dump, usefull for long data
 
 MOV dest, src [,maxsize]
 -------------

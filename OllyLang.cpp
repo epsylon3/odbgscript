@@ -134,6 +134,7 @@ OllyLang::OllyLang()
     commands["len"] = &OllyLang::DoLEN;
     commands["lm"] = &OllyLang::DoLM;
 	commands["log"] = &OllyLang::DoLOG;
+	commands["logbuf"] = &OllyLang::DoLOGBUF;
 	commands["mov"] = &OllyLang::DoMOV;
 	commands["msg"] = &OllyLang::DoMSG;
 	commands["msgyn"] = &OllyLang::DoMSGYN;
@@ -1524,6 +1525,27 @@ string OllyLang::ResolveVarsForExec(string in, bool hex8forExec)
 	}				
 	return out;
 
+}
+
+void OllyLang::menuListLabels(HMENU mLabels,int cmdIndex) {
+
+	map<string, int>::iterator iter;
+	iter = labels.begin();
+	
+	vector<HMENU>::iterator imenu;
+
+	char buffer[32];
+	string str;
+
+	pair<string, int> p;
+	while(iter != labels.end())
+	{
+		p = *iter;
+
+		AppendMenu(mLabels,MF_STRING,cmdIndex+p.second,p.first.c_str());		
+		iter++;
+		//cmdIndex++;
+	}
 }
 
 void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {

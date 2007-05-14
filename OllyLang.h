@@ -51,7 +51,9 @@ public:
 	bool Step(int forceStep);
 
 	// Script Window
+	void menuListLabels(HMENU mLabels,int cmdIndex);
 	void menuListVariables(HMENU mVars,int cmdIndex);
+	
 	bool editVariable(int nVar);
 	void execCommand(void);
 	
@@ -61,10 +63,12 @@ public:
 	bool OnBreakpoint(int reason, int details);
 	bool OnException(DWORD ExceptionCode);
 
-	// Variables that exist
-	map<string, var> variables;
 	// The script that is being executed
 	vector<string> script;
+	// Variables that exist
+	map<string, var> variables;
+	// Labels that exist
+	map<string, int> labels;
 
 	bool showVarHistory;
 	bool painting;
@@ -74,8 +78,6 @@ private:
 	typedef bool (OllyLang::*PFCOMMAND)(string);
 	// Commands that can be executed
 	map<string, PFCOMMAND> commands;
-	// Labels that exist
-	map<string, int> labels;
 	// Possible register names
 	set<string> reg_names;
 	// Possible flag names
@@ -205,6 +207,7 @@ private:
 	bool DoLCLR(string args);
 	bool DoLEN(string args);
 	bool DoLOG(string args);
+	bool DoLOGBUF(string args);
     bool DoLM(string args);
 	bool DoMOV(string args);
 	bool DoMSG(string args);

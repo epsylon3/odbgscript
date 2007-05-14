@@ -1577,14 +1577,16 @@ bool OllyLang::DoGBPR(string args)
 	string ops[1];
 	DWORD addr;
 
-	if(!CreateOperands(args, ops, 1))
+	if(CreateOp(args, ops, 1))
 	{
-
+		if (is_variable(ops[0]))
+			variables[ops[0]] = break_reason;
+		else
+			variables["$RESULT"] = break_reason;
+	} 
+	else
 		variables["$RESULT"] = break_reason;
-
-	}
 	return true;
-//	return false;
 }
 
 //Get Code Information
@@ -2473,6 +2475,44 @@ bool OllyLang::DoLOG(string args)
 				return true;
 			}
 		}
+	}
+	return false;
+}
+
+bool OllyLang::DoLOGBUF(string args)
+{
+	string sSep,ops[3];
+
+	if(!CreateOperands(args, ops, 3)) {
+		ops[2]="\" \"";
+		if(!CreateOperands(args, ops, 2)) {
+			ops[0]=args;
+			ops[1]="0";
+		}
+	}
+
+	GetSTROpValue(ops[2], sSep);
+
+	if (!is_variable(ops[0]))
+		return false;
+	
+	DWORD dw;
+	if(GetDWOpValue(ops[1], dw))
+	{
+		if (dw==0) dw=16;
+
+		string sLine="";
+		string data = variables[ops[0]].strbuffhex();
+		for (int n=0; n < variables[ops[0]].size; n++)
+		{
+			sLine=sLine+data.substr(n*2,2)+sSep;
+			if (n>0 && !((n+1) % dw)) { 
+				DoLOG("\""+sLine+"\",\"\"");
+				sLine="";
+			}
+		}
+		if (sLine!="") DoLOG("\""+sLine+"\",\"\"");
+		return true;
 	}
 	return false;
 }
