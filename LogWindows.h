@@ -21,5 +21,7 @@ int wndlog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int colu
 int add2log(string & command);
 int add2log(char * command);
 
+int add2logMasked(char* message,char* mask);
+
 void clearLogLines();
 

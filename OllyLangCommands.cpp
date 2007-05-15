@@ -1160,8 +1160,7 @@ bool OllyLang::DoFIND(string args)
 	}
 	else if(GetDWOpValue(ops[1], dw) && !is_variable(ops[1])) 
 	{
-		DoREV(ops[1]);
-		itoa(variables["$RESULT"].dw,buffer,16);
+		itoa(rev(dw),buffer,16);
 		string data1=buffer;
 		while(data1.length() < data.length())
 			data1.insert(0,"0");
@@ -1183,8 +1182,7 @@ bool OllyLang::DoFIND(string args)
 		}
         else if(GetDWOpValue(ops[1], dw))
 		{
-			DoREV(ops[1]);
-			itoa(variables["$RESULT"].dw,buffer,16);
+			itoa(rev(dw),buffer,16);
 			string data1=buffer;
 			while(data1.length() < data.length())
 				data1.insert(0,"0");
@@ -2540,17 +2538,24 @@ bool OllyLang::DoMOV(string args)
 {
 	string ops[3];
 	bool bDeclared=false;
-	DWORD maxsize=0;
+	DWORD addr=0,maxsize=0;
 
 	if(CreateOperands(args, ops, 3)){
 		GetDWOpValue(ops[2], maxsize);
 	}
-		else
+	else
 		if(!CreateOperands(args, ops, 2))
 			return false;
 
+	//resolve address with operands
+	if(UnquoteString(ops[1], '[', ']')) {
+		if (!CreateOperands(ops[1],&ops[1],1))
+			return false;
+		ops[1]="["+ops[1]+"]";
+	}
+
 	// Check source
-	DWORD dw = 0, addr = 0;
+	DWORD dw = 0; addr=0;
 	string str = "";
 	string tmpops=ops[0];
 	long double flt;
@@ -2562,7 +2567,7 @@ bool OllyLang::DoMOV(string args)
 	if(is_variable(ops[0]))
 	{
 		// Dest is variable
-		if(GetDWOpValue(ops[1], dw) && maxsize <= 4)
+		if(maxsize <= 4 && variables[ops[0]].vt != STR && GetDWOpValue(ops[1], dw) )
 		{
 			if (maxsize==0) maxsize=4;
 			dw = resizeDW(dw,maxsize);
@@ -2926,6 +2931,39 @@ bool OllyLang::DoOPCODE(string args)
 	return false;
 }
 
+bool OllyLang::DoOPENDUMP(string args)
+{
+	string ops[3];
+
+	if(!CreateOperands(args, ops, 3))
+	if(!CreateOperands(args, ops, 2))
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	DWORD addr, base, size;
+	if(!GetDWOpValue(ops[0], addr))
+		return false;
+	if(!GetDWOpValue(ops[1], base))
+		return false;
+	if(!GetDWOpValue(ops[2], size))
+		return false;
+
+	if (addr==0)
+		return true; //do nothing
+
+	t_memory* mem = Findmemory(addr);
+
+	if (base==0) base=mem->base;
+	if (size==0) size=mem->size;
+	
+	HWND wndDump = Createdumpwindow(NULL,base,size,addr,0x01081,NULL);
+	
+	if (wndDump!=NULL)
+		return true;
+
+	return false;
+}
+
 bool OllyLang::DoOPENTRACE(string args)
 {
 	ulong threadid = Getcputhreadid();
@@ -3194,7 +3232,7 @@ bool OllyLang::DoREV(string args)
 {
 	string ops[1];
 	DWORD dw;
-	byte b, tb[4];
+//	byte b, tb[4];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -3202,11 +3240,13 @@ bool OllyLang::DoREV(string args)
 	if(!GetDWOpValue(ops[0], dw))
 		return false;
 
-	memcpy(&tb[0],&dw,4);
+	dw=rev(dw);
+
+/*	memcpy(&tb[0],&dw,4);
 	dw=tb[3]; tb[3]=tb[0]; tb[0]=dw;
 	dw=tb[2]; tb[2]=tb[1]; tb[1]=dw;
 	memcpy(&dw,&tb[0],4);
-
+*/
 	variables["$RESULT"] = dw;
 	return true;
 }
@@ -3437,7 +3477,6 @@ bool OllyLang::DoSTR(string args)
 			variables[op[0]]=v.strbuff();
 
 			return true;
-			
 		}
 	}
 	return false;

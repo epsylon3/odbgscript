@@ -144,6 +144,7 @@ OllyLang::OllyLang()
 	commands["not"] = &OllyLang::DoNOT;
 	commands["or"] = &OllyLang::DoOR;
 	commands["opcode"] = &OllyLang::DoOPCODE;
+	commands["opendump"] = &OllyLang::DoOPENDUMP;
 	commands["opentrace"] = &OllyLang::DoOPENTRACE;
 	commands["pause"] = &OllyLang::DoPAUSE;
 	commands["pop"] = &OllyLang::DoPOP;

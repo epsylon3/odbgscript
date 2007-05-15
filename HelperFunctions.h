@@ -9,6 +9,7 @@ bool is_hex(string& s);
 bool is_hexwild(string& s);
 bool is_dec(string &s);
 bool is_float(string &s);
+DWORD rev(DWORD dw);
 bool split(vector<string> &vec, const string &str, const char delim);
 char GetWildcard(string &s);
 int Str2Rgch(string &s, char* arr, uint size);

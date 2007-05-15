@@ -136,6 +136,26 @@ bool split(vector<string> &vec, const string &str, const char delim)
 	return true;
 }
 
+//reverse dword bytes
+DWORD rev(DWORD dw) {
+	__asm {
+		push eax
+		push ebx
+		
+		mov eax,dw
+		xchg ah,al
+		mov ebx, eax
+		rol ebx, 16
+
+		xchg bh,bl
+		mov dw,ebx
+
+		pop ebx
+		pop eax
+	}
+	return dw;
+}
+
 bool is_hex(string& s)
 {
     if(s.find_first_not_of("0123456789abcdefABCDEF-")!=string::npos)

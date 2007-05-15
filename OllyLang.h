@@ -221,6 +221,7 @@ private:
 	bool DoNOT(string args);
 	bool DoOR(string args);
 	bool DoOPCODE(string args);
+	bool DoOPENDUMP(string args);
 	bool DoOPENTRACE(string args);
 	bool DoPAUSE(string args);
 	bool DoPOP(string args);

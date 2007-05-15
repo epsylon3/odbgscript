@@ -52,18 +52,21 @@ which has taken a lot of time. Sorry about that.
 TODO:
 After Error Cursor
 Edit Line
-Assign Label to a breakpoint 
 Memory BP reason
+mov data, [eax+10], ecx
 
 2.1 What's new? 
 ---------------
 
 1.56.1
++ OPENDUMP command, to create new dump window
 + BPGOTO command, assign a label to a breakpoint by its address
 + LOGBUF command to log string or buffer variable like a memory dump (wrapped)
 + Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
 + Scroll to Label (in context menu)
 * Cursor on Running command displayed correctly
+* BUF/STR now reverse bytes of dword 
+* mov data, [eax+10], 4 works and will assign dword only if data variable was not a string
 
 1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -517,7 +520,7 @@ Example:
 
 BPD callname
 ------------
-Remove breakpoint on dll call
+Remove breakpoint on dll call set by BPX
 
 BPGOTO addr, label
 ------------------
@@ -1048,6 +1051,10 @@ addr is increased by the length of the opcode (disassemble command).
 With this function you can step forward through code. 
 Example: 
 	opcode 00401000
+
+OPENDUMP addr [,base,size]
+--------------------------
+Create a new Dump Window with data at address.
 
 OPENTRACE
 ---------

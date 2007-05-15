@@ -233,7 +233,7 @@ var& var::operator+=(const DWORD& rhs)
 		if (isbuf) {
 			//Concate Num Dword to a buffer (4 octets)
 			s = strbuffhex();
-			sprintf(dwbuf, "%08X",rhs);
+			sprintf(dwbuf, "%08X",rev(rhs));
 			*this = "#"+s+dwbuf+"#";
 		} else {
 			//Add Number to a String

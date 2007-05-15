@@ -192,3 +192,7 @@ int add2log(string & message) {
 	return add2log((char*)message.c_str());
 
 }
+
+int add2logMasked(char* message,char* mask) {
+return 1;
+}
