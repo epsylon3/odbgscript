@@ -93,18 +93,18 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 {	
 	t_status status; 
 	status = Getstatus();
-	script_state = ollylang->GetState();
+	script_state = ollylang->script_state;
 	
 	// Check for breakpoint jumps
 	if(script_state == SS_RUNNING && debugevent && debugevent->dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
 	{
+
 		EXCEPTION_DEBUG_INFO edi = debugevent->u.Exception;
-		if(edi.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
-			ollylang->OnBreakpoint(PP_EXCEPTION,EXCEPTION_DEBUG_EVENT);
-		else if(edi.ExceptionRecord.ExceptionCode != EXCEPTION_SINGLE_STEP)
+		if(edi.ExceptionRecord.ExceptionCode != EXCEPTION_SINGLE_STEP)
 			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
-		else
-			
+		else if(edi.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
+			ollylang->OnBreakpoint(PP_EXCEPTION,EXCEPTION_DEBUG_EVENT);
+/*		else	
 			if(script_state == SS_RUNNING)
 			{
 				t_thread* t;
@@ -113,11 +113,13 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 				context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 				GetThreadContext(t->thread, &context);
 
+				//Hardware Breakpoints...
 				if(t->reg.ip == context.Dr0 || t->reg.ip == context.Dr1 || t->reg.ip == context.Dr2 || t->reg.ip == context.Dr3) {
 					ollylang->OnBreakpoint(PP_HWBREAK,t->reg.ip);
 				}
 
 			}
+*/
 	}
 
 	if(status == STAT_STOPPED && (script_state == SS_RUNNING || script_state == SS_LOADED))
@@ -126,7 +128,7 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 		try
 		{
 			ollylang->Step(0);
-			script_state = ollylang->GetState();
+			script_state = ollylang->script_state;
 		}
 		catch( ... )
 		{
@@ -135,15 +137,70 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 		}
 
 	}
+
 	//Refocus script windows (ex: when using "Step")
-	if (ollylang->wndProg.hw && status == STAT_STOPPED && script_state != SS_RUNNING) {
+	if (    ollylang->wndProg.hw 
+		&& (status == STAT_STOPPED || status == STAT_EVENT)
+		&& (script_state != SS_RUNNING)
+		) 
+	{
 		if (focusonstop>0) { 
+//			InvalidateProgWindow();
 			SetForegroundWindow(ollylang->wndProg.hw);
 			SetFocus(ollylang->wndProg.hw);
 			focusonstop--;
 		}
 	}	
 
+}
+
+extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_EVENT* debugevent)
+{
+	EXCEPTION_DEBUG_INFO edi;
+	if(debugevent)
+		edi = debugevent->u.Exception;
+
+	script_state = ollylang->script_state;
+
+//cout << hex << reasonex << endl;
+
+	// Handle events
+	if(script_state == SS_RUNNING || script_state == SS_PAUSED) 
+	//PAUSED also TO PROCESS "BPGOTO" BREAKPOINTS
+	{
+		switch(reasonex) 
+		{
+		case PP_INT3BREAK:
+		case PP_HWBREAK:
+		case PP_MEMBREAK:
+			ollylang->OnBreakpoint(reasonex,dummy);
+			break;
+		case PP_EXCEPTION:
+		case PP_ACCESS:
+		case PP_GUARDED:
+		case PP_SINGLESTEP | PP_BYPROGRAM:
+			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
+			break;
+		}
+		Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
+		InvalidateProgWindow();
+	}
+	// Step script
+//	if(script_state == SS_RUNNING || script_state == SS_LOADED)
+//	{
+//		try
+//		{
+//			Broadcast(WM_USER_CHALL, 0, 0);
+//			ollylang->Step(0);
+//			script_state = ollylang->script_state;
+//		}
+//		catch( ... )
+//		{
+//			delete ollylang;
+//			MessageBox(hwmain, "An error occured in the plugin!\nPlease contact SHaG.", "OllyScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+//		}
+//	}
+	return 0;
 }
 
 // Function adds items to main OllyDbg menu (origin=PM_MAIN).
@@ -205,50 +262,7 @@ extc int _export cdecl ExecuteScript(const char* const filename)
 	return 0;
 }
 
-extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_EVENT* debugevent)
-{
-	EXCEPTION_DEBUG_INFO edi;
-	if(debugevent)
-		edi = debugevent->u.Exception;
-	script_state = ollylang->GetState();
 
-	// cout << hex << reasonex << endl;
-
-	// Handle events
-	if(script_state == SS_RUNNING)
-	{
-		switch(reasonex) 
-		{
-		case PP_INT3BREAK:
-		case PP_HWBREAK:
-		case PP_MEMBREAK:
-			ollylang->OnBreakpoint(reasonex,dummy);
-			break;
-		case PP_EXCEPTION:
-		case PP_ACCESS:
-		case PP_GUARDED:
-		case PP_SINGLESTEP | PP_BYPROGRAM:
-			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
-			break;
-		}
-	}
-	// Step script
-//	if(script_state == SS_RUNNING || script_state == SS_LOADED)
-//	{
-//		try
-//		{
-//			Broadcast(WM_USER_CHALL, 0, 0);
-//			ollylang->Step(0);
-//			script_state = ollylang->GetState();
-//		}
-//		catch( ... )
-//		{
-//			delete ollylang;
-//			MessageBox(hwmain, "An error occured in the plugin!\nPlease contact SHaG.", "OllyScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
-//		}
-//	}
-	return 0;
-}
 
 // Receives commands from main menu.
 extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item) 
@@ -313,13 +327,13 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 
 	case 4: // Step
 		ollylang->Step(1);
-		script_state = ollylang->GetState();
+		script_state = ollylang->script_state;
 		break;
 
 	case 5: // Force Pause (like Pause Key)
 		focusonstop=4;
 		ollylang->Pause();
-		script_state = ollylang->GetState();
+		script_state = ollylang->script_state;
     	break;
 
 	case 10:
@@ -457,7 +471,7 @@ extc int ODBG_Pluginshortcut(int origin,int ctrl,int alt,int shift,int key,void 
 			//will pause when running on give focus to script window
 			focusonstop=4;
 			ollylang->Pause();
-			script_state = ollylang->GetState();
+			script_state = ollylang->script_state;
 		//	SetForegroundWindow(ollylang->wndProg.hw);
 		//	SetFocus(ollylang->wndProg.hw);
 		}
@@ -500,7 +514,7 @@ PM_CPUREGS	(t_reg *)	CPU Registers
 extc void _export cdecl ODBG_Pluginreset()
 {	
 	//we keep the script state on restart (paused or not)
-	if (ollylang->GetState() == SS_PAUSED) {
+	if (ollylang->script_state == SS_PAUSED) {
 		ollylang->Reset();
 		ollylang->Pause();
 	} 

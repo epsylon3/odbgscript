@@ -52,14 +52,18 @@ which has taken a lot of time. Sorry about that.
 TODO:
 After Error Cursor
 Edit Line
+Assign Label to a breakpoint 
+Memory BP reason
 
 2.1 What's new? 
 ---------------
 
 1.56.1
++ BPGOTO command, assign a label to a breakpoint by its address
 + LOGBUF command to log string or buffer variable like a memory dump (wrapped)
 + Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
 + Scroll to Label (in context menu)
+* Cursor on Running command displayed correctly
 
 1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -510,6 +514,36 @@ BPCND addr, cond
 Set breakpoint on address addr with condition cond.
 Example:
 	bpcnd 401000, "ECX==1"
+
+BPD callname
+------------
+Remove breakpoint on dll call
+
+BPGOTO addr, label
+------------------
+Automatic Jump at label on Breakpoint (Standard(INT3) and Hardware).
+EOB Like Command
+Example:
+	bphws addr
+	bpgoto addr, MyLabel
+  NextBP:
+	RUN
+	...
+  MyLabel:
+	...
+	jmp NextBP
+
+BPHWC addr
+----------
+Delete hardware breakpoint at a specified address
+Example:
+	bphwc 401000
+	
+BPHWS addr, [mode]
+------------------
+Set hardware breakpoint. Mode can be "r" - read, "w" - write or "x" - execute (default).
+Example:
+	bphws 401000, "x"
 	
 BPL addr, expr
 --------------
@@ -529,18 +563,6 @@ Clear memory breakpoint.
 Example:
 	bpmc
 
-BPHWC addr
-----------
-Delete hardware breakpoint at a specified address
-Example:
-	bphwc 401000
-	
-BPHWS addr, [mode]
-------------------
-Set hardware breakpoint. Mode can be "r" - read, "w" - write or "x" - execute (default).
-Example:
-	bphws 401000, "x"
-
 BPRM addr, size
 ---------------
 Set memory breakpoint on read. Size is size of memory in bytes.
@@ -552,6 +574,10 @@ BPWM addr, size
 Set memory breakpoint on write. Size is size of memory in bytes.
 Example:
 	bpwm 401000, FF
+
+BPX callname
+------------
+Set breakpoint on dll call
 
 BUF var
 -------

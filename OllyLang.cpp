@@ -67,6 +67,7 @@ OllyLang::OllyLang()
 	commands["bp"] = &OllyLang::DoBP;
 	commands["bpcnd"] = &OllyLang::DoBPCND;
 	commands["bpd"] = &OllyLang::DoBPD;
+	commands["bpgoto"] = &OllyLang::DoBPGOTO;
 	commands["bphwcall"] = &OllyLang::DoBPHWCALL;
 	commands["bphwc"] = &OllyLang::DoBPHWC;
 	commands["bphws"] = &OllyLang::DoBPHWS;
@@ -197,7 +198,6 @@ OllyLang::OllyLang()
 	hwndinput = 0;
 
 	showVarHistory=true;
-	painting=0;
 }
 
 OllyLang::~OllyLang()
@@ -338,10 +338,12 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 	return linesAdded;
 }
 
+/*
 int OllyLang::GetState()
 {
 	return script_state;
 }
+*/
 
 bool OllyLang::LoadScript(LPSTR file)
 {
@@ -378,6 +380,7 @@ bool OllyLang::Pause()
 bool OllyLang::Reset()
 {
 	variables.clear();
+	bpjumps.clear();
 	char s[10] = {0};
 	sprintf(s,"%i.%i", VERSIONHI, VERSIONLO);
 	string str(s);
@@ -412,8 +415,6 @@ bool OllyLang::Step(int forceStep)
 	char lastchar;
 	bool jumped;
 	int old_pos;
-
-	t_status st = Getstatus();
 
 	while(!require_ollyloop && Getstatus() == STAT_STOPPED && (script_state == SS_RUNNING || script_state == SS_LOADED || (forceStep && script_state == SS_PAUSED)))
 	{		
@@ -482,6 +483,7 @@ bool OllyLang::Step(int forceStep)
 		// Find command and execute it
 		if(commands.find(command) != commands.end())
 		{
+		
 			// Command found, execute it
 			func = commands[command];
 			dwtick = GetTickCount();
@@ -499,7 +501,8 @@ bool OllyLang::Step(int forceStep)
 			// No such command
 			errorstr = "No such command: " + codeLine;
 		}
-		pgr_scriptpos=script_pos;
+		if (Getstatus() != STAT_RUNNING)
+			pgr_scriptpos=script_pos+1;
 		
 		// Error in processing, show error and die
 		if(!result)
@@ -520,7 +523,7 @@ bool OllyLang::Step(int forceStep)
 			errorstr = "";
 			script_pos++;
 			Pause();
-
+			InvalidateProgWindow();
 			return false;
 		} else {
 			if (variables["$RESULT"].vt == DW)
@@ -558,7 +561,9 @@ bool OllyLang::Step(int forceStep)
 			}
 		}
 
-		pgr_scriptpos=script_pos+1;
+		//Highlight next instr. not if app running...
+		if (Getstatus() != STAT_RUNNING)
+			pgr_scriptpos=script_pos+1;
 
 		if (jumped) { 
 			if(++refresh % 128 == 0) {
@@ -569,18 +574,21 @@ bool OllyLang::Step(int forceStep)
 					InvalidateRect(wndProg.hw, NULL, FALSE);
 				}
 				return true; 
-				//will continue after main loop...
+				//will continue after main loop...redraw etc
 			}
 		}
 
 		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);			
-
-		if(forceStep == 1)
+		
+		if(forceStep == 1) {
+			InvalidateProgWindow();
 			break;
+		}
 
 	}
-	if (wndProg.hw!=NULL)
+
+	if (wndProg.hw!=NULL) //Visible && Not a RUN command 
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;
 }
@@ -598,9 +606,33 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 		script_pos = EOB_row;
 		return true;
 	}
-	else
+	else 
+	{
+		if (reason != PP_EXCEPTION) {
+			t_dump* cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
+			DWORD addr = cpuasm->sel0;
+			if(bpjumps.find(addr) != bpjumps.end())
+			{
+				if (bpjumps[addr]) {
+					script_pos = bpjumps[addr] + 1;
+					pgr_scriptpos = script_pos + 1;
+					setProgLineEIP(pgr_scriptpos,addr);
+					Selectandscroll(&wndProg,pgr_scriptpos,2);
+					if (script_state == SS_PAUSED) {
+						InvalidateProgWindow();
+					}
+					return true;
+				}
+			}
+			pgr_scriptpos = script_pos + 1;
+			if (pgr_scriptpos_paint!=pgr_scriptpos && script_state == SS_PAUSED) {
+				Selectandscroll(&wndProg,pgr_scriptpos,2);
+				InvalidateProgWindow();
+			}
+		}
+	}
 
-		return false;
+	return false;
 }
 
 bool OllyLang::OnException(DWORD ExceptionCode)
@@ -975,6 +1007,29 @@ bool OllyLang::ParseLabels()
 	}
 
 	return false;
+}
+
+bool OllyLang::AddBPJump(int bpaddr,int labelpos)
+{
+	map<int,int>::iterator iter;
+	pair<int,int> p;
+	iter = bpjumps.begin();
+	int loc = 0;
+
+	while(iter != bpjumps.end())
+	{
+		p = *iter;
+		if(p.first == bpaddr) {
+			p.second=labelpos;
+			return true;
+		}
+		iter++;
+		loc++;
+	}
+
+	bpjumps.insert(pair<int, int>(bpaddr,labelpos));
+
+	return true;
 }
 
 bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
@@ -1738,6 +1793,24 @@ void OllyLang::DumpLabels()
 		p = *iter;
 
 		cerr << "Name: " << p.first << ", ";
+		cerr << "Row: " << p.second << endl;
+		iter++;
+	}
+	cerr << endl;
+}
+
+void OllyLang::DumpBPJumps()
+{
+	cerr << "_ LABELS _" << endl;
+	map<int, int>::iterator iter;
+	iter = bpjumps.begin();
+
+	pair<int, int> p;
+	while(iter != bpjumps.end())
+	{
+		p = *iter;
+
+		cerr << "Addr: " << hex << p.first << ", ";
 		cerr << "Row: " << p.second << endl;
 		iter++;
 	}

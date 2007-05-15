@@ -25,7 +25,8 @@ public:
 	t_table wndProg;
 	vector<t_wndprog_data> tProgLines;
 	uint pgr_scriptpos;
-	
+	uint pgr_scriptpos_paint;
+
 	t_table wndLog;
 	vector<t_wndlog_data> tLogLines;
 	
@@ -43,7 +44,7 @@ public:
 	~OllyLang();
 	
 	// Public methods
-	int GetState();
+//	int GetState();
 	bool LoadScript(LPSTR fileName);
 	bool Pause();
 	bool Resume();
@@ -67,11 +68,15 @@ public:
 	vector<string> script;
 	// Variables that exist
 	map<string, var> variables;
-	// Labels that exist
+	// Labels in script
 	map<string, int> labels;
+	// Breakpoint Auto Jumps 
+	map<int, int> bpjumps;
 
 	bool showVarHistory;
-	bool painting;
+
+	int script_state;
+	bool require_ollyloop;
 
 private:
 	
@@ -103,14 +108,12 @@ private:
 		} bitFlags;
 	};
 
-	bool require_ollyloop;
 	bool enable_logging;
 	uint script_pos;
 
 	bool var_logging;
 	bool sub_operand;
 
-	int script_state;
 	int EOB_row;
 	int EOE_row;
 	
@@ -142,6 +145,7 @@ private:
 	bool DoBP(string args);
 	bool DoBPCND(string args);
 	bool DoBPD(string args);
+	bool DoBPGOTO(string args);
 	bool DoBPHWCALL(string args);
 	bool DoBPHWC(string args);
 	bool DoBPHWS(string args);
@@ -278,12 +282,14 @@ private:
 
 	bool ParseLabels();
 	bool Process(string& codeLine);
+	bool AddBPJump(int bpaddr,int labelpos);
 
 	string ResolveVarsForExec(string in,bool hex8forExec);
 
 	// Debug functions
 	void DumpVars();
 	void DumpLabels();
+	void DumpBPJumps();
 	void DumpScript();
 
 };

@@ -389,13 +389,31 @@ bool OllyLang::DoBPCND(string args)
 bool OllyLang::DoBPD(string args)
 {
   	string ops[1];
-	string str1;
 
 	if (!CreateOp(args, ops, 1))
 		return false;
 
 	return DoBPX(ops[0] + ", 1");
 
+}
+
+//Set On Breakpoint Goto Script Label (addr, label)
+bool OllyLang::DoBPGOTO(string args)
+{
+	string ops[2];
+
+	if(!CreateOperands(args, ops, 2))
+		return false;
+
+	DWORD addr = 0;
+	if(GetDWOpValue(ops[0], addr))
+	{
+		if(labels.find(ops[1]) != labels.end()) {
+			AddBPJump(addr,labels[ops[1]]);
+			return true;
+		}
+	}
+	return false;
 }
 
 bool OllyLang::DoBPHWCALL(string args)
@@ -548,18 +566,19 @@ bool OllyLang::DoBPWM(string args)
 	return false;
 }
 
+//Breakpoint on DLL Call
 bool OllyLang::DoBPX(string args)
 {
 
     string ops[2];
 	int i;
 	int bpnmb=0;
-	DWORD parm=0;
+	DWORD del=0;
 	string callname;
  
 	if(CreateOp(args, ops, 2))
 	{
-		GetDWOpValue(ops[1], parm);
+		GetDWOpValue(ops[1], del);
 	}
 	else
 	if(!CreateOp(args, ops, 1))
@@ -568,62 +587,62 @@ bool OllyLang::DoBPX(string args)
 
 	if (GetSTROpValue(ops[0],callname))
 	{
-		  t_table *reftable;
-          t_ref *pref;
-		  
-		  char findname[256]={0};
-          char name[256]={0};
-          strcpy(name,callname.c_str());
+		t_table *reftable;
+		t_ref *pref;
+  
+		char findname[256]={0};
+		char name[256]={0};
+		strcpy(name,callname.c_str());
 
-		  if(strlen(name)==0) 
-		  {
-             errorstr="Function name missed";
-             return false;
-		  }
-		  
-		  Findalldllcalls((t_dump *)Plugingetvalue(VAL_CPUDASM),0,"Intermodular calls");
-          reftable=(t_table *)Plugingetvalue(VAL_REFERENCES);
-
-          if(reftable==NULL || reftable->data.n==0)
-		  {
-              errorstr="No references";
-              return false;
-		  }
-
-		  if(reftable->data.itemsize<sizeof(t_ref))
-		  {
-			  errorstr="Old version of OllyDbg";
-			  return false;
-		  }
-
-   	    for(i=0; i<reftable->data.n; i++) 
+		if(strlen(name)==0) 
 		{
-			   // The safest way: size of t_ref may change in the future!
-			  pref=(t_ref *)((char *)reftable->data.data+reftable->data.itemsize*i);
+			errorstr="Function name missed";
+			return false;
+		}
+		  
+		Findalldllcalls((t_dump *)Plugingetvalue(VAL_CPUDASM),0,"Intermodular calls");
+		reftable=(t_table *)Plugingetvalue(VAL_REFERENCES);
 
-			  if(Findlabel(pref->dest,findname)==0) 
-			  {// Unnamed destination
-			   continue;
-			  }
+		if(reftable==NULL || reftable->data.n==0)
+		{
+			errorstr="No references";
+			return false;
+		}
+
+		 if(reftable->data.itemsize<sizeof(t_ref))
+		{
+			errorstr="Old version of OllyDbg";
+			return false;
+		}
+
+		for(i=0; i<reftable->data.n; i++) 
+		{
+			// The safest way: size of t_ref may change in the future!
+			pref=(t_ref *)((char *)reftable->data.data+reftable->data.itemsize*i);
+
+			if(Findlabel(pref->dest,findname)==0) 
+			{// Unnamed destination
+				continue;
+			}
    
-			  if(stricmp(name,findname)!=0) 
-			  {      // Different function
-			   continue;
-			  } 
+			if(stricmp(name,findname)!=0) 
+			{      // Different function
+				continue;
+			} 
 
-			  if(!parm) 
-			  {                     // Set breakpoint
+			if(!del) 
+			{                     // Set breakpoint
 				Setbreakpoint(pref->addr,TY_ACTIVE,0);
 				Deletenamerange(pref->addr,pref->addr+1,NM_BREAK);
 				Deletenamerange(pref->addr,pref->addr+1,NM_BREAKEXPL);
 				Deletenamerange(pref->addr,pref->addr+1,NM_BREAKEXPR);
 				bpnmb++;
-			  }
-			  else 
-			  {
-			  Deletebreakpoints(pref->addr,pref->addr+1,0);
-			  bpnmb++;
-			  }
+			}
+			else 
+			{
+				 Deletebreakpoints(pref->addr,pref->addr+1,0);
+				 bpnmb++;
+			}
 		}
         variables["$RESULT"]=bpnmb;
         Broadcast(WM_USER_CHALL,0,0);

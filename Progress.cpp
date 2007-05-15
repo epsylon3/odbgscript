@@ -175,7 +175,7 @@ t_wndprog_data *ppl;
 				case 33: // Step
 					ollylang->Pause(); //for right click step when running
 					ollylang->Step(1);
-					script_state = ollylang->GetState();
+					script_state = ollylang->script_state;
 					focusonstop=5;
 					return 1;
 				case 34: // Pause/Resume
@@ -186,7 +186,7 @@ t_wndprog_data *ppl;
 					else 
 					{
 						ollylang->Pause();
-						script_state = ollylang->GetState();
+						script_state = ollylang->script_state;
 					}
 					return 1;
 				case 35: // Abort
@@ -259,7 +259,7 @@ t_wndprog_data *ppl;
 				// Step
 				ollylang->Pause();
 				ollylang->Step(1);
-				script_state = ollylang->GetState();
+				script_state = ollylang->script_state;
 				focusonstop=4;
 				return 1;
 			
@@ -286,7 +286,7 @@ t_wndprog_data *ppl;
 				else 
 				{
 					ollylang->Pause();
-					script_state = ollylang->GetState();
+					script_state = ollylang->script_state;
 				}
 				return 1;
 			} 
@@ -304,11 +304,8 @@ t_wndprog_data *ppl;
             InvalidateRect(hw, NULL, FALSE);
             return 0;
         case WM_PAINT:
-			if (!ollylang->painting) {
-				ollylang->painting=1;
-				Painttable(hw, &ollylang->wndProg, wndprog_get_text);
-				ollylang->painting=0;
-			}
+			ollylang->pgr_scriptpos_paint=ollylang->pgr_scriptpos;
+			Painttable(hw, &ollylang->wndProg, wndprog_get_text);
 			return 0;
 		default:
 		break;
@@ -612,8 +609,10 @@ int setProgLineEIP(int line, int eip)
 	
 	if (ollylang->wndProg.hw!=NULL)	
 	{
-		Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
-		InvalidateProgWindow();
+		if (!ollylang->require_ollyloop) {
+			Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
+			InvalidateProgWindow();
+		}
 	}
 
 	return 1;
