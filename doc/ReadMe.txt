@@ -65,8 +65,8 @@ mov data, [eax+10], ecx
 + Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
 + Scroll to Label (in context menu)
 * Cursor on Running command displayed correctly
-* BUF/STR now reverse bytes of dword 
-* mov data, [eax+10], 4 works and will assign dword only if data variable was not a string
+* "BUF/STR dw" now reverse bytes of the dword 
+* "mov data, [eax+10], 4" works and will assign dword only if data variable was not a string
 
 1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -1202,7 +1202,7 @@ Example:
 
 STR var
 -------
-Converts variable to a String
+Converts variable to a String (buffer or dword)
 
 SUB dest, src
 -------------

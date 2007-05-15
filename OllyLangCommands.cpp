@@ -2856,11 +2856,13 @@ bool OllyLang::DoNEG(string args)
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1))
 	{
-		_asm
+		__asm
 		{
+			push eax
 			mov eax,dw1
 			neg eax
 			mov dw1,eax
+			pop eax
 		}
 		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
 		tmp = strupr(ultoa(dw1, buffer, 16));
@@ -2884,9 +2886,11 @@ bool OllyLang::DoNOT(string args)
 	{
 		__asm
 		{
+			push eax
 			mov eax,dw1
 			not eax
 			mov dw1,eax
+			pop eax
 		}
 		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
 		tmp = strupr(ultoa(dw1, buffer, 16));
@@ -3266,10 +3270,14 @@ bool OllyLang::DoROL(string args)
         
 		__asm
 		{
+			push eax
+			push ecx
 			mov eax,dw1
 			mov cl,dw2
 			rol eax,cl
 			mov dw1,eax
+			pop ecx
+			pop eax
 		}
 		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
 		tmp = strupr(ultoa(dw1, buffer, 16));
@@ -3295,10 +3303,14 @@ bool OllyLang::DoROR(string args)
         
 		__asm
 		{
+			push eax
+			push ecx
 			mov eax,dw1
 			mov cl,dw2
 			ror eax,cl
 			mov dw1,eax
+			pop ecx
+			pop eax
 		}
 		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
 		tmp = strupr(ultoa(dw1, buffer, 16));
