@@ -245,8 +245,17 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
 		mruGetCurrentMenu(&buff[strlen(buff)]);
  		strcpy(&buff[strlen(buff)],
 			"}"
-			"30  Script &Window...\t"
-			",5  Pause Script\tPAUSE"
+			"Script &Functions...{"
+			"30  Script &Window\t"
+			",31  Script &Log\t"
+			"|"
+			",4 Step\t"
+			",2 Pause\tPAUSE"
+			",3 Resume\t"
+			",1 Abort\t"
+			"|"
+			",30 Edit Script..."
+			"}"
 
 		);
 		
@@ -433,33 +442,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 			//cout << hex << mod->codebase;
 			
 			//cout << hex << mod->codebase;
-
-
-
-			/*char cmd[MAXCMDSIZE] = {0};
-		//Readmemory(cmd, 0x401030, 1, 0);
-
-		t_memory* tmem = Findmemory(0x412fc0);
-		ulong addr = 0x412fc0;
-
-		do 
-		{
-			addr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
-			Readcommand(addr, cmd);
-		} while(cmd[0] != 0x61);
-
-		Manualbreakpoint(addr, VK_F2, 0, 0, FIXEDFONT);
-		Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 0, VK_F9);
-
-		//Disasm((uchar*)cmd, sizeof(cmd), 0x412fc0, 0, &d, DISASM_CODE, 0);
-		//ulong x = 
-		t_disasm d;
-		DWORD r = cmd[0] << (8 * 3);// + cmd[1] << (8 * 2);// + cmd[2] << 8 + cmd[3];
-		r += cmd[1] << (8 * 2);
-		r += cmd[2] << 8;
-		r += cmd[3];
-		cerr << cmd << endl;
-		*/
+		
 		break;
 
     default: 

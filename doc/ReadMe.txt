@@ -75,6 +75,7 @@ x ALLOC, FREE can now refresh the memory window, was a problem with LIB, used ne
 * PUSH, POP Command fixed
 
 1.55.3 (14 May 2007)
++ Added Sub Context Menu in Disasm
 + Added HISTORY command to enable/disable value History (run faster)
 + Added BEGINSEARCH and ENDSEARCH to optimize "find commands"
 + Added GCI Command to Get info on disasm command
