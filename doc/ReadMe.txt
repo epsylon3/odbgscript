@@ -64,6 +64,7 @@ mov data, [eax+10], ecx
 + LOGBUF command to log string or buffer variable like a memory dump (wrapped)
 + Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
 + Scroll to Label (in context menu)
+x Buffer read speed optimisation
 * Cursor on Running command displayed correctly
 * "BUF/STR dw" now reverse bytes of the dword 
 * "mov data, [eax+10], 4" works and will assign dword only if data variable was not a string

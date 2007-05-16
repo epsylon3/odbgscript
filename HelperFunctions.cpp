@@ -260,10 +260,12 @@ int Str2Hex(string &s, string &dst, ulong size)
 	uint i = 0;
 	char c[3]={0};
 	dst="";
+	dst.resize(size*2);
+	char * p = (char*)dst.c_str();
 	while(i < size)
 	{
-		sprintf(c,"%02X",s[i]);
-		dst.append(c);
+		sprintf(p+(i*2),"%02X",s.at(i));
+		//dst.append(c);
 		i++;
 	}
 	return i;
