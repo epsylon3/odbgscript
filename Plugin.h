@@ -18,40 +18,45 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// IMPORTANT INFORMATION /////////////////////////////
 
 // 1. Export all callback functions by name, NOT by ordinal!
-// 2. Force byte alignment of OllyDbg structures!
-// 3. Set default char type to unsigned!
-// 4. Read documentation!
+// 2. If using from .c sources, set default char type to unsigned!
+// 3. Read documentation!
 
-// If you prefere Borland, this will force necessary settings (but, as a side
+// If you prefer Borland, this will force necessary settings (but, as a side
 // effect, may cause plenty of warnings if other include files will be compiled
 // with different options):
+#ifndef OLLYDBG_PLUGIN_H
+#define OLLYDBG_PLUGIN_H
+
+#pragma pack(push, 1)
+
 #ifdef __BORLANDC__
+  #pragma option -b						// enums as longs
 
-  #pragma option -a1                   // Byte alignment
-  #pragma option -K                    // Unsigned char
-
+  #ifndef __cplusplus
+    #pragma option -K                    // Unsigned char
+  #endif
   // And here I check that settings are correct. Unfortunately, Microsoft C (at
   // least C++ 5.0) doesn't allow for sizeof and typecasts in conditionals:
 
-  typedef struct t_aligntest {
+  struct t_aligntest {
     char           a;
     long           b;
-  } t_aligntest;
+  };
 
-  #if (sizeof(t_aligntest)!=sizeof(char)+sizeof(long))
+  #if (sizeof(struct t_aligntest)!=sizeof(char)+sizeof(long))
     #error Please assure byte alignment of OllyDbg structures
   #endif
-  #undef t_aligntest
 
+#ifndef __cplusplus
   #if ((char)0xFF!=255)
     #error Please set default char type to unsigned
   #endif
+#endif
 
 #endif
 
@@ -59,12 +64,11 @@
 // that character is set to unsigned.
 #ifdef _MSC_VER
 
-  #pragma pack(1)                      // Force byte alignment of structures
-
+#ifndef __cplusplus
   #ifndef _CHAR_UNSIGNED               // Verify that character is unsigned
     #error Please set default char type to unsigned (option /J)
   #endif
-
+#endif
   // Borland adds underscore to export automatically, whereas I don't know any
   // such option for Microsoft compiler. This solution is not too elegant but
   // works.
@@ -163,19 +167,7 @@ typedef unsigned long  ulong;          // Unsigned long
 #define INFOFONT       10
 
 ////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// INFORMATION FUNCTIONS /////////////////////////////
-
-extc void    cdecl Addtolist(long addr,int highlight,char *format,...);
-extc void    cdecl Updatelist(void);
-extc HWND    cdecl Createlistwindow(void);
-extc void    cdecl Error(char *format,...);
-extc void    cdecl Message(ulong addr,char *format,...);
-extc void    cdecl Infoline(char *format,...);
-extc void    cdecl Progress(int promille,char *format,...);
-extc void    cdecl Flash(char *format,...);
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////// DATA FORMATTING FUNCTIONS ///////////////////////////
+/////////////////////////////// DATA FORMATTING ////////////////////////////////
 
 // Bits used in Decodeaddress(), Decoderelativeoffset() and  Decodethreadname()
 // to specify decoding mode:
@@ -199,23 +191,8 @@ extc void    cdecl Flash(char *format,...);
 #define DIACRITICAL    0x02            // Diacritical character
 #define RAREASCII      0x10            // Rare ASCII character
 
-extc int     cdecl Decodeaddress(ulong addr,ulong base,int addrmode,
-               char *symb,int nsymb,char *comment);
-extc int     cdecl Decoderelativeoffset(ulong addr,int addrmode,
-               char *symb,int nsymb);
-extc int     cdecl Decodecharacter(char *s,uint c);
-extc int     cdecl Printfloat4(char *s,float f);
-extc int     cdecl Printfloat8(char *s,double d);
-extc int     cdecl Printfloat10(char *s,long double ext);
-extc int     cdecl Print3dnow(char *s,uchar *f);
-extc int     cdecl Printsse(char *s,char *f);
-extc ulong   cdecl Followcall(ulong addr);
-extc int     cdecl IstextA(char c);
-extc int     cdecl IstextW(wchar_t w);
-extc int     cdecl Stringtotext(char *data,int ndata,char *text,int ntext);
-
 ////////////////////////////////////////////////////////////////////////////////
-///////////////////////////// DATA INPUT FUNCTIONS /////////////////////////////
+////////////////////////////////// DATA INPUT //////////////////////////////////
 
 #define MAXCMDSIZE     16              // Maximal length of 80x86 command
 #define NSEQ           8               // Max length of command sequence
@@ -270,45 +247,8 @@ typedef struct t_extmodel {            // Model for extended command search
   char           rbmask[MAXCMDSIZE];   // Mask for pseudoregister RB
 } t_extmodel;
 
-extc int     cdecl Getlong(char *title,ulong *data,int datasize,
-               char letter,int mode);
-extc int     cdecl Getlongxy(char *title,ulong *data,int datasize,
-               char letter,int mode,int x,int y);
-extc int     cdecl Getregxy(char *title,ulong *data,char letter,int x,int y);
-extc int     cdecl Getline(char *title,ulong *data);
-extc int     cdecl Getlinexy(char *title,ulong *data,int x,int y);
-extc int     cdecl Getfloat10(char *title,long double *fdata,
-               uchar *tag,char letter,int mode);
-extc int     cdecl Getfloat10xy(char *title,long double *fdata,
-               char *tag,char letter,int mode,int x,int y);
-extc int     cdecl Getfloat(char *title,void *fdata,int size,
-               char letter,int mode);
-extc int     cdecl Getfloatxy(char *title,void *fdata,int size,
-               char letter,int mode,int x,int y);
-extc void    cdecl Getasmfindmodel(t_asmmodel model[NMODELS],
-               char letter,int searchall);
-extc void    cdecl Getasmfindmodelxy(t_asmmodel model[NMODELS],
-               char letter,int searchall,int x,int y);
-extc int     cdecl Gettext(char *title,char *text,
-               char letter,int type,int fontindex);
-extc int     cdecl Gettextxy(char *title,char *text,char letter,
-               int type,int fontindex,int x,int y);
-extc int     cdecl Gethexstring(char *title,t_hexstr *hs,
-               int mode,int fontindex,char letter);
-extc int     cdecl Gethexstringxy(char *title,t_hexstr *hs,int mode,
-               int fontindex,char letter,int x,int y);
-extc int     cdecl Getmmx(char *title,uchar *data,int mode);
-extc int     cdecl Getmmxxy(char *title,char *data,int mode,int x,int y);
-extc int     cdecl Get3dnow(char *title,uchar *data,int mode);
-extc int     cdecl Get3dnowxy(char *title,char *data,int mode,int x,int y);
-extc int     cdecl Browsefilename(char *title,char *name,char *defext,
-               int getarguments);
-extc int     cdecl OpenEXEfile(char *path,int dropped);
-extc int     cdecl Attachtoactiveprocess(int newprocessid);
-extc void    cdecl Animate(int animation);
-
 ////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// SORTED DATA FUNCTIONS /////////////////////////////
+////////////////////////////////// SORTED DATA /////////////////////////////////
 
 #define NBAR           17              // Max allowed number of segments in bar
 
@@ -525,25 +465,6 @@ typedef struct t_table {               // Window with sorted data and bar
   DRAWFUNC       *drawfunc;            // Function which decodes table fields
 } t_table;
 
-extc int     cdecl Createsorteddata(t_sorted *sd,char *name,int itemsize,
-               int nmax,SORTFUNC *sortfunc,DESTFUNC *destfunc);
-extc void    cdecl Destroysorteddata(t_sorted *sd);
-extc void    cdecl *Addsorteddata(t_sorted *sd,void *item);
-extc void    cdecl Deletesorteddata(t_sorted *sd,ulong addr);
-extc void    cdecl Deletesorteddatarange(t_sorted *sd,ulong addr0,ulong addr1);
-extc int     cdecl Deletenonconfirmedsorteddata(t_sorted *sd);
-extc void*   cdecl Findsorteddata(t_sorted *sd,ulong addr);
-extc void*   cdecl Findsorteddatarange(t_sorted *sd,ulong addr0,ulong addr1);
-extc int     cdecl Findsorteddataindex(t_sorted *sd,ulong addr0,ulong addr1);
-extc int     cdecl Sortsorteddata(t_sorted *sd,int sort);
-extc void*   cdecl Getsortedbyselection(t_sorted *sd,int index);
-extc void    cdecl Defaultbar(t_bar *pb);
-extc int     cdecl Tablefunction(t_table *pt,
-               HWND hw,UINT msg,WPARAM wp,LPARAM lp);
-extc void    cdecl Painttable(HWND hw,t_table *pt,DRAWFUNC getline);
-extc int     cdecl Gettableselectionxy(t_table *pt,int column,int *px,int *py);
-extc void    cdecl Selectandscroll(t_table *pt,int index,int mode);
-
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// NAME FUNCTIONS ////////////////////////////////
 
@@ -583,21 +504,6 @@ extc void    cdecl Selectandscroll(t_table *pt,int index,int mode);
 #define NM_IMCALL      0xFE            // Intermodular call
 
 #define NMHISTORY      0x40            // Converts NM_xxx to type of init list
-
-extc int     cdecl Insertname(ulong addr,int type,char *name);
-extc int     cdecl Quickinsertname(ulong addr,int type,char *name);
-extc void    cdecl Mergequicknames(void);
-extc void    cdecl Discardquicknames(void);
-extc int     cdecl Findname(ulong addr,int type,char *name);
-extc int     cdecl Decodename(ulong addr,int type,char *name);
-extc ulong   cdecl Findnextname(char *name);
-extc int     cdecl Findlabel(ulong addr,char *name);
-extc void    cdecl Deletenamerange(ulong addr0,ulong addr1,int type);
-extc int     cdecl Findlabelbyname(char *name,ulong *addr,
-               ulong addr0,ulong addr1);
-extc ulong   cdecl Findimportbyname(char *name,ulong addr0,ulong addr1);
-extc int     cdecl Demanglename(char *name,int type,char *undecorated);
-extc int     cdecl Findsymbolicname(ulong addr,char *fname);
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// DISASSEMBLY FUNCTIONS /////////////////////////////
@@ -810,23 +716,6 @@ typedef struct t_disasm {              // Results of disassembling
   ulong          reserved[29];         // Reserved for plugin compatibility
 } t_disasm;
 
-extc ulong   cdecl Disasm(uchar *src,ulong srcsize,ulong srcip,uchar *srcdec,
-               t_disasm *disasm,int disasmmode,ulong threadid);
-extc ulong   cdecl Disassembleback(uchar *block,ulong base,ulong size,
-               ulong ip,int n,int usedec);
-extc ulong   cdecl Disassembleforward(uchar *block,ulong base,ulong size,
-               ulong ip,int n,int usedec);
-extc int     cdecl Issuspicious(char *cmd,ulong size,ulong ip,
-               ulong threadid,t_reg *preg,char *s);
-extc int     cdecl Isfilling(ulong offset,char *data,ulong size,ulong align);
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////// ASSEMBLY FUNCTIONS //////////////////////////////
-
-extc int     cdecl Assemble(char *cmd,ulong ip,t_asmmodel *model,int attempt,
-               int constsize,char *errtext);
-extc int     cdecl Checkcondition(int code,ulong flags);
-
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// EXPRESSIONS //////////////////////////////////
 
@@ -843,9 +732,6 @@ typedef struct t_result {              // Result of expression's evaluation
     wchar_t      wvalue[TEXTLEN/2]; }; // UNICODE form of expression's value
   ulong          lvaddr;               // Address of lvalue or NULL
 } t_result;
-
-extc int     cdecl Expression(t_result *result,char *expression,int a,int b,
-               uchar *data,ulong database,ulong datasize,ulong threadid);
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// THREAD FUNCTIONS ///////////////////////////////
@@ -869,14 +755,6 @@ typedef struct t_thread {              // Information about active threads
   long           systime;              // Time in system mode, 1/10th ms, or -1
   ulong          reserved[16];         // Reserved for future compatibility
 } t_thread;
-
-extc HWND    cdecl Createthreadwindow(void);
-extc t_thread* cdecl Findthread(ulong threadid);
-extc int     cdecl Decodethreadname(char *s,ulong threadid,int mode);
-extc ulong   cdecl Getcputhreadid(void);
-extc ulong   cdecl Runsinglethread(ulong threadid);
-extc void    cdecl Restoreallthreads(void);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// MEMORY FUNCTIONS ///////////////////////////////
@@ -907,14 +785,6 @@ typedef struct t_heap {                // Heap block descriptor
   ulong          type;                 // Service information, TY_xxx
   ulong          parent;               // Handle of heap descriptor block
 } t_heap;
-
-extc int     cdecl Listmemory(void); 
-extc t_memory* cdecl Findmemory(ulong addr);
-extc int     cdecl Guardmemory(ulong base,ulong size,int guard);
-extc void    cdecl Havecopyofmemory(uchar *copy,ulong base,ulong size);
-extc ulong   cdecl Readmemory(void *buf,ulong addr,ulong size,int mode);
-extc ulong   cdecl Writememory(void *buf,ulong addr,ulong size,int mode);
-extc ulong   cdecl Readcommand(ulong ip,char *cmd);
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// MODULE FUNCTIONS ///////////////////////////////
@@ -1016,13 +886,6 @@ typedef struct t_module {              // Executable module descriptor
   ulong          reserved[15];         // Reserved for plugin compatibility
 } t_module;
 
-extc t_module* cdecl Findmodule(ulong addr);
-extc t_fixup* cdecl Findfixup(t_module *pmod,ulong addr);
-extc uchar*  cdecl Finddecode(ulong addr,ulong *psize);
-extc ulong   cdecl Findfileoffset(t_module *pmod,ulong addr);
-extc int     cdecl Decoderange(ulong addr,ulong size,char *s);
-extc int     cdecl Analysecode(t_module *pmod);
-
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////// DUMP /////////////////////////////////////
 
@@ -1086,7 +949,7 @@ typedef struct t_dump {                // Current status of dump window
 } t_dump;
 
 ////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////// WINDOW FUNCTIONS ///////////////////////////////
+///////////////////////////////////// WINDOWS //////////////////////////////////
 
 #define WM_USER_MENU   (WM_USER+101)   // Activate context-sensitive menu
 #define WM_USER_SCR    (WM_USER+102)   // Redraw scroll(s)
@@ -1128,29 +991,6 @@ typedef struct t_dump {                // Current status of dump window
 #define BKUP_SAVECOPY  6               // Save backup copy to file
 #define BKUP_DELETE    7               // Delete backup copy
 
-extc int     cdecl Registerotclass(char *classname,
-               char *iconname,WNDPROC classproc);
-extc HWND    cdecl Newtablewindow(t_table *pt,int nlines,int maxcolumns,
-               char *winclass,char *wintitle);
-extc HWND    cdecl Quicktablewindow(t_table *pt,int nlines,int maxcolumns,
-               char *winclass,char *wintitle);
-extc HWND    cdecl Createdumpwindow(char *name,ulong base,ulong size,
-               ulong addr,int type,SPECFUNC *specdump);
-extc void    cdecl Setdumptype(t_dump *pd,int dumptype);
-extc void    cdecl Dumpbackup(t_dump *pd,int action);
-extc int     cdecl Broadcast(UINT msg,WPARAM wp,LPARAM lp);
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////// DATA CONVERSION FUNCTIONS ///////////////////////////
-
-extc ulong   cdecl Compress(uchar *bufin,ulong nbufin,
-               uchar *bufout,ulong nbufout);
-extc ulong   cdecl Getoriginaldatasize(char *bufin,ulong nbufin);
-extc ulong   cdecl Decompress(uchar *bufin,ulong nbufin,
-               uchar *bufout,ulong nbufout);
-extc ulong   cdecl Calculatecrc(uchar *copy,ulong base,ulong size,
-               t_module *pmod,ulong fixupoffset);
-
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// REFERENCES AND SEARCH /////////////////////////////
 
@@ -1160,17 +1000,6 @@ typedef struct t_ref {                 // Description of reference
   ulong          type;                 // Type of reference, TY_xxx
   ulong          dest;                 // Destination of call
 } t_ref;
-
-extc int     cdecl Findreferences(ulong base,ulong size,ulong addr0,ulong addr1,
-               ulong origin,int recurseonjump,char *title);
-extc int     cdecl Findstrings(ulong base,ulong size,ulong origin,char *title);
-extc int     cdecl Findalldllcalls(t_dump *pd,ulong origin,char *title);
-extc int     cdecl Findallcommands(t_dump *pd,t_asmmodel *model,
-               ulong origin,char *title);
-extc int     cdecl Findallsequences(t_dump *pd,t_extmodel model[NSEQ][NMODELS],
-               ulong origin,char *title);
-extc ulong   cdecl Walkreference(int dir);
-extc ulong   cdecl Walkreferenceex(int dir,ulong *size);
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////// BREAKPOINT AND TRACE FUNCTIONS ////////////////////////
@@ -1237,41 +1066,6 @@ typedef struct t_hardbpoint {          // Description of hardware breakpoint
   ulong          reserved[4];          // Reserved for the future
 } t_hardbpoint;
 
-extc int     cdecl Setbreakpoint(ulong addr,ulong type,uchar cmd);
-extc int     cdecl Setbreakpointext(ulong addr,ulong type,char cmd,
-               ulong passcount);
-extc int     cdecl Manualbreakpoint(ulong addr,
-               int key,int shiftkey,ulong nametype,int font);
-extc void    cdecl Deletebreakpoints(ulong addr0,ulong addr1,int silent);
-extc ulong   cdecl Getbreakpointtype(ulong addr);
-extc ulong   cdecl Getbreakpointtypecount(ulong addr,ulong *passcount);
-extc ulong   cdecl Getnextbreakpoint(ulong addr,ulong *type,int *cmd);
-extc void    cdecl Tempbreakpoint(ulong addr,int mode);
-extc int     cdecl Hardbreakpoints(int closeondelete);
-extc int     cdecl Sethardwarebreakpoint(ulong addr,int size,int type);
-extc int     cdecl Deletehardwarebreakpoint(int index);
-extc int     cdecl Deletehardwarebreakbyaddr(ulong addr);
-extc int     cdecl Setmembreakpoint(int type,ulong addr,ulong size);
-extc uchar*  cdecl Findhittrace(ulong addr,uchar **ptracecopy,ulong *psize);
-extc int     cdecl Modifyhittrace(ulong addr0,ulong addr1,int mode);
-extc ulong   cdecl Isretaddr(ulong retaddr,ulong *procaddr);
-extc HWND    cdecl Creatertracewindow(void);
-extc void    cdecl Settracecondition(char *cond,int onsuspicious,
-               ulong in0,ulong in1,ulong out0,ulong out1);
-extc void    cdecl Settracecount(ulong count);
-extc void    cdecl Settracepauseoncommands(char *cmdset);
-extc int     cdecl Startruntrace(t_reg *preg);
-extc void    cdecl Deleteruntrace(void);
-extc int     cdecl Runtracesize(void);
-extc int     cdecl Findprevruntraceip(ulong ip,int startback);
-extc int     cdecl Findnextruntraceip(ulong ip,int startback);
-extc int     cdecl Getruntraceregisters(int nback,t_reg *preg,
-               t_reg *pold,char *cmd,char *comment);
-extc int     cdecl Getruntraceprofile(ulong addr,ulong size,ulong *profile);
-extc void    cdecl Scrollruntracewindow(int back);
-extc HWND    cdecl Createprofilewindow(ulong base,ulong size);
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// CODE INJECTION ////////////////////////////////
 
@@ -1283,11 +1077,6 @@ typedef struct t_inject {              // Description of injected code
   int            stacksize;            // Stack size to save
   int            datatype;             // 0: in/out, 1: in, 2: out
 } t_inject;
-
-extc int     cdecl Injectcode(ulong threadid,t_inject *inject,char *data,
-               ulong datasize,ulong parm1,ulong parm2,
-               INJECTANSWER *answerfunc);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// CPU-SPECIFIC FUNCTIONS ////////////////////////////
@@ -1305,19 +1094,6 @@ extc int     cdecl Injectcode(ulong threadid,t_inject *inject,char *data,
 #define CPU_NOCREATE   0x04000         // Don't create CPU window if absent
 #define CPU_REDRAW     0x08000         // Redraw CPU window immediately
 #define CPU_NOFOCUS    0x10000         // Don't assign focus to main window
-
-extc void    cdecl Setcpu(ulong threadid,ulong asmaddr,
-               ulong dumpaddr,ulong stackaddr,int mode);
-extc void    cdecl Setdisasm(ulong asmaddr,ulong selsize,int mode);
-extc void    cdecl Redrawdisassembler(void);
-extc void    cdecl Getdisassemblerrange(ulong *pbase,ulong *psize);
-extc ulong   cdecl Findprocbegin(ulong addr);
-extc ulong   cdecl Findprocend(ulong addr);
-extc ulong   cdecl Findprevproc(ulong addr);
-extc ulong   cdecl Findnextproc(ulong addr);
-extc int     cdecl Getproclimits(ulong addr,ulong *start,ulong *end);
-extc void    cdecl Sendshortcut(int where,ulong addr,
-               int msg,int ctrl,int shift,int vkcode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// PROCESS CONTROL ////////////////////////////////
@@ -1338,11 +1114,6 @@ typedef enum t_status {                // Thread/process status
   STAT_CLOSING                         // Process is requested to terminate
 } t_status;
 
-extc t_status cdecl Getstatus(void);
-extc int     cdecl Go(ulong threadid,ulong tilladdr,int stepmode,
-               int givechance,int backupregs);
-extc int     cdecl Suspendprocess(int processevents);
-
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// DECODING OF ARGUMENTS /////////////////////////////
 
@@ -1350,15 +1121,6 @@ extc int     cdecl Suspendprocess(int processevents);
 #define DASC_NOHEX     1               // Test, print nothing if not a string
 #define DASC_ASCII     2               // Force ASCII
 #define DASC_PASCAL    3               // Force Pascal
-
-extc uchar*  cdecl Findknownfunction(ulong addr,int direct,
-               int level,char *fname);
-extc int     cdecl Decodeknownargument(ulong addr,uchar *arg,ulong value,
-               int valid,char *s,char *mask,uchar *pset[]);
-extc char    cdecl *Findunknownfunction(ulong ip,char *code,char *dec,
-               ulong size,char *fname);
-extc int     cdecl Decodeascii(ulong value,char *s,int len,int mode);
-extc int     cdecl Decodeunicode(ulong value,char *s,int len);
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// SOURCE CODE SUPPORT //////////////////////////////
@@ -1372,28 +1134,8 @@ typedef struct t_sourceline {          // Source line descriptor
   ulong          line;                 // 0-based line number
 } t_sourceline;
 
-extc HWND    cdecl Showsourcefromaddress(ulong addr,int show);
-extc int     cdecl Getresourcestring(t_module *pm,ulong id,char *s);
-extc t_sourceline* cdecl Getlinefromaddress(ulong addr);
-extc ulong   cdecl Getaddressfromline(ulong addr0,ulong addr1,
-               char *path,ulong line);
-extc int     cdecl Getsourcefilelimits(ulong nameaddr,
-               ulong *addr0,ulong *addr1);
-extc int     cdecl Decodefullvarname(t_module *pmod,t_symvar *psym,
-               int offset,char *name);
-extc int     cdecl Getbprelname(t_module *pmod,ulong addr,long offset,
-               char *s,int nsymb);
-
 ////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// WATCH SUPPORT /////////////////////////////////
-
-extc HWND    cdecl Createwatchwindow(void);
-extc int     cdecl Deletewatch(int indexone);
-extc int     cdecl Insertwatch(int indexone,char *text);
-extc int     cdecl Getwatch(int indexone,char *text);
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////// WINDOWS-SPECIFIC FUNCTIONS //////////////////////////
+///////////////////////////////// WINDOWS-SPECIFIC /////////////////////////////
 
 #define MAXNEST        32              // Max allowed code structure nesting
 
@@ -1417,9 +1159,6 @@ typedef struct t_window {              // Description of window
   char           tree[MAXNEST];        // Tree display
 } t_window;
 
-extc HWND    cdecl Createwinwindow(void);
-
-
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// PATCHES ////////////////////////////////////
 
@@ -1431,11 +1170,8 @@ typedef struct t_patch {
   char           mod[TEXTLEN];         // Patched code
 } t_patch;
 
-extc HWND    cdecl Createpatchwindow(void);
-
-
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////// PLUGIN-SPECIFIC FUNCTIONS ///////////////////////////
+//////////////////////////////////// PLUGIN-SPECIFIC ///////////////////////////
 
 // Parameters of Plugingetvalue().
 #define VAL_HINST              1       // Current program instance
@@ -1496,19 +1232,8 @@ extc HWND    cdecl Createpatchwindow(void);
 #define VAL_PATCHES            58      // Table of patches
 #define VAL_HINTS              59      // Sorted data with analysis hints
 
-extc int     cdecl Registerpluginclass(char *classname,char *iconname,
-               HINSTANCE dllinst,WNDPROC classproc);
-extc void    cdecl Unregisterpluginclass(char *classname);
-extc int     cdecl Pluginwriteinttoini(HINSTANCE dllinst,char *key,int value);
-extc int     cdecl Pluginwritestringtoini(HINSTANCE dllinst,char *key,char *s);
-extc int     cdecl Pluginreadintfromini(HINSTANCE dllinst,char *key,int def);
-extc int     cdecl Pluginreadstringfromini(HINSTANCE dllinst,char *key,
-               char *s,char *def);
-extc int     cdecl Pluginsaverecord(ulong tag,ulong size,void *data);
-extc int     cdecl Plugingetvalue(int type);
-
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////// EXPORTED PLUGIN CALLBACK FUNCTIONS //////////////////////
+/////////////////////////// EXPORTED PLUGIN CALLBACKS //////////////////////////
 
 // Origins of standard OllyDbg windows as passed to plugin. In parenthesis is
 // the type of item you get in ODBG_Pluginmenu(), ODBG_Pluginaction() and
@@ -1577,24 +1302,328 @@ extc int     cdecl Plugingetvalue(int type);
 #define MI_WINJU3      0x33754A0AL
 #define MI_APPST       0x73614F0AL     // OllyAppStarter by Homunculus
 
+#ifdef __cplusplus
+extern "C" {
+namespace ODBG {
+#endif
+//information function protos
+extern void    cdecl Addtolist(long addr, int highlight, char *format,...);
+extern void    cdecl Updatelist(void);
+extern HWND    cdecl Createlistwindow(void);
+extern void    cdecl Error(char *format,...);
+extern void    cdecl Message(ulong addr,char *format,...);
+extern void    cdecl Infoline(char *format,...);
+extern void    cdecl Progress(int promille,char *format,...);
+extern void    cdecl Flash(char *format,...);
+
+//data formatting protos
+extern int     cdecl Decodeaddress(ulong addr,ulong base,int addrmode,
+               char *symb,int nsymb,char *comment);
+extern int     cdecl Decoderelativeoffset(ulong addr,int addrmode,
+               char *symb,int nsymb);
+extern int     cdecl Decodecharacter(char *s,uint c);
+extern int     cdecl Printfloat4(char *s,float f);
+extern int     cdecl Printfloat8(char *s,double d);
+extern int     cdecl Printfloat10(char *s,long double ext);
+extern int     cdecl Print3dnow(char *s,uchar *f);
+extern int     cdecl Printsse(char *s,char *f);
+extern ulong   cdecl Followcall(ulong addr);
+extern int     cdecl IstextA(char c);
+extern int     cdecl IstextW(wchar_t w);
+extern int     cdecl Stringtotext(char *data,int ndata,char *text,int ntext);
+
+//data input protos
+extern int     cdecl Getlong(char *title,ulong *data,int datasize,
+               char letter,int mode);
+extern int     cdecl Getlongxy(char *title,ulong *data,int datasize,
+               char letter,int mode,int x,int y);
+extern int     cdecl Getregxy(char *title,ulong *data,char letter,int x,int y);
+extern int     cdecl Getline(char *title,ulong *data);
+extern int     cdecl Getlinexy(char *title,ulong *data,int x,int y);
+extern int     cdecl Getfloat10(char *title,long double *fdata,
+               uchar *tag,char letter,int mode);
+extern int     cdecl Getfloat10xy(char *title,long double *fdata,
+               char *tag,char letter,int mode,int x,int y);
+extern int     cdecl Getfloat(char *title,void *fdata,int size,
+               char letter,int mode);
+extern int     cdecl Getfloatxy(char *title,void *fdata,int size,
+               char letter,int mode,int x,int y);
+extern void    cdecl Getasmfindmodel(t_asmmodel model[NMODELS],
+               char letter,int searchall);
+extern void    cdecl Getasmfindmodelxy(t_asmmodel model[NMODELS],
+               char letter,int searchall,int x,int y);
+extern int     cdecl Gettext(char *title,char *text,
+               char letter,int type,int fontindex);
+extern int     cdecl Gettextxy(char *title,char *text,char letter,
+               int type,int fontindex,int x,int y);
+extern int     cdecl Gethexstring(char *title,t_hexstr *hs,
+               int mode,int fontindex,char letter);
+extern int     cdecl Gethexstringxy(char *title,t_hexstr *hs,int mode,
+               int fontindex,char letter,int x,int y);
+extern int     cdecl Getmmx(char *title,uchar *data,int mode);
+extern int     cdecl Getmmxxy(char *title,char *data,int mode,int x,int y);
+extern int     cdecl Get3dnow(char *title,uchar *data,int mode);
+extern int     cdecl Get3dnowxy(char *title,char *data,int mode,int x,int y);
+extern int     cdecl Browsefilename(char *title,char *name,char *defext,
+               int getarguments);
+extern int     cdecl OpenEXEfile(char *path,int dropped);
+extern int     cdecl Attachtoactiveprocess(int newprocessid);
+extern void    cdecl Animate(int animation);
+
+//sorting function protos
+extern int     cdecl Createsorteddata(t_sorted *sd,char *name,int itemsize,
+               int nmax,SORTFUNC *sortfunc,DESTFUNC *destfunc);
+extern void    cdecl Destroysorteddata(t_sorted *sd);
+extern void*    cdecl Addsorteddata(t_sorted *sd,void *item);
+extern void    cdecl Deletesorteddata(t_sorted *sd,ulong addr);
+extern void    cdecl Deletesorteddatarange(t_sorted *sd,ulong addr0,ulong addr1);
+extern int     cdecl Deletenonconfirmedsorteddata(t_sorted *sd);
+extern void*   cdecl Findsorteddata(t_sorted *sd,ulong addr);
+extern void*   cdecl Findsorteddatarange(t_sorted *sd,ulong addr0,ulong addr1);
+extern int     cdecl Findsorteddataindex(t_sorted *sd,ulong addr0,ulong addr1);
+extern int     cdecl Sortsorteddata(t_sorted *sd,int sort);
+extern void*   cdecl Getsortedbyselection(t_sorted *sd,int index);
+extern void    cdecl Defaultbar(t_bar *pb);
+extern int     cdecl Tablefunction(t_table *pt,
+               HWND hw,UINT msg,WPARAM wp,LPARAM lp);
+extern void    cdecl Painttable(HWND hw,t_table *pt,DRAWFUNC getline);
+extern int     cdecl Gettableselectionxy(t_table *pt,int column,int *px,int *py);
+extern void    cdecl Selectandscroll(t_table *pt,int index,int mode);
+
+//name function protos
+extern int     cdecl Insertname(ulong addr,int type,char *name);
+extern int     cdecl Quickinsertname(ulong addr,int type,char *name);
+extern void    cdecl Mergequicknames(void);
+extern void    cdecl Discardquicknames(void);
+extern int     cdecl Findname(ulong addr,int type,char *name);
+extern int     cdecl Decodename(ulong addr,int type,char *name);
+extern ulong   cdecl Findnextname(char *name);
+extern int     cdecl Findlabel(ulong addr,char *name);
+extern void    cdecl Deletenamerange(ulong addr0,ulong addr1,int type);
+extern int     cdecl Findlabelbyname(char *name,ulong *addr,
+               ulong addr0,ulong addr1);
+extern ulong   cdecl Findimportbyname(char *name,ulong addr0,ulong addr1);
+extern int     cdecl Demanglename(char *name,int type,char *undecorated);
+extern int     cdecl Findsymbolicname(ulong addr,char *fname);
+
+//disassembly function protos
+extern ulong   cdecl Disasm(uchar *src,ulong srcsize,ulong srcip,uchar *srcdec,
+               t_disasm *disasm,int disasmmode,ulong threadid);
+extern ulong   cdecl Disassembleback(uchar *block,ulong base,ulong size,
+               ulong ip,int n,int usedec);
+extern ulong   cdecl Disassembleforward(uchar *block,ulong base,ulong size,
+               ulong ip,int n,int usedec);
+extern int     cdecl Issuspicious(char *cmd,ulong size,ulong ip,
+               ulong threadid,t_reg *preg,char *s);
+extern int     cdecl Isfilling(ulong offset,char *data,ulong size,ulong align);
+
+//assembly function protos
+extern int     cdecl Assemble(char *cmd,ulong ip,t_asmmodel *model,int attempt,
+               int constsize,char *errtext);
+extern int     cdecl Checkcondition(int code,ulong flags);
+
+//expression function protos
+extern int     cdecl Expression(t_result *result,char *expression,int a,int b,
+               uchar *data,ulong database,ulong datasize,ulong threadid);
+
+//thread function protos
+extern HWND    cdecl Createthreadwindow(void);
+extern t_thread* cdecl Findthread(ulong threadid);
+extern int     cdecl Decodethreadname(char *s,ulong threadid,int mode);
+extern ulong   cdecl Getcputhreadid(void);
+extern ulong   cdecl Runsinglethread(ulong threadid);
+extern void    cdecl Restoreallthreads(void);
+
+//memory function protos
+extern int     cdecl Listmemory(void);
+extern t_memory* cdecl Findmemory(ulong addr);
+extern int     cdecl Guardmemory(ulong base,ulong size,int guard);
+extern void    cdecl Havecopyofmemory(uchar *copy,ulong base,ulong size);
+extern ulong   cdecl Readmemory(void *buf,ulong addr,ulong size,int mode);
+extern ulong   cdecl Writememory(void *buf,ulong addr,ulong size,int mode);
+extern ulong   cdecl Readcommand(ulong ip,char *cmd);
+
+//module function protos
+extern t_module* cdecl Findmodule(ulong addr);
+extern t_fixup* cdecl Findfixup(t_module *pmod,ulong addr);
+extern uchar*  cdecl Finddecode(ulong addr,ulong *psize);
+extern ulong   cdecl Findfileoffset(t_module *pmod,ulong addr);
+extern int     cdecl Decoderange(ulong addr,ulong size,char *s);
+extern int     cdecl Analysecode(t_module *pm);
+
+extern int     cdecl Registerotclass(char *classname,
+               char *iconname,WNDPROC classproc);
+extern HWND    cdecl Newtablewindow(t_table *pt,int nlines,int maxcolumns,
+               char *winclass,char *wintitle);
+extern HWND    cdecl Quicktablewindow(t_table *pt,int nlines,int maxcolumns,
+               char *winclass,char *wintitle);
+extern HWND    cdecl Createdumpwindow(char *name,ulong base,ulong size,
+               ulong addr,int type,SPECFUNC *specdump);
+extern void    cdecl Setdumptype(t_dump *pd,int dumptype);
+extern void    cdecl Dumpbackup(t_dump *pd,int action);
+extern int     cdecl Broadcast(UINT msg,WPARAM wp,LPARAM lp);
+
+//conversion function protos
+extern ulong   cdecl Compress(uchar *bufin,ulong nbufin,
+               uchar *bufout,ulong nbufout);
+extern ulong   cdecl Getoriginaldatasize(char *bufin,ulong nbufin);
+extern ulong   cdecl Decompress(uchar *bufin,ulong nbufin,
+               uchar *bufout,ulong nbufout);
+extern ulong   cdecl Calculatecrc(uchar *copy,ulong base,ulong size,
+               t_module *pmod,ulong fixupoffset);
+
+//search/reference function protos
+extern int     cdecl Findreferences(ulong base,ulong size,ulong addr0,ulong addr1,
+               ulong origin,int recurseonjump,char *title);
+extern int     cdecl Findstrings(ulong base,ulong size,ulong origin,char *title);
+extern int     cdecl Findalldllcalls(t_dump *pd,ulong origin,char *title);
+extern int     cdecl Findallcommands(t_dump *pd,t_asmmodel *model,
+               ulong origin,char *title);
+extern int     cdecl Findallsequences(t_dump *pd,t_extmodel model[NSEQ][NMODELS],
+               ulong origin,char *title);
+extern ulong   cdecl Walkreference(int dir);
+extern ulong   cdecl Walkreferenceex(int dir,ulong *size);
+
+//breakpoint function protos
+extern int     cdecl Setbreakpoint(ulong addr,ulong type,uchar cmd);
+extern int     cdecl Setbreakpointext(ulong addr,ulong type,char cmd,
+               ulong passcount);
+extern int     cdecl Manualbreakpoint(ulong addr,
+               int key,int shiftkey,ulong nametype,int font);
+extern void    cdecl Deletebreakpoints(ulong addr0,ulong addr1,int silent);
+extern ulong   cdecl Getbreakpointtype(ulong addr);
+extern ulong   cdecl Getbreakpointtypecount(ulong addr,ulong *passcount);
+extern ulong   cdecl Getnextbreakpoint(ulong addr,ulong *type,int *cmd);
+extern void    cdecl Tempbreakpoint(ulong addr,int mode);
+extern int     cdecl Hardbreakpoints(int closeondelete);
+extern int     cdecl Sethardwarebreakpoint(ulong addr,int size,int type);
+extern int     cdecl Deletehardwarebreakpoint(int index);
+extern int     cdecl Deletehardwarebreakbyaddr(ulong addr);
+extern int     cdecl Setmembreakpoint(int type,ulong addr,ulong size);
+extern uchar*  cdecl Findhittrace(ulong addr,uchar **ptracecopy,ulong *psize);
+extern int     cdecl Modifyhittrace(ulong addr0,ulong addr1,int mode);
+extern ulong   cdecl Isretaddr(ulong retaddr,ulong *procaddr);
+extern HWND    cdecl Creatertracewindow(void);
+extern void    cdecl Settracecondition(char *cond,int onsuspicious,
+               ulong in0,ulong in1,ulong out0,ulong out1);
+extern void    cdecl Settracecount(ulong count);
+extern void    cdecl Settracepauseoncommands(char *cmdset);
+extern int     cdecl Startruntrace(t_reg *preg);
+extern void    cdecl Deleteruntrace(void);
+extern int     cdecl Runtracesize(void);
+extern int     cdecl Findprevruntraceip(ulong ip,int startback);
+extern int     cdecl Findnextruntraceip(ulong ip,int startback);
+extern int     cdecl Getruntraceregisters(int nback,t_reg *preg,
+               t_reg *pold,char *cmd,char *comment);
+extern int     cdecl Getruntraceprofile(ulong addr,ulong size,ulong *profile);
+extern void    cdecl Scrollruntracewindow(int back);
+extern HWND    cdecl Createprofilewindow(ulong base,ulong size);
+
+//code injection protos
+extern int     cdecl Injectcode(ulong threadid,t_inject *inject,char *data,
+               ulong datasize,ulong parm1,ulong parm2,
+               INJECTANSWER *answerfunc);
+
+//cpu function protos
+extern void    cdecl Setcpu(ulong threadid,ulong asmaddr,
+               ulong dumpaddr,ulong stackaddr,int mode);
+extern void    cdecl Setdisasm(ulong asmaddr,ulong selsize,int mode);
+extern void    cdecl Redrawdisassembler(void);
+extern void    cdecl Getdisassemblerrange(ulong *pbase,ulong *psize);
+extern ulong   cdecl Findprocbegin(ulong addr);
+extern ulong   cdecl Findprocend(ulong addr);
+extern ulong   cdecl Findprevproc(ulong addr);
+extern ulong   cdecl Findnextproc(ulong addr);
+extern int     cdecl Getproclimits(ulong addr,ulong *start,ulong *end);
+extern void    cdecl Sendshortcut(int where,ulong addr,
+               int msg,int ctrl,int shift,int vkcode);
+
+//process ctrl protos
+extern t_status cdecl Getstatus(void);
+extern int     cdecl Go(ulong threadid,ulong tilladdr,int stepmode,
+               int givechance,int backupregs);
+extern int     cdecl Suspendprocess(int processevents);
+
+//decode function protos
+extern uchar*  cdecl Findknownfunction(ulong addr,int direct,
+               int level,char *fname);
+extern int     cdecl Decodeknownargument(ulong addr,uchar *arg,ulong value,
+               int valid,char *s,char *mask,uchar *pset[]);
+extern char*   cdecl Findunknownfunction(ulong ip,char *code,char *dec,
+               ulong size,char *fname);
+extern int     cdecl Decodeascii(ulong value,char *s,int len,int mode);
+extern int     cdecl Decodeunicode(ulong value,char *s,int len);
+
+//source function protos
+extern HWND    cdecl Showsourcefromaddress(ulong addr,int show);
+extern int     cdecl Getresourcestring(t_module *pm,ulong id,char *s);
+extern t_sourceline* cdecl Getlinefromaddress(ulong addr);
+extern ulong   cdecl Getaddressfromline(ulong addr0,ulong addr1,
+               char *path,ulong line);
+extern int     cdecl Getsourcefilelimits(ulong nameaddr,
+               ulong *addr0,ulong *addr1);
+extern int     cdecl Decodefullvarname(t_module *pmod,t_symvar *psym,
+               int offset,char *name);
+extern int     cdecl Getbprelname(t_module *pmod,ulong addr,long offset,
+               char *s,int nsymb);
+//watch function protos
+extern HWND    cdecl Createwatchwindow(void);
+extern int     cdecl Deletewatch(int indexone);
+extern int     cdecl Insertwatch(int indexone,char *text);
+extern int     cdecl Getwatch(int indexone,char *text);
+
+//windows function protos
+extern HWND    cdecl Createwinwindow(void);
+
+//patch function protos
+extern HWND    cdecl Createpatchwindow(void);
+
+//plugin function protos
+extern int     cdecl Registerpluginclass(char *classname,char *iconname,
+									   HINSTANCE dllinst,WNDPROC classproc);
+extern void    cdecl Unregisterpluginclass(char *classname);
+extern int     cdecl Pluginwriteinttoini(HINSTANCE dllinst,char *key,int value);
+extern int     cdecl Pluginwritestringtoini(HINSTANCE dllinst,char *key,char *s);
+extern int     cdecl Pluginreadintfromini(HINSTANCE dllinst,char *key,int def);
+extern int     cdecl Pluginreadstringfromini(HINSTANCE dllinst,char *key,char *s,char *def);
+extern int     cdecl Pluginsaverecord(ulong tag,ulong size,void *data);
+extern int     cdecl Plugingetvalue(int type);
+
+#ifdef __cplusplus
+}	//namespace
+#endif
+
 // Prototypes for plugin callback functions.
-extc int  _export cdecl ODBG_Plugindata(char shortname[32]);
-extc int  _export cdecl ODBG_Plugininit(int ollydbgversion,HWND hw,
+int  _export cdecl ODBG_Plugindata(char shortname[32]);
+int  _export cdecl ODBG_Plugininit(int ollydbgversion,HWND hw,
                         ulong *features);
-extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent);
-extc void _export cdecl ODBG_Pluginsaveudd(t_module *pmod,int ismainmodule);
-extc int  _export cdecl ODBG_Pluginuddrecord(t_module *pmod,int ismainmodule,
+void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent);
+void _export cdecl ODBG_Pluginsaveudd(t_module *pmod,int ismainmodule);
+int  _export cdecl ODBG_Pluginuddrecord(t_module *pmod,int ismainmodule,
                         ulong tag,ulong size,void *data);
-extc int  _export cdecl ODBG_Pluginmenu(int origin,char data[4096],void *item);
-extc void _export cdecl ODBG_Pluginaction(int origin,int action,void *item);
-extc int  _export cdecl ODBG_Pluginshortcut(
+int  _export cdecl ODBG_Pluginmenu(int origin,char data[4096],void *item);
+void _export cdecl ODBG_Pluginaction(int origin,int action,void *item);
+int  _export cdecl ODBG_Pluginshortcut(
                         int origin,int ctrl,int alt,int shift,int key,
                         void *item);
-extc void _export cdecl ODBG_Pluginreset(void);
-extc int  _export cdecl ODBG_Pluginclose(void);
-extc void _export cdecl ODBG_Plugindestroy(void);
-extc int  _export cdecl ODBG_Paused(int reason,t_reg *reg);
-extc int  _export cdecl ODBG_Pausedex(int reasonex,int dummy,t_reg *reg,
+void _export cdecl ODBG_Pluginreset(void);
+int  _export cdecl ODBG_Pluginclose(void);
+void _export cdecl ODBG_Plugindestroy(void);
+int  _export cdecl ODBG_Paused(int reason,t_reg *reg);
+int  _export cdecl ODBG_Pausedex(int reasonex,int dummy,t_reg *reg,
                         DEBUG_EVENT *debugevent);
-extc int  _export cdecl ODBG_Plugincmd(int reason,t_reg *reg,char *cmd);
-                        
+int  _export cdecl ODBG_Plugincmd(int reason,t_reg *reg,char *cmd);
+
+#ifdef __cplusplus
+}	//extern "C"
+using namespace ODBG;
+#endif
+
+#ifdef __BORLANDC__
+#pragma option -b.
+#endif
+
+#pragma pack(pop)
+
+#endif
+

@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 ollydbg.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /pdb:none /machine:I386 /libpath:"C:\WINDOWS\system32"
+# ADD LINK32 ollydbgvc7.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /pdb:none /machine:I386 /libpath:"C:\WINDOWS\system32"
 # SUBTRACT LINK32 /nodefaultlib
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
@@ -88,7 +88,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ollydbg.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/ODbgScript.dll " /pdbtype:sept
+# ADD LINK32 ollydbgvc7.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/ODbgScript.dll " /pdbtype:sept
 # SUBTRACT LINK32 /verbose /profile /map /nodefaultlib /force
 # Begin Special Build Tool
 SOURCE="$(InputPath)"

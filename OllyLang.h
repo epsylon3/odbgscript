@@ -186,6 +186,7 @@ private:
 	bool DoGBPR(string args);
 	bool DoGCI(string args);
 	bool DoGCMT(string args);
+	bool DoGMA(string args);
 	bool DoGMEMI(string args);
 	bool DoGMI(string args);
 	bool DoGN(string args);
@@ -228,6 +229,7 @@ private:
 	bool DoPREOP(string args);
 	bool DoPUSH(string args);
 	bool DoREADSTR(string args);
+	bool DoREFRESH(string args);
 	bool DoREPL(string args);
 	bool DoRESET(string args);
 	bool DoREF(string args);
@@ -293,4 +295,10 @@ private:
 	void DumpBPJumps();
 	void DumpScript();
 
+	void DropVariable(string var);
+
+	DWORD AddProcessMemoryBloc(string data, int mode=PAGE_READWRITE);
+	bool  DelProcessMemoryBloc(DWORD address);
+
+	bool ExecuteASM(string command);
 };

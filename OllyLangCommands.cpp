@@ -75,11 +75,13 @@ bool OllyLang::DoALLOC(string args)
 	DWORD addr, size;
 	if(GetDWOpValue(ops[0], size))
 	{
+
 		HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
 		addr = (DWORD) VirtualAllocEx(hDbgPrc,NULL,size,MEM_RESERVE|MEM_COMMIT,PAGE_EXECUTE_READWRITE);
 		variables["$RESULT"] = addr;
 		//Refresh Memory Window
-		//Listmemory(); //LNK ERROR, not found in .LIB 
+		Listmemory();
+		require_ollyloop=1;
 		return true;
 	}
 	return false;
@@ -965,9 +967,7 @@ bool OllyLang::DoDPE(string args)
 bool OllyLang::DoENDE(string args)
 {
 	// Free memory
-	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
-	VirtualFreeEx(hDebugee, pmemforexec, 0x1000, MEM_DECOMMIT);
-	return true;
+	return DelProcessMemoryBloc((DWORD) pmemforexec);
 }
 
 bool OllyLang::DoERUN(string args)
@@ -1116,9 +1116,10 @@ bool OllyLang::DoFILL(string args)
 		&& GetDWOpValue(ops[2], val))
 	{
 		BYTE* buffer = new BYTE[len];
-		BYTE b = 0 + val;
+		FillMemory(buffer,len,val);
+/*		BYTE b = 0 + val;
 		for(ulong i = 0; i < len; i++)
-			buffer[i] = b;
+			buffer[i] = b;*/
 		Writememory(buffer, start, len, MM_SILENT);
 		delete []buffer;
 		Broadcast(WM_USER_CHALL, 0, 0);
@@ -1521,17 +1522,25 @@ bool OllyLang::DoFREE(string args)
 {
 	string ops[2];
 
-	if(!CreateOperands(args, ops, 2))
+	if(!CreateOperands(args, ops, 2)) {
+		ops[1]="0";
+		if(!CreateOperands(args, ops, 1))
 		return false;
+	}
 
 	DWORD addr, size;
 	if(GetDWOpValue(ops[0], addr) && GetDWOpValue(ops[1], size))
 	{
-		HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
-		variables["$RESULT"] = (DWORD) VirtualFreeEx(hDbgPrc,(void*)addr,size,MEM_DECOMMIT);
-		//Refresh Memory Window
-		//Listmemory(); //LNK ERROR, not found in .LIB 
-		return true;
+		//To Refresh Memory Window
+		require_ollyloop=1;
+		if (size==0)
+			return DelProcessMemoryBloc(addr);
+		else {
+			HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
+			variables["$RESULT"] = (DWORD) VirtualFreeEx(hDbgPrc,(void*)addr,size,MEM_DECOMMIT);
+			Listmemory();
+			return true;
+		}
 	}
 	return false;
 }
@@ -1663,6 +1672,46 @@ bool OllyLang::DoGCMT(string args)
 	return false;
 }
 
+
+bool OllyLang::DoGMA(string args)
+{
+	string str,ops[2];
+
+	if(!CreateOperands(args, ops, 2))
+		return false;
+
+	if(GetSTROpValue(ops[0], str)) {
+
+		Listmemory();
+
+		int t=Plugingetvalue(VAL_MEMORY);
+		if (t<=0)
+			return false;
+
+		t_table* ttab=(t_table*) t;
+		t_memory* tmem;
+		t_module* tmod;
+		string sMod;
+
+		for (int n=0;n<ttab->data.n;n++) {
+	
+			tmem = (t_memory*) Getsortedbyselection(&ttab->data,n);
+			tmod = (t_module*) Findmodule(tmem->base);
+			if (tmod!=NULL) {
+				sMod.assign(tmod->name,SHORTLEN);
+				if (stricmp(sMod.c_str(),str.c_str())==0) {
+					Int2Hex(tmem->base, str);
+					return DoGMI(str+","+ops[1]);		
+				}
+			}
+		}
+	}
+
+	variables["$RESULT"] = 0;
+
+	return true;
+
+}
 bool OllyLang::DoGMEMI(string args)
 {
 	string ops[2];
@@ -1892,42 +1941,81 @@ bool OllyLang::DoGO(string args)
 	return false;
 }
 
+//gpa "LoadLibraryA","kernel32.dll"
 bool OllyLang::DoGPA(string args)
 {
-	string ops[2];
+	string ops[3];
+	DWORD dontfree=0;
 
-	if(!CreateOperands(args, ops, 2))
-		return false;
+	if(CreateOperands(args, ops, 3))
+		GetDWOpValue(ops[2], dontfree);
+	else
+		if(!CreateOperands(args, ops, 2))
+			return false;
+
+	variables["$RESULT"] = 0;
+	DropVariable("$RESULT_1");
+	DropVariable("$RESULT_2");
 
 	string proc, lib;
+	FARPROC p;
 
 	if(GetSTROpValue(ops[0], proc) && GetSTROpValue(ops[1], lib))
 	{
-		HMODULE hMod = LoadLibraryEx(lib.c_str(),NULL,LOAD_WITH_ALTERED_SEARCH_PATH);
-		if(hMod == 0)
-		{
-			//errorstr = "No such library: " + lib;
+		HMODULE hMod=LoadLibraryEx(lib.c_str(),NULL,LOAD_WITH_ALTERED_SEARCH_PATH);
+
+		if(hMod==0)	{
 			variables["$RESULT"] = 0;
-			variables["$RESULT_1"] = "";
-			variables["$RESULT_2"] = "";
+			errorstr = "GPA: "+StrLastError();
+
+			if (dontfree) {
+
+				DoGPA("\"LoadLibraryA\",\"kernel32.dll\"");
+
+				HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+
+				DWORD pmem = AddProcessMemoryBloc(lib);
+
+				string tmp;
+				sprintf(buffer,"%09X",pmem);
+				tmp.assign(buffer);
+
+				if (DoPUSH(tmp)) {
+
+					sprintf(buffer,"%09X",variables["$RESULT"].dw);
+
+					ExecuteASM("call "+tmp);
+				
+				}
+
+				
+				//VirtualFreeEx(hDebugee, pmem, 0x1000, MEM_DECOMMIT);
+
+			}
 			return true;
 		}
+
 		variables["$RESULT_1"] = lib;
 
-		FARPROC p = GetProcAddress(hMod, proc.c_str());
-		FreeLibrary(hMod);
+		//if (proc != "")
+		p = GetProcAddress(hMod, proc.c_str());
+		//else
+		//:	GetModu
 
-		if(p == 0)
-		{
-			//errorstr = "No such procedure: " + proc;
-			variables["$RESULT"] = 0;
+		if (!dontfree) {
+			FreeLibrary(hMod);
+			require_ollyloop=1;
+		}
+
+		if(p == 0) {
+			errorstr = "GPA: No such procedure: " + proc;
 			return true;
 		}
+
 		variables["$RESULT"] = (DWORD) p;
 		variables["$RESULT_2"] = proc;
 		return true;
 	}
-	variables["$RESULT"] = 0;
 	return false;
 }
 
@@ -3002,8 +3090,9 @@ bool OllyLang::DoPOP(string args)
 	{
 		args = ops[0] + ", [esp]";
 		DoMOV(args);
-		args1 = "esp, 4";
-		DoADD(args1);
+
+		args1 = "esp, esp+4";
+		DoMOV(args1);
 
 		t_thread* pt = Findthread(Getcputhreadid());	
 //		int regname = GetRegNr("esp");
@@ -3053,8 +3142,9 @@ bool OllyLang::DoPUSH(string args)
 
 	if(GetDWOpValue(ops[0], dw1))
 	{
-		args = "esp, 4";
-		DoSUB(args);
+		args = "esp, esp-4";
+		DoMOV(args);
+
 		args = "[esp], " + ops[0];
 		DoMOV(args);
 
@@ -3165,6 +3255,15 @@ bool OllyLang::DoREF(string args)
 
 	}
 	return false;
+}
+
+bool OllyLang::DoREFRESH(string args)
+{
+	Listmemory();
+	Redrawdisassembler();
+	require_ollyloop=1;
+	Broadcast(WM_USER_CHALL, 0, 0);
+	return true;
 }
 
 bool OllyLang::DoREPL(string args)

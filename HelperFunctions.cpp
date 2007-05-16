@@ -23,12 +23,17 @@ HINSTANCE hinstModule() {
 	return hinst;
 }
 
+void MsgBox(string sMsg, string sTitle)
+{
+	MessageBox(hwndOllyDbg(),sMsg.c_str(),sTitle.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);
+}
+
 void DbgMsg(int n,char* title)
 {
 #ifdef _DEBUG
 	char data[32];
 	_itoa( n, data, 10 );
-	MessageBox(hwndOllyDbg(),data,title,MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
+	MessageBox(hwndOllyDbg(),data,title,MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);
 #endif
 }
 
@@ -273,8 +278,8 @@ int Str2Hex(string &s, string &dst, ulong size)
 
 int Int2Hex(DWORD dw, string &dst) 
 {
-	char buffer [9];
-	dw = sprintf("%X",buffer,dw);
+	char buffer [10];
+	dw = sprintf(buffer,"%X",dw);
 	dst = buffer; 
 	return dw;
 }
@@ -606,3 +611,33 @@ bool ESPRun(void)
 
     return true;
 }
+
+string StrLastError(void) 
+{ 
+    LPVOID lpMsgBuf;
+    LPVOID lpDisplayBuf;
+    DWORD dw = GetLastError();
+	
+	string sError;
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
+	
+	sError=(char *)lpMsgBuf;
+
+	int len=sError.length();
+	if (len>2)
+		if (sError.substr(len-3,2)=="\r\n")
+			sError.erase(len-3,2);
+	
+    LocalFree(lpMsgBuf);
+
+	return sError; 
+}
+

@@ -53,21 +53,26 @@ TODO:
 After Error Cursor
 Edit Line
 Memory BP reason
-mov data, [eax+10], ecx
+Save/Restore Script Breakpoints
 
 2.1 What's new? 
 ---------------
 
 1.56.1
++ REFRESH command, to redraw disam and other windows
++ GMA command, Like GMI, but get Module Info by its name
 + OPENDUMP command, to create new dump window
 + BPGOTO command, assign a label to a breakpoint by its address
 + LOGBUF command to log string or buffer variable like a memory dump (wrapped)
 + Added ERUN command to replace ESTO in the future (mnemonic problem with STO)
 + Scroll to Label (in context menu)
++ JZ, JNZ added (clone of JE/JNE)
 x Buffer read speed optimisation
+x ALLOC, FREE can now refresh the memory window, was a problem with LIB, used new VC7 PDK
 * Cursor on Running command displayed correctly
 * "BUF/STR dw" now reverse bytes of the dword 
 * "mov data, [eax+10], 4" works and will assign dword only if data variable was not a string
+* PUSH, POP Command fixed
 
 1.55.3 (14 May 2007)
 + Added HISTORY command to enable/disable value History (run faster)
@@ -770,12 +775,12 @@ Example:
 	findmem #6A00E8# // find a PUSH 0 followed by some kind of call
 	findmem #6A00E8#, 00400000 // search it after address 0040.0000
 
-FREE addr, size
-----------
-Free memory allocated by ALLOC.
+FREE addr [, size]
+------------------
+Free memory allocated by ALLOC. If size not given, drop whole memory bloc.
 Example
     alloc 1000
-	free $RESULT, 1000
+	free $RESULT
 
 GAPI addr #BETA#
 ---------
@@ -821,6 +826,10 @@ GCMT addr
 ---------
 Gets the comment, automatic comment or analyse's comment at specified code address
 
+GMA name, info
+--------------
+Calls GMI, but parameter is short name of the module
+
 GMEMI addr, info
 ----------------
 Gets information about a memory block to which the specified address belongs.
@@ -856,11 +865,12 @@ Executes to specified address (like G in SoftIce)
 Example:
 	go 401005
 
-GPA proc, lib
--------------
+GPA proc, lib, [0,1]
+--------------------
 Gets the address of the specified procedure in the specified library.
 When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
 Useful for setting breakpoints on APIs.
+Set third param to 1 if you want to keep library in memory
 Example:
 	gpa "MessageBoxA", "user32.dll" // After this $RESULT is the address of MessageBoxA and you can do "bp $RESULT".
 

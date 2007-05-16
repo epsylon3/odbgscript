@@ -16,6 +16,7 @@ int Str2Rgch(string &s, char* arr, uint size);
 int Str2RgchWithWC(string &s, char* arr, uint size, char wc);
 string trim(const string& sData);
 bool UnquoteString(string& s, char cstart, char cend);
+void MsgBox(string sMsg, string sTitle);
 void DbgMsg(int n, char* title);
 void DbgMsg(int n,string title="");
 void DbgMsgHex(int n, char* title);
@@ -37,6 +38,7 @@ HWND FindHandle(DWORD dwThreadId, string wdwClass, long x, long y);
 bool SaveDump(string fileName, DWORD ep);
 bool GetPEInfo(DWORD ep);
 
-
 DWORD  resizeDW(DWORD dw, DWORD size);
 void resizeSTR(string &str, DWORD size);
+
+string StrLastError(void);

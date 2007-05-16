@@ -110,6 +110,7 @@ OllyLang::OllyLang()
 	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
 	commands["gmemi"] = &OllyLang::DoGMEMI;
+	commands["gma"] = &OllyLang::DoGMA;
 	commands["gmi"] = &OllyLang::DoGMI;
 	commands["gn"] = &OllyLang::DoGN;
 	commands["go"] = &OllyLang::DoGO;
@@ -128,6 +129,8 @@ OllyLang::OllyLang()
 	commands["je"] = &OllyLang::DoJE;
 	commands["jmp"] = &OllyLang::DoJMP;
 	commands["jne"] = &OllyLang::DoJNE;
+	commands["jnz"] = &OllyLang::DoJNE;
+	commands["jz"] = &OllyLang::DoJE;
 	commands["key"] = &OllyLang::DoKEY;
 	commands["lbl"] = &OllyLang::DoLBL;
     commands["lc"] = &OllyLang::DoLC;
@@ -151,6 +154,7 @@ OllyLang::OllyLang()
 	commands["preop"] = &OllyLang::DoPREOP;
 	commands["push"] = &OllyLang::DoPUSH;
 	commands["readstr"] = &OllyLang::DoREADSTR;
+	commands["refresh"] = &OllyLang::DoREFRESH;
 	commands["ref"] = &OllyLang::DoREF;
 	commands["repl"] = &OllyLang::DoREPL;
 	commands["reset"] = &OllyLang::DoRESET;
@@ -1848,6 +1852,94 @@ void OllyLang::DumpScript()
 		iter++;
 	}
 	cerr << endl;
+}
+
+void OllyLang::DropVariable(string var)
+{
+	if (variables.find(var) != variables.end())
+		variables.erase(variables.find(var));
+}
+
+DWORD OllyLang::AddProcessMemoryBloc(string data, int mode)
+{
+	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+	DWORD pmem;
+
+	// Allocate memory for data
+	pmem = (DWORD) VirtualAllocEx(hDebugee, NULL, data.size(), MEM_COMMIT, PAGE_READWRITE);
+
+	return pmem;
+}
+
+bool OllyLang::DelProcessMemoryBloc(DWORD address)
+{
+	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+
+	t_memory* tmem = Findmemory(address);
+
+	if (tmem!=NULL) {
+		VirtualFreeEx(hDebugee, (void*) tmem->base, tmem->size, MEM_DECOMMIT);
+		return true;
+	}
+
+	return false;
+}
+
+bool OllyLang::ExecuteASM(string command)
+{
+	// Old eip
+	ulong eip;
+	// For Assemble API
+	t_asmmodel model;
+	char error[255] = {0};
+	char buffer[255] = {0};
+	// Bytes assembled
+	int len = 0, totallen = 0;
+	bool res = true;
+	// Temp storage
+	string tmp;
+
+	// Get process handle and save eip
+	t_thread* thr = Findthread(Getcputhreadid());
+	eip = thr->reg.ip;
+
+	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+
+	// Allocate memory for code
+	DWORD pmemexec = (DWORD) VirtualAllocEx(hDebugee, NULL, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+
+	// Assemble and write code to memory (everything between EXEC and ENDE)
+
+	tmp = ResolveVarsForExec(command,true);
+	sprintf(buffer, tmp.c_str());
+	len = Assemble(buffer, pmemexec + totallen, &model, 0, 0, error);
+	if (len < 0) {
+		errorstr = tmp+"\n"+error;
+		return false;
+	} else {
+		WriteProcessMemory(hDebugee, (LPVOID)(pmemexec + totallen), model.code, len, 0);
+		totallen += len;
+	}
+
+	// Assemble and write jump to original EIP
+	sprintf(buffer, "JMP %lX", eip);
+	len = Assemble(buffer, pmemexec + totallen, &model, 0, 0, error);
+	if (len < 0) {
+		errorstr = error;
+	} else {
+		WriteProcessMemory(hDebugee, (LPVOID)(pmemexec + totallen), model.code, len, 0);
+	}
+
+	// Set new eip and run to the original one
+	thr->reg.ip = pmemexec;
+	thr->reg.modified = 1;
+	thr->regvalid = 1;
+	Broadcast(WM_USER_CHREG, 0, 0);
+	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
+	DbgMsgHex(pmemexec);
+//	DelProcessMemoryBloc(pmemexec);
+
+	return true;
 }
 
 #include "OllyLangCommands.cpp"
