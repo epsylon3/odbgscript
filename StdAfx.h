@@ -4,6 +4,11 @@
 //
 #pragma once
 
+//remove debug build warnings (debug names too long)
+#ifdef _DEBUG
+#pragma warning (disable : 4786)
+#endif
+
 // Insert your headers here
 //#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
@@ -21,7 +26,7 @@
 
 #include <stdio.h>
 #include <fcntl.h>
-#include <io.h>
+//#include <io.h>
 //#include <stdlib.h> 
 
 #include <windows.h>
@@ -29,6 +34,10 @@
 #include <Winuser.h>
 #include <shlwapi.h>
 #include <shellapi.h>
+
+#ifdef _DEBUG
+#include <io.h>
+#endif 
 
 #include "var.h"
 #include "plugin.h"

@@ -54,12 +54,14 @@ extc int _export cdecl ODBG_Plugininit(int ollydbgversion, HWND hw, ulong *featu
 {
 	HINSTANCE hinst;
 
-	if(ollydbgversion < PLUGIN_VERSION)
+	if(ollydbgversion < PLUGIN_VERSION) {
+		MessageBox(hwndOllyDbg(), "Incompatible Ollydbg Version !", "ODbgScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
 		return -1;
+	}
 
 	// Report plugin in the log window.
-	Addtolist(0, 0, "ODbgScript v%i.%i",VERSIONHI,VERSIONLO);
-	Addtolist(0, -1,"  by Epsylon3@gmail.com from OllyScript 0.92 by SHaG");
+	Addtolist(0, 0, "ODbgScript v%i.%i.%i",VERSIONHI,VERSIONLO,VERSIONST);
+	Addtolist(0, -1,"  http://odbgscript.sf.net");
 	ollylang = new OllyLang();
 
 	if (Createsorteddata(&ollylang->wndProg.data,"ODbgScript Data", 
@@ -273,14 +275,15 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
   char s[256];
   HINSTANCE hinst  = hinstModule();
   HWND      hwmain = hwndOllyDbg();
+  OPENFILENAME ofn={0};
   switch (action) 
   {
 	case 0: // Run script
-		OPENFILENAME ofn;       // common dialog box structure
+		       // common dialog box structure
 		char szFile[260];       // buffer for file name
 		
 		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(ofn));
+		//ZeroMemory(&ofn, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = hwmain;
 		ofn.lpstrFile = szFile; 
@@ -298,9 +301,10 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		ofn.lpstrInitialDir = buff;
 		ofn.lpstrTitle = "Select Script";
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		
 
 		// Display the Open dialog box. 
-		if (GetOpenFileName(&ofn)==TRUE)
+		if (GetOpenFileName(&ofn)==TRUE) //Comdlg32.lib
 		{
 			// Load script
 			ollylang->LoadScript(ofn.lpstrFile);

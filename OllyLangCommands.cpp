@@ -143,7 +143,7 @@ bool OllyLang::DoASK(string args)
 		HINSTANCE hi = (HINSTANCE)GetModuleHandle("ODbgScript.dll");
 		HWND hw = 0; //not modal but dialog need to be closed on plugin close.
 		char* returned_buffer = (char*)DialogBoxParam(hi, MAKEINTRESOURCE(IDD_INPUT), hw, (DLGPROC) InputDialogProc, (LPARAM)title.c_str());
-		if ((byte)returned_buffer != NULL)
+		if ((BYTE)returned_buffer != NULL)
 		{
 			string returned = returned_buffer;
 			delete[256] returned_buffer;
@@ -779,7 +779,7 @@ bool OllyLang::DoCOE(string args)
 bool OllyLang::DoDBH(string args)
 {
 	t_thread* thr = Findthread(Getcputhreadid());
-	byte buf[4];
+	BYTE buf[4];
 	ulong fs = thr->reg.limit[2]; // BUG IN ODBG!!!
 	fs += 0x30;
 	Readmemory(buf, fs, 4, MM_RESTORE);
@@ -793,7 +793,7 @@ bool OllyLang::DoDBH(string args)
 bool OllyLang::DoDBS(string args)
 {
 	t_thread* thr = Findthread(Getcputhreadid());
-	byte buffer[4];
+	BYTE buffer[4];
 	ulong fs = thr->reg.limit[2]; // BUG IN ODBG!!!
 	fs += 0x30;
 	Readmemory(buffer, fs, 4, MM_RESTORE);
@@ -1115,8 +1115,8 @@ bool OllyLang::DoFILL(string args)
 		&& GetDWOpValue(ops[1], len) 
 		&& GetDWOpValue(ops[2], val))
 	{
-		byte* buffer = new byte[len];
-		byte b = 0 + val;
+		BYTE* buffer = new BYTE[len];
+		BYTE b = 0 + val;
 		for(ulong i = 0; i < len; i++)
 			buffer[i] = b;
 		Writememory(buffer, start, len, MM_SILENT);
@@ -1545,7 +1545,7 @@ bool OllyLang::DoGAPI(string args)
 		return false;
 
 	if(GetDWOpValue(ops[0], addr)){
-		byte buffer[MAXCMDSIZE];
+		BYTE buffer[MAXCMDSIZE];
 		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
 		
 		if (size>0) {
@@ -1619,7 +1619,7 @@ bool OllyLang::DoGCI(string args)
 
 		transform(param.begin(), param.end(), param.begin(), toupper);
 
-		byte buffer[MAXCMDSIZE];
+		BYTE buffer[MAXCMDSIZE];
 		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
 
 		if (size>0) {
@@ -2027,7 +2027,7 @@ bool OllyLang::DoGPP(string args)
 			continue; 
 
 			//Disasm origin to get comments
-		byte buffer[MAXCMDSIZE];
+		BYTE buffer[MAXCMDSIZE];
 		size=Readmemory(buffer, ref->addr, MAXCMDSIZE, MM_SILENT);					
 		if (size>0) {
 
@@ -2910,7 +2910,7 @@ bool OllyLang::DoOPCODE(string args)
 	DWORD addr,size;
 	if(GetDWOpValue(ops[0], addr))
 	{
-		byte buffer[MAXCMDSIZE];
+		BYTE buffer[MAXCMDSIZE];
 		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
 		
 		if (size>0) 
@@ -3105,7 +3105,7 @@ bool OllyLang::DoREF(string args)
 			curREF=-1;
 			
 			//Info to get destination address
-			byte buffer[MAXCMDSIZE];
+			BYTE buffer[MAXCMDSIZE];
 			size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
 			t_disasm disasm;
 			size=Disasm(buffer, size, addr, NULL, &disasm, DISASM_SIZE, NULL);
@@ -3143,7 +3143,7 @@ bool OllyLang::DoREF(string args)
 						goto ignore_origin;
 
 					//Disasm origin to get comments
-					byte buffer[MAXCMDSIZE];
+					BYTE buffer[MAXCMDSIZE];
 					size=Readmemory(buffer, ref->addr, MAXCMDSIZE, MM_SILENT);					
 					if (size>0) 
 					{
@@ -3236,7 +3236,7 @@ bool OllyLang::DoREV(string args)
 {
 	string ops[1];
 	DWORD dw;
-//	byte b, tb[4];
+//	BYTE b, tb[4];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
