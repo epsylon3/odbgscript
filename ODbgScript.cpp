@@ -254,7 +254,7 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
 			",3 Resume\t"
 			",1 Abort\t"
 			"|"
-			",30 Edit Script..."
+			",32 Edit Script..."
 			"}"
 
 		);
@@ -395,6 +395,11 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 	case 31:
 		{
 			initLogWindow();
+			break;
+		}
+	case 32: // Edit Script
+		{
+			ShellExecute(hwndOllyDbg(),"open",ollylang->scriptpath.c_str(),NULL,ollylang->currentdir.c_str(),SW_SHOWDEFAULT);
 			break;
 		}
 	case 11:
