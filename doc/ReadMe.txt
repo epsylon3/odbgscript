@@ -59,6 +59,7 @@ Save/Restore Script Breakpoints
 ---------------
 
 1.56.1
++ Added 'Asm Comments
 + REFRESH command, to redraw disam and other windows
 + GMA command, Like GMI, but get Module Info by its name
 + OPENDUMP command, to create new dump window

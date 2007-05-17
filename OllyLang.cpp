@@ -288,6 +288,17 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			} else
 				scriptline.erase(p,scriptline.length()-p);
 		}
+		else if(scriptline.find("'")!=string::npos && !is_comment) 
+		{
+			p=scriptline.find("'");
+			if (scriptline.find("\"")!=string::npos) {
+
+				if (p > scriptline.rfind("\"") || p < scriptline.find("\""))
+					scriptline.erase(p,scriptline.length()-p);
+
+			} else
+				scriptline.erase(p,scriptline.length()-p);
+		}
 		else if(is_comment)
 		{
 			iter++;

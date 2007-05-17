@@ -325,8 +325,8 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		break;
 
 	case 1: // Abort
-		ollylang->Reset(); 
 		MessageBox(hwmain,"Script aborted!","ODbgScript",MB_OK|MB_ICONEXCLAMATION);
+		ollylang->Reset(); 
 		ollylang->Pause();
 		break;
 
