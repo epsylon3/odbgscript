@@ -3264,8 +3264,24 @@ bool OllyLang::DoREF(string args)
 
 bool OllyLang::DoREFRESH(string args)
 {
+	//Refresh Memory Map
 	Listmemory();
+
+	//Refresh Executable Modules (no other way found to do this)
+	t_table* tt = (t_table*)Plugingetvalue(VAL_MODULES);
+	if (tt->hw!=0) {
+		//was visible
+		Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'E');
+	} else {
+		//was hidden, hide it after
+		Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'E');
+		if (tt->hw!=0)
+			CloseWindow(tt->hw);
+	}
+
+	//Refresh DISAM
 	Redrawdisassembler();
+
 	require_ollyloop=1;
 	Broadcast(WM_USER_CHALL, 0, 0);
 	return true;
