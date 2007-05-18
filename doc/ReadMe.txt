@@ -58,8 +58,10 @@ Save/Restore Script Breakpoints
 2.1 What's new? 
 ---------------
 
+1.57.1
++ Added ;Asm Comments
+
 1.56.3 (18 May 2007)
-+ Added 'Asm Comments
 + REFRESH command, to redraw memory map, module, and disasm windows
 + GMA command, Like GMI, but get Module Info by its name
 + OPENDUMP command, to create new dump window
@@ -780,7 +782,8 @@ Example:
 
 FREE addr [, size]
 ------------------
-Free memory allocated by ALLOC. If size not given, drop whole memory bloc.
+Free memory bloc allocated by ALLOC (or not). 
+If size not given, drop whole memory bloc.
 Example
     alloc 1000
 	free $RESULT
@@ -936,7 +939,7 @@ Use this after cmp. Works like it's asm counterpart.
 Example:
 	jbe SOME_LABEL
 
-JE label
+JE label (JZ)
 --------
 Use this after cmp. Works like it's asm counterpart.
 Example:
@@ -948,7 +951,7 @@ Unconditionally jump to a label.
 Example:
 	jmp SOME_LABEL
 
-JNE label
+JNE label (JNZ)
 ---------
 Use this after cmp. Works like it's asm counterpart.
 Example:

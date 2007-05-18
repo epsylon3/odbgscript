@@ -41,7 +41,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", " + "\"" + v1.str + "\"";
-		//setProgLineValue(script_pos+1,(str1+str2));
+		//setProgLineValue(script_pos+1,(v1.str));
 		return DoMOV(args);
 	}
 	else if (GetANYOpValue(ops[0], str1) 
@@ -52,7 +52,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", " + "\"" + v1.str + "\"";
-		//setProgLineValue(script_pos+1,(str1+str2));
+		//setProgLineValue(script_pos+1,(v1.str));
 		return DoMOV(args);
 	}
 	return false;
@@ -261,7 +261,7 @@ bool OllyLang::DoATOI(string args)
 
 	if (!CreateOperands(args, ops, 2)) 
 	{
-		ops[1] = "16.";
+		ops[1] = "10"; //10h=(16.) : Default Hexa number
 		if (!CreateOperands(args, ops, 1))
 			return false;
 	}
