@@ -1871,6 +1871,53 @@ void OllyLang::DropVariable(string var)
 		variables.erase(variables.find(var));
 }
 
+//Format each DWORD in %09X : ex: 0DEADBEEF (to be assembled)
+string OllyLang::FormatAsmDwords(string asmLine)
+{
+		// Create command and arguments
+		string command = asmLine;
+		string arg, args = "";
+		size_t pos = asmLine.find_first_of(" \t");
+		DWORD dw,nbArgs=0;
+		if(pos != string::npos)
+		{
+			command = trim(asmLine.substr(0, pos));
+			args = trim(asmLine.substr(pos));
+
+		} else {
+			//no args
+			return asmLine;
+		}
+
+		command+=" ";
+
+		// Search for DWORDS, i think there is no string params with "," in asm
+		while ((pos = args.find_first_of(",")) != string::npos)
+		{
+			arg=trim(args.substr(0, pos));
+			args.erase(0,pos+1);
+			ForLastArg:
+			if (is_hex(arg)) {
+				dw=arg.size();
+				arg="00000000"+arg;
+				arg=arg.substr(dw-1,9);
+			}
+			if (arg!="") {
+				if (nbArgs)	command.append(", ");
+				command.append(arg);
+			}
+			nbArgs++;
+		}
+		args=trim(args);
+		if (args!="") { 
+			arg=args;
+			args="";
+			goto ForLastArg;
+		}
+
+		return trim(command);
+}
+
 DWORD OllyLang::AddProcessMemoryBloc(string data, int mode)
 {
 	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);

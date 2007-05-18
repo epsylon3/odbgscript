@@ -71,6 +71,7 @@ Save/Restore Script Breakpoints
 x Buffer read speed optimisation
 x ALLOC, FREE can now refresh the memory window, was a problem with LIB, used new VC7 PDK
 * Cursor on Running command displayed correctly
+* ASM, ASMTEXT now format correctly DWORDs args to be assembled
 * "BUF/STR dw" now reverse bytes of the dword 
 * "mov data, [eax+10], 4" works and will assign dword only if data variable was not a string
 * PUSH, POP Command fixed

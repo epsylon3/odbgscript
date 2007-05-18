@@ -187,6 +187,10 @@ bool OllyLang::DoASM(string args)
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], cmd))
 	{
+		cmd=FormatAsmDwords(cmd);
+
+		DoLOG("\""+cmd+"\"");
+
 		strcpy(buffer, cmd.c_str());
 		if((len = Assemble(buffer, addr, &model, 0, 1, error)) <= 0)
 		{
@@ -220,33 +224,34 @@ bool OllyLang::DoASMTXT(string args)
 	long len = 0,lens = 0,line = 0;
 	DWORD addr;
 
-    if(GetDWOpValue(ops[0], addr) 
+	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1],asmfile))
 	{
 		if(fopen(asmfile.c_str(), "rb")){
 			
-	       string asmline,asmdoc;
-	       std::ifstream fin;
-		   (asmfile.c_str(), ios::in);
-		   fin.open(asmfile.c_str());
+			string asmline,asmdoc;
+			std::ifstream fin;
+			(asmfile.c_str(), ios::in);
+			fin.open(asmfile.c_str());
 
-	           while(getline(fin, asmline))
-			   {
-                 line++;
-	             len=Assemble((char*)asmline.c_str(), 0, &model, 0, 1, error);                     
-				 int ii = sprintf(buff, "%s", (model.code));
-				 strncat(opcode,buff,len);
-				 lens = (lens + len);
-			   } 
-				 Writememory(opcode, addr, lens, MM_SILENT|MM_DELANAL);
-			     Broadcast(WM_USER_CHALL, 0, 0);
-			     variables["$RESULT"] = lens;
-				 variables["$RESULT_1"] = line;
-			     require_ollyloop = 1;
+			while(getline(fin, asmline))
+			{
+				line++;
+				asmline=FormatAsmDwords(asmline);
+				len=Assemble((char*)asmline.c_str(), 0, &model, 0, 1, error);                     
+				int ii = sprintf(buff, "%s", (model.code));
+				strncat(opcode,buff,len);
+				lens = (lens + len);
+			} 
+			Writememory(opcode, addr, lens, MM_SILENT|MM_DELANAL);
+			Broadcast(WM_USER_CHALL, 0, 0);
+			variables["$RESULT"] = lens;
+			variables["$RESULT_1"] = line;
+			require_ollyloop = 1;
 			fin.close();
 		}	
-	 return true;
-     }
+		return true;
+	}
 	return false;
 }
 

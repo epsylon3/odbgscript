@@ -297,6 +297,8 @@ private:
 
 	void DropVariable(string var);
 
+	string FormatAsmDwords(string asmLine);
+
 	DWORD AddProcessMemoryBloc(string data, int mode=PAGE_READWRITE);
 	bool  DelProcessMemoryBloc(DWORD address);
 
