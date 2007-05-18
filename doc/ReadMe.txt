@@ -58,10 +58,8 @@ Save/Restore Script Breakpoints
 2.1 What's new? 
 ---------------
 
-1.57.1
+1.60.3 (18 May 2007)
 + Added ;Asm Comments
-
-1.56.3 (18 May 2007)
 + REFRESH command, to redraw memory map, module, and disasm windows
 + GMA command, Like GMI, but get Module Info by its name
 + OPENDUMP command, to create new dump window
