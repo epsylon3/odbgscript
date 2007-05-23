@@ -120,6 +120,7 @@ private:
 	string errorstr;
 
 	DWORD tickcount;
+	DWORD tickcounthi;
 
 	unsigned char * search_buffer;
 
@@ -141,6 +142,7 @@ private:
 	bool DoASMTXT(string args);
 	bool DoATOI(string args);
 	bool DoBC(string args);
+	bool DoBD(string args);
 	bool DoBEGINSEARCH(string args);
 	bool DoBP(string args);
 	bool DoBPCND(string args);

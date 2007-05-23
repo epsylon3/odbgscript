@@ -641,3 +641,22 @@ string StrLastError(void)
 	return sError; 
 }
 
+// microsec
+LARGE_INTEGER MyGetTickCount(LARGE_INTEGER oldValue)
+{
+	LARGE_INTEGER result, *lpPerformanceCount, *Frequency;
+	lpPerformanceCount=(LARGE_INTEGER *) malloc(8);
+	if (!QueryPerformanceCounter(lpPerformanceCount))
+	{	// il n'y a pas d'horloge haute précision sur le micro. On se contente de GetTickCount
+		result.QuadPart = (GetTickCount()*1000) - oldValue.QuadPart;
+	}
+	else
+	{	// il y en a une. On va l'utiliser
+		Frequency=(LARGE_INTEGER *) malloc(8);
+		QueryPerformanceFrequency(Frequency);
+		result.QuadPart = ((lpPerformanceCount->QuadPart * 1000000) / Frequency->QuadPart) - oldValue.QuadPart;
+		free(Frequency);
+	}
+	free(lpPerformanceCount);
+	return result;
+}

@@ -50,13 +50,19 @@ The development of the plugin has been a bit slow, I've got a job programming xr
 which has taken a lot of time. Sorry about that.
 
 TODO:
-After Error Cursor
+After Error Script Cursor
+STI/STO Script Cursor
 Edit Line
 Memory BP reason
 Save/Restore Script Breakpoints
 
 2.1 What's new? 
 ---------------
+
+1.61.1
++ BD (Disable Breakpoint, without deleting it)
++ JG/JGE (clone of JA/JAE)
+x TICK precision is now microseconds, and can get 64bits result (TICK, var, 1) for highpart
 
 1.60.3 (18 May 2007)
 + Added ;Asm Comments
@@ -492,6 +498,13 @@ Example:
 	bc 401000
 	bc x
 	bc eip
+
+BD addr
+--------
+Disables breakpoint at addr.
+Example:
+	bp 401000
+	BD 401000
 
 BEGINSEARCH [start]
 -------------------
@@ -1244,9 +1257,10 @@ Executes "Trace into" in OllyDbg, CTRL-F7 in OllyDbg.
 Example:
 	ti
 
-TICK var
---------
-Set variable with last command execution time (msec)
+TICK var, [0,1]
+---------------
+Set variable with last command execution time (microsec)
+if second parameter is 1, get High DWORD;
 
 TICND cond
 ----------

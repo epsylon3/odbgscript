@@ -368,6 +368,24 @@ bool OllyLang::DoBP(string args)
 	return false;
 }
 
+bool OllyLang::DoBD(string args)
+{
+	string ops[1];
+
+	if (!CreateOperands(args, ops, 1))
+		return false;
+
+	DWORD dw;
+	if(GetDWOpValue(ops[0], dw))
+	{
+		Setbreakpoint(dw, TY_DISABLED, 0);
+		Broadcast(WM_USER_CHALL, 0, 0);
+		require_ollyloop = 1;
+		return true;
+	}
+	return false;
+}
+
 bool OllyLang::DoBPCND(string args)
 {
 	string ops[2];
@@ -2866,6 +2884,10 @@ bool OllyLang::DoMSG(string args)
 		
 		//hwndOllyDbg() or 0: modal or not
 		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
+		if (wndProg.hw) {
+			SetForegroundWindow(wndProg.hw);
+			SetFocus(wndProg.hw);
+		}
 		if(ret == IDCANCEL) {
 			return Pause();
 		} 
@@ -2887,7 +2909,11 @@ bool OllyLang::DoMSGYN(string args)
 		if (wndProg.hw!=NULL)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 
-		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONQUESTION | MB_YESNOCANCEL | MB_TOPMOST);
+		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONQUESTION | MB_YESNOCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
+		if (wndProg.hw) {
+			SetForegroundWindow(wndProg.hw);
+			SetFocus(wndProg.hw);
+		}
 		if(ret == IDCANCEL)
 		{
 			variables["$RESULT"] = 2;

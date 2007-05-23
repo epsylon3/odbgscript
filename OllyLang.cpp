@@ -63,6 +63,7 @@ OllyLang::OllyLang()
     commands["asmtxt"] = &OllyLang::DoASMTXT;	
 	commands["atoi"] = &OllyLang::DoATOI;
 	commands["bc"] = &OllyLang::DoBC;
+	commands["bd"] = &OllyLang::DoBD;
 	commands["beginsearch"] = &OllyLang::DoBEGINSEARCH;
 	commands["bp"] = &OllyLang::DoBP;
 	commands["bpcnd"] = &OllyLang::DoBPCND;
@@ -127,6 +128,8 @@ OllyLang::OllyLang()
 	commands["jb"] = &OllyLang::DoJB;
 	commands["jbe"] = &OllyLang::DoJBE;
 	commands["je"] = &OllyLang::DoJE;
+	commands["jg"] = &OllyLang::DoJA;
+	commands["jge"] = &OllyLang::DoJAE;
 	commands["jmp"] = &OllyLang::DoJMP;
 	commands["jne"] = &OllyLang::DoJNE;
 	commands["jnz"] = &OllyLang::DoJNE;
@@ -426,7 +429,7 @@ bool OllyLang::Step(int forceStep)
 	require_ollyloop = 0;
 	t_dump *cpuasm;
 	PFCOMMAND func;
-	DWORD dwtick;
+	LARGE_INTEGER dwtick;
 	int refresh=1;
 	char lastchar;
 	bool jumped;
@@ -502,15 +505,17 @@ bool OllyLang::Step(int forceStep)
 		
 			// Command found, execute it
 			func = commands[command];
-			dwtick = GetTickCount();
+			dwtick.QuadPart=0;
+			dwtick = MyGetTickCount(dwtick);
 			old_pos = script_pos;
 			result = (this->*func)(args);
-			dwtick = GetTickCount()-dwtick;
-			this->tickcount = dwtick;
+			dwtick = MyGetTickCount(dwtick);
+			this->tickcount = dwtick.LowPart;
+			this->tickcounthi = dwtick.HighPart;
 			if (old_pos>script_pos || old_pos+1<script_pos) {
 				jumped=true;
 			}
-
+ 
 		}
 		else 
 		{
