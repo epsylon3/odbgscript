@@ -588,8 +588,8 @@ bool OllyLang::Step(int forceStep)
 		if (script_state == SS_LOADED) {
 			//After a reset (ret)
 			script_state = SS_PAUSED;
+			//display start of script
 			Selectandscroll(&wndProg,0,2);
-//			pgr_scriptpos = 1;
 			break;
 		}
 		
@@ -597,10 +597,6 @@ bool OllyLang::Step(int forceStep)
 
 		//Next code Line
 		script_pos=GetFirstCodeLine(script_pos);
-
-		//Highlight next instr. not if app running...
-		if (Getstatus() != STAT_RUNNING)
-			pgr_scriptpos=script_pos+1;
 
 		if (jumped) { 
 			if(++refresh % 128 == 0) {
@@ -614,6 +610,10 @@ bool OllyLang::Step(int forceStep)
 				//will continue after main loop...redraw etc
 			}
 		}
+
+		//Highlight next instr. not if app running... or if stepping
+		if (Getstatus() != STAT_RUNNING || forceStep==1)
+			pgr_scriptpos=script_pos+1;
 
 		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);			
@@ -640,7 +640,7 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 
 	if(EOB_row > -1)
 	{
-		script_pos = EOB_row;
+		script_pos = GetFirstCodeLine(EOB_row);
 		return true;
 	}
 	else 
@@ -651,7 +651,7 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 			if(bpjumps.find(addr) != bpjumps.end())
 			{
 				if (bpjumps[addr]) {
-					script_pos = bpjumps[addr] + 1;
+					script_pos = GetFirstCodeLine(bpjumps[addr] + 1);
 					pgr_scriptpos = script_pos + 1;
 					setProgLineEIP(pgr_scriptpos,addr);
 					Selectandscroll(&wndProg,pgr_scriptpos,2);
@@ -661,7 +661,7 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 					return true;
 				}
 			}
-			pgr_scriptpos = script_pos + 1;
+			//pgr_scriptpos = script_pos + 1;
 			if (pgr_scriptpos_paint!=pgr_scriptpos && script_state == SS_PAUSED) {
 				Selectandscroll(&wndProg,pgr_scriptpos,2);
 				InvalidateProgWindow();

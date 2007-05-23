@@ -184,8 +184,10 @@ extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_
 			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
 			break;
 		}
-		Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
-		InvalidateProgWindow();
+		if (ollylang->wndProg.hw) {
+			Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
+			InvalidateProgWindow();
+		}
 	}
 	// Step script
 //	if(script_state == SS_RUNNING || script_state == SS_LOADED)
