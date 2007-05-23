@@ -60,7 +60,7 @@ BEGINSEARCH working ?
 2.1 What's new? 
 ---------------
 
-1.61.1
+1.61 (23 May 2007)
 + Script Window can now display comments (only comments with ";")
 + BD (Disable Breakpoint, without deleting it)
 + JG/JGE (clone of JA/JAE)
@@ -69,7 +69,7 @@ x TICK precision is now microseconds and get time since script startup, second v
 * On Startup, cursor is now on first code line (if labels/comments)
 * fixed bug when affecting dword to string variable, was no more possible
 
-1.60.3 (18 May 2007)
+1.60 (18 May 2007)
 + Added ;Asm Comments
 + REFRESH command, to redraw memory map, module, and disasm windows
 + GMA command, Like GMI, but get Module Info by its name
@@ -87,7 +87,7 @@ x ALLOC, FREE can now refresh the memory window, was a problem with LIB, used ne
 * "mov data, [eax+10], 4" works and will assign dword only if data variable was not a string
 * PUSH, POP Command fixed
 
-1.55.3 (14 May 2007)
+1.55 (14 May 2007)
 + Added Sub Context Menu in Disasm
 + Added HISTORY command to enable/disable value History (run faster)
 + Added BEGINSEARCH and ENDSEARCH to optimize "find commands"
