@@ -1262,10 +1262,17 @@ Executes "Trace into" in OllyDbg, CTRL-F7 in OllyDbg.
 Example:
 	ti
 
-TICK var, reftime
------------------
+TICK var [,reftime]
+-------------------
 Set variable with script execution time (microsec)
 if reftime parameter is set, set $RESULT with time since reftime.
+var is declared automatically.
+Example:
+	tick time
+	msg time		//time since script startup
+	tick time,time	
+	msg $RESULT		//time since last TICK
+
 
 TICND cond
 ----------
