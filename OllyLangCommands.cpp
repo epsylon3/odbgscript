@@ -3710,8 +3710,22 @@ bool OllyLang::DoTI(string args)
 
 bool OllyLang::DoTICK(string args)
 {
-	if (is_variable(args)) {
-		variables[args] = this->tickcount;
+	string ops[2];
+	if(!CreateOperands(args, ops, 2))
+		if(!CreateOperands(args, ops, 1))
+			return false;
+
+	if (!is_variable(ops[0])) {
+		DoVAR(ops[0]);
+	}
+
+	ulong timeref=0;
+	GetDWOpValue(ops[1], timeref);
+
+	if (is_variable(ops[0])) {
+		variables[ops[0]] = this->tickcount;
+		if (timeref)
+			variables["$RESULT"]=this->tickcount-timeref;
 		return true;
 	}
 	return false;

@@ -55,6 +55,7 @@ STI/STO Script Cursor
 Edit Line
 Memory BP reason
 Save/Restore Script Breakpoints
+BEGINSEARCH working ?
 
 2.1 What's new? 
 ---------------
@@ -1264,7 +1265,7 @@ Example:
 TICK var, reftime
 -----------------
 Set variable with script execution time (microsec)
-if reftime parameter is set, set period since reftime.
+if reftime parameter is set, set $RESULT with time since reftime.
 
 TICND cond
 ----------
