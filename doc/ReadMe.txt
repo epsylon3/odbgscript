@@ -63,6 +63,7 @@ Save/Restore Script Breakpoints
 + BD (Disable Breakpoint, without deleting it)
 + JG/JGE (clone of JA/JAE)
 x TICK precision is now microseconds, and can get 64bits result (TICK, var, 1) for highpart
+* Fixed ASM dw parameters with letter like this one : asm jmpaddr,"MOV DWORD PTR SS:[ESP+D],eax"
 
 1.60.3 (18 May 2007)
 + Added ;Asm Comments

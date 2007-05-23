@@ -1876,14 +1876,14 @@ void OllyLang::DropVariable(string var)
 		variables.erase(variables.find(var));
 }
 
-//Format each DWORD in %09X : ex: 0DEADBEEF (to be assembled)
+//Add zero char before dw values, ex: 0DEADBEEF (to be assembled) usefull if first char is letter
 string OllyLang::FormatAsmDwords(string asmLine)
 {
 		// Create command and arguments
 		string command = asmLine;
-		string arg, args = "";
-		size_t pos = asmLine.find_first_of(" \t");
-		DWORD dw,nbArgs=0;
+		string arg, sSep, args = "";
+		size_t pos = asmLine.find_first_of(" \t\r\n");
+		DWORD nbArgs=0;
 		if(pos != string::npos)
 		{
 			command = trim(asmLine.substr(0, pos));
@@ -1897,21 +1897,23 @@ string OllyLang::FormatAsmDwords(string asmLine)
 		command+=" ";
 
 		// Search for DWORDS, i think there is no string params with "," in asm
-		while ((pos = args.find_first_of(",")) != string::npos)
+		while ((pos = args.find_first_of("+],")) != string::npos)
 		{
 			arg=trim(args.substr(0, pos));
-			args.erase(0,pos+1);
 			ForLastArg:
 			if (is_hex(arg)) {
-				dw=arg.size();
-				arg="00000000"+arg;
-				arg=arg.substr(dw-1,9);
+				if (arg.size()>0)
+					if (arg.substr(0,1).find_first_of("abcdefABCDEF") != string::npos)
+						arg="0"+arg;
 			}
-			if (arg!="") {
-				if (nbArgs)	command.append(", ");
-				command.append(arg);
-			}
+			if (nbArgs)	command.append(sSep);
+			command.append(arg);
+
 			nbArgs++;
+			if (args!="") {
+				sSep=args.substr(pos,1);
+				args.erase(0,pos+1);
+			}
 		}
 		args=trim(args);
 		if (args!="") { 
