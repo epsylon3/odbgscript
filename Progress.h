@@ -2,6 +2,10 @@
 #define PROG_RES_LEN 128
 #define PROG_VAL_LEN 256
 
+#define PROG_TYPE_COMMAND	1
+#define PROG_TYPE_EXECUTED	2
+#define PROG_TYPE_COMMENT	8
+
 // This is the table for Script Execution
 typedef struct t_wndprog_data {
 
@@ -26,7 +30,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 
 void InvalidateProgWindow(void);
 
-int addProgLine(int line, string & command);
+int addProgLine(int line, string & command, bool is_comment=false) ;
 int setProgLineEIP(int line, int eip);
 int setProgLineValue(int line, string& value);
 int setProgLineValue(int line, DWORD value);
@@ -35,6 +39,7 @@ int setProgLineResult(int line, string& result);
 int setProgLineResult(int line, DWORD result);
 int setProgLineResultFloat(int line, long double result);
 int isProgLineBP(int line);
+int isProgLineComment(int line);
 
 void clearProgLines();
 void resetProgLines();

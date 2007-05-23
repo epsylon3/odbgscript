@@ -244,21 +244,22 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 	string scriptline;
 	int inc_pos = -1, linesAdded = 0;
 	int p;
-	bool is_comment = false;
+	bool comment_todisplay, in_comment = false;
 
 	while(iter != toInsert.end())
 	{
+		comment_todisplay=0;
 		scriptline = trim(*iter);
 		// Handle comments
 		if(scriptline == "/*")
 		{
-			is_comment = true;
+			in_comment = true;
 			iter++;
 			continue;
 		}
 		else if(scriptline == "*/")
 		{
-			is_comment = false;
+			in_comment = false;
 			iter++;
 			continue;
 		}
@@ -266,13 +267,13 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 		{
 			p=scriptline.find("/*");
 			scriptline.erase(p,scriptline.length()-p);
-			is_comment = true;
+			in_comment = true;
 		}
 		else if (scriptline.find("*/")!=string::npos && scriptline.find("/*")==string::npos) 
 		{
 			p=scriptline.find("*/");
 			scriptline.erase(0,p+2);
-			is_comment = false;
+			in_comment = false;
 		}
 		else if (scriptline.find("/*")!=string::npos && scriptline.find("*/")!=string::npos) 
 		{
@@ -280,7 +281,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			scriptline.erase(p,scriptline.find("*/")-p+2);
 		}
 		// Check for comments at the end of rows and erase those
-		else if(scriptline.find("//")!=string::npos && !is_comment) 
+		else if(!in_comment && scriptline.find("//")!=string::npos) 
 		{
 			p=scriptline.find("//");
 			if (scriptline.find("\"")!=string::npos) {
@@ -291,10 +292,13 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			} else
 				scriptline.erase(p,scriptline.length()-p);
 		}
-		else if(scriptline.find(";")!=string::npos && !is_comment) 
+		else if(!in_comment && scriptline.find(";")!=string::npos) 
 		{
 			p=scriptline.find(";");
-			if (scriptline.find("\"")!=string::npos) {
+			if (p==0) {
+				comment_todisplay=1;
+			}
+			else if (scriptline.find("\"")!=string::npos) {
 
 				if (p > scriptline.rfind("\"") || p < scriptline.find("\""))
 					scriptline.erase(p,scriptline.length()-p);
@@ -302,7 +306,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			} else
 				scriptline.erase(p,scriptline.length()-p);
 		}
-		else if(is_comment)
+		else if(in_comment) //Comment Block, ignored
 		{
 			iter++;
 			continue;
@@ -349,7 +353,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			script.insert(script.begin() + posInScript, scriptline);
 			linesAdded++;
 			posInScript++;
-			addProgLine(posInScript,scriptline);
+			addProgLine(posInScript,scriptline,comment_todisplay);
 		}
 
 		iter++;
@@ -363,6 +367,28 @@ int OllyLang::GetState()
 	return script_state;
 }
 */
+
+ulong OllyLang::GetFirstCodeLine(ulong from) //=0
+{
+	ulong nline=from;
+	string codeLine;
+	char lastchar;
+
+	// Check for label after (skip it/them)
+	if(nline < script.size()) {
+		
+		codeLine = trim(script[nline]);
+		lastchar = codeLine[codeLine.length() - 1];
+		// Check if its a label or comment
+		while(nline < script.size() && (lastchar == ':' || isProgLineComment(nline+1)))
+		{
+			nline++;
+			codeLine = trim(script[nline]);
+			lastchar = codeLine[codeLine.length() - 1];
+		} 
+	}
+	return nline;
+}
 
 bool OllyLang::LoadScript(LPSTR file)
 {
@@ -384,7 +410,7 @@ bool OllyLang::LoadScript(LPSTR file)
 	Pluginwritestringtoini(hinstModule(), "ScriptDir", file);
 	mruAddFile(file);
 
-	pgr_scriptpos=1;
+	pgr_scriptpos=GetFirstCodeLine()+1;
 	setProgLineEIP(pgr_scriptpos,0);
 
 	return true;
@@ -408,8 +434,8 @@ bool OllyLang::Reset()
 	EOE_row = -1;
 	script_state = SS_LOADED;
 	enable_logging = false;
-	script_pos = 0;
-	pgr_scriptpos = 1; 
+	script_pos = GetFirstCodeLine();
+	pgr_scriptpos = script_pos+1; 
 	resetProgLines();
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
@@ -429,7 +455,7 @@ bool OllyLang::Step(int forceStep)
 	require_ollyloop = 0;
 	t_dump *cpuasm;
 	PFCOMMAND func;
-	LARGE_INTEGER dwtick;
+	LARGE_INTEGER i64;
 	int refresh=1;
 	char lastchar;
 	bool jumped;
@@ -439,14 +465,16 @@ bool OllyLang::Step(int forceStep)
 	{		
 		jumped=false;
 
-		if (pgr_scriptpos==1) {
-			cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
-			setProgLineEIP(pgr_scriptpos,cpuasm->sel0);
+		if (script_pos<=GetFirstCodeLine()) {
+			i64.QuadPart= MyGetTickCount(0).QuadPart;
+			tickcount_startup=i64.QuadPart;
 		}
 
 		// Set state to RUNNING
 		if(forceStep == 0)
 			script_state = SS_RUNNING;
+
+		script_pos=GetFirstCodeLine(script_pos);
 
 		// Check if script out of bounds
 		DumpScript();
@@ -456,21 +484,6 @@ bool OllyLang::Step(int forceStep)
 		// Get code line
 		string codeLine = trim(script[script_pos]);
 
-		// Log line of code if that is enabled
-		if(enable_logging)
-		{
-			char buffer[4096] = {0};
-			strcpy(buffer, "--> ");
-			strcat(buffer, codeLine.c_str());
-			Addtolist(0, -1, buffer);
-		}
-
-		// Check if its a label
-		while(codeLine[codeLine.length() - 1] == ':')
-		{
-			script_pos++;
-			codeLine = trim(script[script_pos]);
-		}
 		pgr_scriptpos=script_pos+1;
 		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);
@@ -479,6 +492,15 @@ bool OllyLang::Step(int forceStep)
 		if (isProgLineBP(pgr_scriptpos) && script_state!=SS_PAUSED) {
 			script_state=SS_PAUSED;
 			break;
+		}
+
+		// Log line of code if that is enabled
+		if(enable_logging)
+		{
+			char buffer[4096] = {0};
+			strcpy(buffer, "--> ");
+			strcat(buffer, codeLine.c_str());
+			Addtolist(0, -1, buffer);
 		}
 
 		// Create command and arguments
@@ -505,13 +527,14 @@ bool OllyLang::Step(int forceStep)
 		
 			// Command found, execute it
 			func = commands[command];
-			dwtick.QuadPart=0;
-			dwtick = MyGetTickCount(dwtick);
+			//i64 = MyGetTickCount(0);
 			old_pos = script_pos;
 			result = (this->*func)(args);
-			dwtick = MyGetTickCount(dwtick);
-			this->tickcount = dwtick.LowPart;
-			this->tickcounthi = dwtick.HighPart;
+			//i64.QuadPart = MyGetTickCount(i64.QuadPart);
+			i64 = MyGetTickCount(tickcount_startup);
+			this->tickcount = i64.LowPart;
+			this->tickcounthi = i64.HighPart;
+
 			if (old_pos>script_pos || old_pos+1<script_pos) {
 				jumped=true;
 			}
@@ -521,6 +544,8 @@ bool OllyLang::Step(int forceStep)
 		{
 			// No such command
 			errorstr = "No such command: " + codeLine;
+			Pause();
+			InvalidateProgWindow();
 		}
 		if (Getstatus() != STAT_RUNNING)
 			pgr_scriptpos=script_pos+1;
@@ -563,24 +588,15 @@ bool OllyLang::Step(int forceStep)
 		if (script_state == SS_LOADED) {
 			//After a reset (ret)
 			script_state = SS_PAUSED;
-			pgr_scriptpos = 1;
+			Selectandscroll(&wndProg,0,2);
+//			pgr_scriptpos = 1;
 			break;
 		}
 		
 		script_pos++;
-		
-		// Check for label after (skip it/them)
-		if(script_pos < script.size()) {
-			
-			codeLine = trim(script[script_pos]);
-			lastchar = codeLine[codeLine.length() - 1];
-			while(lastchar == ':' && script_pos < script.size())
-			{
-				script_pos++;
-				codeLine = trim(script[script_pos]);
-				lastchar = codeLine[codeLine.length() - 1];
-			}
-		}
+
+		//Next code Line
+		script_pos=GetFirstCodeLine(script_pos);
 
 		//Highlight next instr. not if app running...
 		if (Getstatus() != STAT_RUNNING)

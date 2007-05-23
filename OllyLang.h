@@ -52,9 +52,11 @@ public:
 	bool Step(int forceStep);
 
 	// Script Window
+	ulong GetFirstCodeLine(ulong from=0);
+
 	void menuListLabels(HMENU mLabels,int cmdIndex);
 	void menuListVariables(HMENU mVars,int cmdIndex);
-	
+
 	bool editVariable(int nVar);
 	void execCommand(void);
 	
@@ -121,6 +123,7 @@ private:
 
 	DWORD tickcount;
 	DWORD tickcounthi;
+	ULONGLONG tickcount_startup;
 
 	unsigned char * search_buffer;
 

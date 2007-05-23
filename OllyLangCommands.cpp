@@ -2680,6 +2680,7 @@ bool OllyLang::DoMOV(string args)
 		// Dest is variable
 		if(maxsize <= 4 && variables[ops[0]].vt != STR && GetDWOpValue(ops[1], dw) )
 		{
+			// DW to DW/FLT var
 			if (maxsize==0) maxsize=4;
 			dw = resizeDW(dw,maxsize);
 			variables[ops[0]] = dw;
@@ -2687,7 +2688,16 @@ bool OllyLang::DoMOV(string args)
 		}
 		else if(GetSTROpValue(ops[1], str, maxsize))
 		{
+			// STR to any var
 			variables[ops[0]] = str;
+		}
+		else if(maxsize <= 4 && GetDWOpValue(ops[1], dw) )
+		{
+			// DW to STR var
+			if (maxsize==0) maxsize=4;
+			dw = resizeDW(dw,maxsize);
+			variables[ops[0]] = dw;
+			variables[ops[0]].size = maxsize;
 		}
 		else if(GetFLTOpValue(ops[1], flt))
 		{

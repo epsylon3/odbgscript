@@ -42,4 +42,4 @@ DWORD  resizeDW(DWORD dw, DWORD size);
 void resizeSTR(string &str, DWORD size);
 
 string StrLastError(void);
-LARGE_INTEGER MyGetTickCount(LARGE_INTEGER oldValue);
+LARGE_INTEGER MyGetTickCount(ULONGLONG oldValue);

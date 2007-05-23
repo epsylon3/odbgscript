@@ -60,10 +60,13 @@ Save/Restore Script Breakpoints
 ---------------
 
 1.61.1
++ Script Window can now display comments (only comments with ";")
 + BD (Disable Breakpoint, without deleting it)
 + JG/JGE (clone of JA/JAE)
-x TICK precision is now microseconds, and can get 64bits result (TICK, var, 1) for highpart
+x TICK precision is now microseconds and get time since script startup, second var for relative time
 * Fixed ASM dw parameters with letter like this one : asm jmpaddr,"MOV DWORD PTR SS:[ESP+D],eax"
+* On Startup, cursor is now on first code line (if labels/comments)
+* fixed bug when affecting dword to string variable, was no more possible
 
 1.60.3 (18 May 2007)
 + Added ;Asm Comments
@@ -1258,10 +1261,10 @@ Executes "Trace into" in OllyDbg, CTRL-F7 in OllyDbg.
 Example:
 	ti
 
-TICK var, [0,1]
----------------
-Set variable with last command execution time (microsec)
-if second parameter is 1, get High DWORD;
+TICK var, reftime
+-----------------
+Set variable with script execution time (microsec)
+if reftime parameter is set, set period since reftime.
 
 TICND cond
 ----------
@@ -1323,7 +1326,8 @@ Example:
 
 3.3 Comments
 ------------
-Comments can be put anywhere and have to start with "//". 
+Comments can be put anywhere and have to start with ";" or "//".
+Comment lines starting with ";" will be displayed in script window.
 Block comments between "/*" and "*/"
 
 3.4 Menus

@@ -10,6 +10,7 @@ t_wndprog_data *ppl;
 			//ppl=(t_wndprog_data *)Getsortedbyselection(&ollylang->wndProg.data,ollylang->wndProg.data.selected);
 			if (i > 0) 
 			{
+				i=ollylang->GetFirstCodeLine(i-1)+1;
 				ollylang->jumpToLine(i);
 				InvalidateRect(hw, NULL, FALSE);
 			}
@@ -392,7 +393,12 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			  ret = sprintf(s, "%d", pline->line);
 			else if (pline->line==-1)
 			  ret = sprintf(s, "LOAD");
-			
+
+			if (pline->type & PROG_TYPE_COMMENT) //comment
+			{
+				*select=DRAW_MASK;
+				memset(mask,DRAW_GRAY,ret);
+			} 			
 			if (pline->pause) 
 			{
 				//Hilite Breakpoint
@@ -414,7 +420,13 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			}
 		break;
 		case 1:
-			if (pline->command[strlen(pline->command)-1] == ':' || pline->line == 0)
+			if (pline->type & PROG_TYPE_COMMENT) //comment
+			{
+				ret = sprintf(s, "%s", &pline->command);
+				*select=DRAW_MASK;
+				memset(mask,DRAW_GRAY,ret);
+			} 
+			else if (pline->command[strlen(pline->command)-1] == ':' || pline->line == 0)
 			{
 				ret = sprintf(s, "%s", &pline->command[1]);
 				memset(&s[ret],'_',PROG_CMD_LEN-ret);
@@ -427,13 +439,14 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				ret = sprintf(s, "%s", pline->command);
 				memset(mask,DRAW_NORMAL,ret);
 			}
+
 			if (pline->line == ollylang->pgr_scriptpos && ret>0) 
 			{
 				//Hilite Current Line	
 				*select=DRAW_MASK;
 				memset(mask,DRAW_EIP,ret);			
 			}
-			else if (pline->type==2 && ret>0) 
+			else if ((pline->type & PROG_TYPE_EXECUTED) && !(pline->type & PROG_TYPE_COMMENT) && ret>0) 
 			{
 				//Hilite executed lines
 				*select=DRAW_MASK;
@@ -567,7 +580,7 @@ void InvalidateProgWindow(void)
 		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
 }
 
-int addProgLine(int line, string & command) 
+int addProgLine(int line, string & command, bool is_comment) 
 {
 
 	t_wndprog_data pline={0};
@@ -578,7 +591,10 @@ int addProgLine(int line, string & command)
 	strncat(pline.command,command.c_str(),PROG_CMD_LEN-2);
 	strcpy(pline.result,"");	
 	strcpy(pline.values,"");
-	pline.type = 1;
+	if (is_comment)
+		pline.type = PROG_TYPE_COMMENT;
+	else
+		pline.type = PROG_TYPE_COMMAND;
 	pline.eip = 0;
 		
 	ollylang->tProgLines.push_back(pline);
@@ -600,7 +616,7 @@ int setProgLineEIP(int line, int eip)
 
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 
-	ppl->type = 2;
+	ppl->type |= PROG_TYPE_EXECUTED;
 
 	if (ppl->command[strlen(ppl->command)-1] == ':')
 		return 1;
@@ -748,7 +764,9 @@ void resetProgLines()
 	{	
 		ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 		
-		ppl->type = 1;
+		//reset executed color
+		if (!(ppl->type & PROG_TYPE_COMMENT)) //ignore comments
+			ppl->type &= PROG_TYPE_COMMAND;
 		
 		strcpy(ppl->result,"");	
 		strcpy(ppl->values,"");
@@ -762,11 +780,30 @@ void resetProgLines()
 	InvalidateProgWindow();
 }
 
+int isProgLineComment(int line) 
+{
+
+	t_wndprog_data *ppl;
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	if (ppl==NULL)
+		return false;
+
+	if (ppl->type & PROG_TYPE_COMMENT) 
+	{
+		return true;
+	}
+
+	return false;
+
+}
+
 int isProgLineBP(int line) 
 {
 
 	t_wndprog_data *ppl;
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	if (ppl==NULL)
+		return false;
 	
 	if (ppl->pause && ollylang->wndProg.hw) 
 	{
