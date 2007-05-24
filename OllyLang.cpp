@@ -447,6 +447,7 @@ bool OllyLang::Reset()
 	script_pos = GetFirstCodeLine();
 	pgr_scriptpos = script_pos+1; 
 	resetProgLines();
+	tickcount_startup=0;
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;
@@ -475,7 +476,7 @@ bool OllyLang::Step(int forceStep)
 	{		
 		jumped=false;
 
-		if (script_pos<=GetFirstCodeLine()) {
+		if (tickcount_startup==0) {
 			i64.QuadPart= MyGetTickCount(0).QuadPart;
 			tickcount_startup=i64.QuadPart;
 		}

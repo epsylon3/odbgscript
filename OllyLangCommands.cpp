@@ -3768,8 +3768,13 @@ bool OllyLang::DoTICK(string args)
 {
 	string ops[2];
 	if(!CreateOperands(args, ops, 2))
-		if(!CreateOperands(args, ops, 1))
-			return false;
+		if(args=="" || !CreateOperands(args, ops, 1)) {
+			char tmpbuf[256];
+			sprintf(tmpbuf,"%u ms",this->tickcount/1000);
+			string s; s.assign(tmpbuf);
+			variables["$RESULT"]=s;
+			return true;
+		}
 
 	if (!is_variable(ops[0])) {
 		DoVAR(ops[0]);

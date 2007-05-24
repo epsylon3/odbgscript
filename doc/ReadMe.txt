@@ -60,6 +60,7 @@ BEGINSEARCH working ?
 1.62 SVN ( May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)
 + Added GCI parameter COMMAND to get asm command string
++ TICK without variable set time from start in text, in "%d ms" format. log purpose.
 * DF/SF flags fixed
 * EOB with EXEC/ENDE fixed
 * After Error Script Cursor, also added "!" symbol in front of line
@@ -1268,16 +1269,17 @@ Executes "Trace into" in OllyDbg, CTRL-F7 in OllyDbg.
 Example:
 	ti
 
-TICK var [,reftime]
+TICK [var [,reftime]]
 -------------------
 Set variable with script execution time (microsec)
 if reftime parameter is set, set $RESULT with time since reftime.
+if no parameter is set, function set $RESULT with execution time in text, in "<ssss mmm> ms" format
 var is declared automatically.
 Example:
 	tick time
 	msg time		//time since script startup
 	tick time,time	
-	msg $RESULT		//time since last TICK
+	msg $RESULT		//time since last TICK, DWORD value
 
 
 TICND cond
