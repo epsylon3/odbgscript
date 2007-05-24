@@ -12,7 +12,7 @@ bool OllyLang::DoADD(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2 ;
+	ulong dw1, dw2 ;
 	string str1, str2, tmp ;
 
 	if (GetDWOpValue(ops[0], dw1) 
@@ -72,7 +72,7 @@ bool OllyLang::DoALLOC(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD addr, size;
+	ulong addr, size;
 	if(GetDWOpValue(ops[0], size))
 	{
 
@@ -94,7 +94,7 @@ bool OllyLang::DoAN(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw;
+	ulong dw;
 
 	if(GetDWOpValue(ops[0], dw))
 	{
@@ -112,7 +112,7 @@ bool OllyLang::DoAND(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	if (GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
@@ -179,7 +179,7 @@ bool OllyLang::DoASM(string args)
 		return false;
 
 	t_asmmodel model;
-	DWORD addr;
+	ulong addr;
 	string cmd;
 	char error[255] = {0};
 	int len = 0;
@@ -222,7 +222,7 @@ bool OllyLang::DoASMTXT(string args)
 	string asmfile;
     char buff[128]={0},opcode[4096]={0},error[256]={0};
 	long len = 0,lens = 0,line = 0;
-	DWORD addr;
+	ulong addr;
 
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1],asmfile))
@@ -267,7 +267,7 @@ bool OllyLang::DoATOI(string args)
 	}
 
 	string str;
-	DWORD base, dw;
+	ulong base, dw;
 
 	if(GetSTROpValue(ops[0], str) 
 		&& GetDWOpValue(ops[1], base) )
@@ -285,7 +285,7 @@ bool OllyLang::DoBC(string args)
 	if (!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw;
+	ulong dw;
 	if (GetDWOpValue(ops[0], dw))
 	{
 		Deletebreakpoints(dw, dw + 1, 0);
@@ -299,7 +299,7 @@ bool OllyLang::DoBC(string args)
 bool OllyLang::DoBEGINSEARCH(string args)
 {
 	string ops[1];
-	DWORD start;
+	ulong start;
 
 	if (!CreateOperands(args, ops, 1))
 		start=0;
@@ -357,7 +357,7 @@ bool OllyLang::DoBP(string args)
 	if (!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw;
+	ulong dw;
 	if(GetDWOpValue(ops[0], dw))
 	{
 		Setbreakpoint(dw, TY_ACTIVE, 0);
@@ -375,7 +375,7 @@ bool OllyLang::DoBD(string args)
 	if (!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw;
+	ulong dw;
 	if(GetDWOpValue(ops[0], dw))
 	{
 		Setbreakpoint(dw, TY_DISABLED, 0);
@@ -393,7 +393,7 @@ bool OllyLang::DoBPCND(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr = 0;
+	ulong addr = 0;
 	string condition;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], condition))
@@ -430,7 +430,7 @@ bool OllyLang::DoBPGOTO(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr = 0;
+	ulong addr = 0;
 	if(GetDWOpValue(ops[0], addr))
 	{
 		if(labels.find(ops[1]) != labels.end()) {
@@ -461,7 +461,7 @@ bool OllyLang::DoBPHWC(string args)
 	if (!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw1;
+	ulong dw1;
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		Deletehardwarebreakbyaddr(dw1);
@@ -481,7 +481,7 @@ bool OllyLang::DoBPHWS(string args)
 		else ops[1]="\"x\"";
 	}
 
-	DWORD dw1;
+	ulong dw1;
 	string str1;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetSTROpValue(ops[1], str1))
@@ -510,7 +510,7 @@ bool OllyLang::DoBPL(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr = 0;
+	ulong addr = 0;
 	string expression;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], expression))
@@ -533,7 +533,7 @@ bool OllyLang::DoBPLCND(string args)
 	if(!CreateOperands(args, ops, 3))
 		return false;
 
-	DWORD addr = 0;
+	ulong addr = 0;
 	string expression, condition;
 	if (GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], expression) 
@@ -564,7 +564,7 @@ bool OllyLang::DoBPRM(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr, size;
+	ulong addr, size;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size))
 	{
@@ -581,7 +581,7 @@ bool OllyLang::DoBPWM(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr, size;
+	ulong addr, size;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size))
 	{
@@ -598,7 +598,7 @@ bool OllyLang::DoBPX(string args)
     string ops[2];
 	int i;
 	int bpnmb=0;
-	DWORD del=0;
+	ulong del=0;
 	string callname;
  
 	if(CreateOp(args, ops, 2))
@@ -712,7 +712,7 @@ bool OllyLang::DoCMP(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1 = 0, dw2 = 0;
+	ulong dw1 = 0, dw2 = 0;
 	string s1, s2;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
@@ -767,7 +767,7 @@ bool OllyLang::DoCMT(string args)
 		return false;
 
 	string cmt;
-	DWORD addr;
+	ulong addr;
 
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], cmt))
@@ -846,7 +846,7 @@ bool OllyLang::DoDIV(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
 		if(dw2==0)
@@ -875,7 +875,7 @@ bool OllyLang::DoDM(string args)
 
     path = path.substr(0, path.rfind('\\') + 1);
 	
-	DWORD addr, size;
+	ulong addr, size;
 	string filename;
 	if (GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size) 
@@ -921,7 +921,7 @@ bool OllyLang::DoDMA(string args)
 
     path = path.substr(0, path.rfind('\\') + 1);
 
-	DWORD addr, size;
+	ulong addr, size;
 	string filename;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size) 
@@ -969,7 +969,7 @@ bool OllyLang::DoDPE(string args)
     path = path.substr(0, path.rfind('\\') + 1);
 
 	string filename;
-	DWORD ep;
+	ulong ep;
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetDWOpValue(ops[1], ep))
 	{
@@ -1143,7 +1143,7 @@ bool OllyLang::DoFILL(string args)
 
 	if(!CreateOperands(args, ops, 3))
 		return false;
-	DWORD start, len, val;
+	ulong start, len, val;
 
 	if(GetDWOpValue(ops[0], start) 
 		&& GetDWOpValue(ops[1], len) 
@@ -1166,14 +1166,14 @@ bool OllyLang::DoFILL(string args)
 bool OllyLang::DoFIND(string args)
 {
 	string ops[3];
-	DWORD maxsize=0;
+	ulong maxsize=0;
 	if(CreateOp(args, ops, 3)){
 		GetDWOpValue(ops[2], maxsize);
 	}
 	else if(!CreateOp(args, ops, 2))
 		return false;
 
-	DWORD addr,dw;
+	ulong addr,dw;
 	string data=ops[1];
 	string finddata=ops[1];
 
@@ -1293,7 +1293,7 @@ bool OllyLang::DoFINDCMD(string args)
 
 	string ops[2];
 	t_asmmodel model;
-	DWORD addr;
+	ulong addr;
 	string cmd,args1;
 	char buff[128]={0},opcode[64]={0},error[256]={0},tmp[64]={0};
 	int len;
@@ -1334,7 +1334,7 @@ bool OllyLang::DoFINDCMDS(string args)
 
 	string ops[2];
 	t_asmmodel model;
-	DWORD addr;
+	ulong addr;
 	string cmds,args1,cmd;
 	char opcode[256]={0},buff[32]={0},tmp[64]={0},error[64]={0};
 	int len=0,length=0,startadr=0,endadr=0,lps=0,codelen=0;
@@ -1389,14 +1389,14 @@ bool OllyLang::DoFINDCMDS(string args)
 bool OllyLang::DoFINDOP(string args)
 {
 	string ops[3];
-	DWORD maxsize=0;
+	ulong maxsize=0;
 	if(CreateOp(args, ops, 3)){
 		GetDWOpValue(ops[2], maxsize);
 	}
 	else if(!CreateOp(args, ops, 2))
 		return false;
 
-	DWORD addr, dw, endaddr;
+	ulong addr, dw, endaddr;
 	string data=ops[1];
 	string finddata=ops[1];
 
@@ -1448,7 +1448,7 @@ bool OllyLang::DoFINDOP(string args)
 
 	int result = -1;
 	int ok = 0;
-	DWORD addrsize;
+	ulong addrsize;
 	if(GetDWOpValue(ops[0], addr) && is_hexwild(ops[1]))
 	{
 		t_memory* tmem = Findmemory(addr);
@@ -1463,7 +1463,7 @@ bool OllyLang::DoFINDOP(string args)
 		do 
 		{
 
-			DWORD nextaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
+			ulong nextaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
 //			endaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
 			ok = Readcommand(addr, cmd);
 
@@ -1510,7 +1510,7 @@ bool OllyLang::DoFINDMEM(string args)
 
 	t_memory* tm;
 	char szBase[9];
-	DWORD start=0; 
+	ulong start=0; 
 	string sArgs;
 	bool bSkip;
 
@@ -1562,7 +1562,7 @@ bool OllyLang::DoFREE(string args)
 		return false;
 	}
 
-	DWORD addr, size;
+	ulong addr, size;
 	if(GetDWOpValue(ops[0], addr) && GetDWOpValue(ops[1], size))
 	{
 		//To Refresh Memory Window
@@ -1582,7 +1582,7 @@ bool OllyLang::DoFREE(string args)
 bool OllyLang::DoGAPI(string args)
 {
     string ops[1];
-	DWORD addr,size,test,addr2;
+	ulong addr,size,test,addr2;
 
 	if(!CreateOp(args, ops, 1))
 		return false;
@@ -1635,17 +1635,50 @@ bool OllyLang::DoGAPI(string args)
 bool OllyLang::DoGBPR(string args)
 {
 	string ops[1];
-	DWORD addr;
+
+	if (break_reason == PP_MEMBREAK) {
+		//Mem Breakpoint Reason
+
+		break_memaddr=0;
+		t_thread* t;
+		t = Findthread(Getcputhreadid());
+		CONTEXT context;
+		context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+		GetThreadContext(t->thread, &context);
+
+		ulong tHwBpAddr[4];
+		tHwBpAddr[0]=context.Dr0;
+		tHwBpAddr[1]=context.Dr1;
+		tHwBpAddr[2]=context.Dr2;
+		tHwBpAddr[3]=context.Dr3;
+
+		BYTE buffer[MAXCMDSIZE];
+		ulong size=Readmemory(buffer, t->reg.ip, MAXCMDSIZE, MM_SILENT);
+		if (size>0) {
+			t_disasm disasm;
+			size=Disasm(buffer,size,t->reg.ip,NULL,&disasm,DISASM_DATA,NULL);
+			if (size>0) {
+				char i,j;
+				for (j=0;j<3;j++)
+					if (disasm.opaddr[j]!=0) 
+					{
+						break_memaddr=disasm.opaddr[j];
+						for (i=0;i<4;i++) 
+						if (tHwBpAddr[i]==disasm.opaddr[j])
+							break;
+					}
+			}
+		}
+	}
 
 	if(CreateOp(args, ops, 1))
 	{
-		if (is_variable(ops[0]))
+		if (is_variable(ops[0])) {
 			variables[ops[0]] = break_reason;
-		else
-			variables["$RESULT"] = break_reason;
+			return true;
+		}
 	} 
-	else
-		variables["$RESULT"] = break_reason;
+	variables["$RESULT"] = break_reason;
 	return true;
 }
 
@@ -1653,26 +1686,38 @@ bool OllyLang::DoGBPR(string args)
 bool OllyLang::DoGCI(string args)
 {
     string ops[2], param;
-	DWORD addr,size;
+	ulong addr,size;
 
 	if(!CreateOp(args, ops, 2))
 		return false;
 
-	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", param)){
+	if ( GetDWOpValue(ops[0], addr) 
+	   && GetSTROpValue("\""+ops[1]+"\"", param) )
+	{
 
 		transform(param.begin(), param.end(), param.begin(), toupper);
 
 		BYTE buffer[MAXCMDSIZE];
 		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
 
-		if (size>0) {
+		if (size>0) 
+		{
 			t_disasm disasm;
-			size=Disasm(buffer,size,addr,NULL,&disasm,DISASM_DATA,NULL);
+			size=Disasm(buffer,size,addr,NULL,&disasm,DISASM_CODE,NULL);
 
 			if (size<=0)
 				return false;
-			else if (param == "DESTINATION") {
+			else if (param == "DESTINATION") 
+			{
 				variables["$RESULT"] = disasm.jmpaddr; 
+				return true;
+			}
+			else if (param == "COMMAND")
+			{
+				string s;
+				s.assign(disasm.result);
+				while (s.find("  ") != string::npos) ReplaceString(s,"  "," ");
+				variables["$RESULT"] = s; 
 				return true;
 			}
 		}
@@ -1683,7 +1728,7 @@ bool OllyLang::DoGCI(string args)
 bool OllyLang::DoGCMT(string args)
 {
 	string comment;
-	DWORD addr,size;
+	ulong addr,size;
 
 	if(GetDWOpValue(args, addr))
 	{
@@ -1753,7 +1798,7 @@ bool OllyLang::DoGMEMI(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr = 0;
+	ulong addr = 0;
 	string str;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
@@ -1801,7 +1846,7 @@ bool OllyLang::DoGMI(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD addr = 0;
+	ulong addr = 0;
 	string str;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
@@ -1921,7 +1966,7 @@ bool OllyLang::DoGMI(string args)
 bool OllyLang::DoGN(string args)
 {
 	string ops[1];
-	DWORD addr;
+	ulong addr;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -1960,7 +2005,7 @@ bool OllyLang::DoGN(string args)
 bool OllyLang::DoGO(string args)
 {
 	string ops[1];
-	DWORD addr;
+	ulong addr;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -1979,7 +2024,7 @@ bool OllyLang::DoGO(string args)
 bool OllyLang::DoGPA(string args)
 {
 	string ops[3];
-	DWORD dontfree=0;
+	ulong dontfree=0;
 
 	if(CreateOperands(args, ops, 3))
 		GetDWOpValue(ops[2], dontfree);
@@ -2008,7 +2053,7 @@ bool OllyLang::DoGPA(string args)
 
 				HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
 
-				DWORD pmem = AddProcessMemoryBloc(lib);
+				ulong pmem = AddProcessMemoryBloc(lib);
 
 				string tmp;
 				sprintf(buffer,"%09X",pmem);
@@ -2127,7 +2172,7 @@ bool OllyLang::DoGPP(string args)
 	if (!DoGPA(args))
 		return false;
 
-	DWORD addr = variables["$RESULT"].dw;
+	ulong addr = variables["$RESULT"].dw;
 	if (addr==0)
 		return false;
 
@@ -2175,7 +2220,7 @@ bool OllyLang::DoGPP(string args)
 bool OllyLang::DoGRO(string args)
 {
 	string ops[1];
-	DWORD addr;
+	ulong addr;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -2210,8 +2255,8 @@ bool OllyLang::DoHANDLE(string args)
 	}
 
 	string sClassName;
-	DWORD x,y;
-	DWORD thid = Plugingetvalue(VAL_MAINTHREADID);
+	ulong x,y;
+	ulong thid = Plugingetvalue(VAL_MAINTHREADID);
 
 	if(GetDWOpValue(ops[0], x) 
 		&& GetDWOpValue(ops[1], y) 
@@ -2238,7 +2283,7 @@ bool OllyLang::DoINC(string args)
 bool OllyLang::DoHISTORY(string args)
 {
 	string ops[1];
-	DWORD dw;
+	ulong dw;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -2261,7 +2306,7 @@ bool OllyLang::DoITOA(string args)
 			return false;
 	}
 
-	DWORD base, dw;
+	ulong base, dw;
 
 	if(GetDWOpValue(ops[0], dw) 
 		&& GetDWOpValue(ops[1], base) )
@@ -2341,7 +2386,7 @@ bool OllyLang::DoJNE(string args)
 bool OllyLang::DoKEY(string args)
 {
 	string ops[3];
-	DWORD key,shift,ctrl;
+	ulong key,shift,ctrl;
 
 	if(!CreateOperands(args, ops, 3)) {
 		ops[2]="0";
@@ -2371,7 +2416,7 @@ bool OllyLang::DoLBL(string args)
 		return false;
 
 	string lbl;
-	DWORD addr;
+	ulong addr;
 
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], lbl))
@@ -2406,7 +2451,7 @@ bool OllyLang::DoLM(string args)
 
     path = path.substr(0, path.rfind('\\') + 1);
 
-    DWORD addr, size;
+    ulong addr, size;
     string filename;
     if(GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size) 
@@ -2493,7 +2538,7 @@ bool OllyLang::DoLOG(string args)
 			return false;
 	}
 
-	DWORD dw=0;
+	ulong dw=0;
 	string str;
 	long double flt=0;
 
@@ -2524,7 +2569,7 @@ bool OllyLang::DoLOG(string args)
 		if (vt==DW || vt==EMP) {
 			if(GetDWOpValue(ops[0], dw))
 			{
-				//dword constant
+				//ulong constant
 				if (prefix.compare("DEFAULT") == 0) {
 
 					char sym[4096] = {0};
@@ -2555,7 +2600,7 @@ bool OllyLang::DoLOG(string args)
 		if (vt==FLT || vt==EMP) {
 			if(GetFLTOpValue(ops[0], flt))
 			{
-				//dword constant
+				//ulong constant
 				if (prefix.compare("DEFAULT") == 0) {
 					sprintf(buffer, "%s: %2lf", ops[0].c_str(), flt);				
 				} else {
@@ -2635,7 +2680,7 @@ bool OllyLang::DoLOGBUF(string args)
 	if (!is_variable(ops[0]))
 		return false;
 	
-	DWORD dw;
+	ulong dw;
 	if(GetDWOpValue(ops[1], dw))
 	{
 		if (dw==0) dw=16;
@@ -2660,7 +2705,7 @@ bool OllyLang::DoMOV(string args)
 {
 	string ops[3];
 	bool bDeclared=false;
-	DWORD addr=0,maxsize=0;
+	ulong addr=0,maxsize=0;
 
 	if(CreateOperands(args, ops, 3)){
 		GetDWOpValue(ops[2], maxsize);
@@ -2677,7 +2722,7 @@ bool OllyLang::DoMOV(string args)
 	}
 
 	// Check source
-	DWORD dw = 0; addr=0;
+	ulong dw = 0; addr=0;
 	string str = "";
 	string tmpops=ops[0];
 	long double flt;
@@ -2957,7 +3002,7 @@ bool OllyLang::DoOR(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
@@ -2976,7 +3021,7 @@ bool OllyLang::DoMUL(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 * dw2, buffer, 16);
@@ -2992,7 +3037,7 @@ bool OllyLang::DoNEG(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw1;
+	ulong dw1;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1))
 	{
@@ -3020,7 +3065,7 @@ bool OllyLang::DoNOT(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw1;
+	ulong dw1;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1))
 	{
@@ -3047,7 +3092,7 @@ bool OllyLang::DoOPCODE(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD addr,size;
+	ulong addr,size;
 	if(GetDWOpValue(ops[0], addr))
 	{
 		BYTE buffer[MAXCMDSIZE];
@@ -3084,7 +3129,7 @@ bool OllyLang::DoOPENDUMP(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD addr, base, size;
+	ulong addr, base, size;
 	if(!GetDWOpValue(ops[0], addr))
 		return false;
 	if(!GetDWOpValue(ops[1], base))
@@ -3136,7 +3181,7 @@ bool OllyLang::DoPOP(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw,dw1;
+	ulong dw,dw1;
 
 	if(GetDWOpValue(ops[0], dw1))
 	{
@@ -3165,7 +3210,7 @@ bool OllyLang::DoPREOP(string args)
 	if (ops[0]=="")
 		ops[0]="eip";
 
-	DWORD addr,base;
+	ulong addr,base;
 	if(!GetDWOpValue(ops[0], addr))
 		return false;
 
@@ -3190,7 +3235,7 @@ bool OllyLang::DoPUSH(string args)
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	DWORD dw,dw1;
+	ulong dw,dw1;
 
 	if(GetDWOpValue(ops[0], dw1))
 	{
@@ -3213,9 +3258,9 @@ bool OllyLang::DoPUSH(string args)
 bool OllyLang::DoREADSTR(string args)
 {
 	string ops[2],s;
-    DWORD maxsize=0;
+    ulong maxsize=0;
 
-	DWORD dw = 0, addr = 0;
+	ulong dw = 0, addr = 0;
 	string str = "";
 	if(CreateOperands(args, ops, 2)) 
 	{
@@ -3235,7 +3280,7 @@ bool OllyLang::DoREF(string args)
 		return false;
 
 	char title[256]="Reference to Command - ODbgScript REF";	
-	DWORD addr,size;
+	ulong addr,size;
 	if(GetDWOpValue(ops[0], addr))
 	{
 		variables["$RESULT"] = 0;
@@ -3257,7 +3302,7 @@ bool OllyLang::DoREF(string args)
 			// Get process handle and save eip
 			HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
 			t_thread* thr = Findthread(Getcputhreadid());
-			DWORD eip = thr->reg.ip;
+			ulong eip = thr->reg.ip;
 
 			//Search for references
 			t_memory* mem = Findmemory(addr);
@@ -3346,7 +3391,7 @@ bool OllyLang::DoREPL(string args)
 		return false;
 	}
 
-	DWORD addr, len;
+	ulong addr, len;
 	if(GetDWOpValue(ops[0], addr) && UnquoteString(ops[1], '#', '#') && UnquoteString(ops[2], '#', '#') && GetDWOpValue(ops[3], len))
 	{
 		// Replace
@@ -3402,7 +3447,7 @@ bool OllyLang::DoRET(string args)
 bool OllyLang::DoREV(string args)
 {
 	string ops[1];
-	DWORD dw;
+	ulong dw;
 //	BYTE b, tb[4];
 
 	if(!CreateOperands(args, ops, 1))
@@ -3429,7 +3474,7 @@ bool OllyLang::DoROL(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1;
+	ulong dw1;
 	BYTE dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) && GetBYTEOpValue(ops[1], dw2))
@@ -3461,7 +3506,7 @@ bool OllyLang::DoROR(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1;
+	ulong dw1;
 	BYTE dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
@@ -3587,7 +3632,7 @@ bool OllyLang::DoSHL(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
@@ -3607,7 +3652,7 @@ bool OllyLang::DoSHR(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
@@ -3668,7 +3713,7 @@ bool OllyLang::DoSUB(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
@@ -3696,7 +3741,7 @@ bool OllyLang::DoTEST(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
@@ -3829,7 +3874,7 @@ bool OllyLang::DoXCHG(string args)
 	if (!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 
 	if (GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2)) {
 		args = ops[0] + ", " + ultoa(dw2, buffer, 16);
@@ -3850,7 +3895,7 @@ bool OllyLang::DoXOR(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	DWORD dw1, dw2;
+	ulong dw1, dw2;
 	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
@@ -3887,7 +3932,7 @@ bool OllyLang::DoWRT(string args)
 		  path += filename;
 		
 		HANDLE hFile;
-		DWORD dwAccBytes=0;
+		ulong dwAccBytes=0;
 
 		hFile = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if(hFile != INVALID_HANDLE_VALUE) 
@@ -3928,7 +3973,7 @@ bool OllyLang::DoWRTA(string args)
 		  path += filename;
 		
 		HANDLE hFile;
-		DWORD dwAccBytes=0;
+		ulong dwAccBytes=0;
 		
 		data=ops[2]+data;	
 

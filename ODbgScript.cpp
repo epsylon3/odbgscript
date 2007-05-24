@@ -319,8 +319,10 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		{
 			// Load script
 			ollylang->LoadScript(ofn.lpstrFile);
-			// Save script directory
-			
+			if (ollylang->wndProg.hw) {
+				SetForegroundWindow(ollylang->wndProg.hw);
+				SetFocus(ollylang->wndProg.hw);
+			}
 			// Start script
 			ollylang->Resume();
 		}
@@ -387,6 +389,11 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 			Pluginwritestringtoini(hinst, "ScriptDir", buff);
 
 			ollylang->Resume();
+			if (ollylang->wndProg.hw) {
+				SetForegroundWindow(ollylang->wndProg.hw);
+				SetFocus(ollylang->wndProg.hw);
+			}
+
 			break;
 		}
 	case 30:

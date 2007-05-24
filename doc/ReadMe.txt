@@ -50,7 +50,6 @@ The development of the plugin has been a bit slow, I've got a job programming xr
 which has taken a lot of time. Sorry about that.
 
 TODO:
-After Error Script Cursor
 Edit Line
 Memory BP reason
 Save/Restore Script Breakpoints
@@ -60,8 +59,10 @@ BEGINSEARCH working ?
 ---------------
 1.62 SVN ( May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)
++ Added GCI parameter COMMAND to get asm command string
 * DF/SF flags fixed
 * EOB with EXEC/ENDE fixed
+* After Error Script Cursor, also added "!" symbol in front of line
 
 1.61 (23 May 2007)
 + Script Window can now display comments (only comments with ";")
@@ -843,7 +844,9 @@ Example:
 GCI addr, info
 --------------
 Gets information about asm command
-"info" can be DESTINATION for Destination of jump/call/return
+"info" can be :
+	- DESTINATION for Destination of jump/call/return
+	- COMMAND for asm command string
 Example:
 	GCI eip, DESTINATION
 

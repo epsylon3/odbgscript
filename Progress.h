@@ -10,6 +10,7 @@
 
 #define PROG_ATTR			0xF0
 #define PROG_ATTR_EXECUTED	0x10
+#define PROG_ATTR_ERROR		0x80
 
 // This is the table for Script Execution
 typedef struct t_wndprog_data {
@@ -35,18 +36,19 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 
 void InvalidateProgWindow(void);
 
-int addProgLine(int line, string & command, int type=false);
-int setProgLineEIP(int line, int eip);
-int setProgLineValue(int line, string& value);
-int setProgLineValue(int line, DWORD value);
-int setProgLineValueFloat(int line, long double value);
-int setProgLineResult(int line, var& result);
-int setProgLineResult(int line, string& result);
-int setProgLineResult(int line, DWORD result);
-int setProgLineResultFloat(int line, long double result);
-int isProgLineBP(int line);
-int isProgLineComment(int line);
-int getProgLineType(int line);
+int  addProgLine(int line, string & command, int type=false);
+int  setProgLineEIP(int line, int eip);
+int  setProgLineValue(int line, string& value);
+int  setProgLineValue(int line, DWORD value);
+int  setProgLineValueFloat(int line, long double value);
+int  setProgLineResult(int line, var& result);
+int  setProgLineResult(int line, string& result);
+int  setProgLineResult(int line, DWORD result);
+int  setProgLineResultFloat(int line, long double result);
+int  isProgLineBP(int line);
+int  isProgLineComment(int line);
+int  getProgLineType(int line);
+int  setProgLineAttr(int line,int type) ;
 
 void clearProgLines();
 void resetProgLines();

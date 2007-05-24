@@ -37,7 +37,8 @@ public:
 	HWND hwndinput;
 	
 	//last breakpoint reason
-	int break_reason;
+	ulong break_reason;
+	ulong break_memaddr;
 
 	// Constructor & destructor
 	OllyLang();

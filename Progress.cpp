@@ -426,7 +426,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
 			}
-			else if (pline->type & PROG_TYPE_LABEL || pline->line == 0)
+			else if ((pline->type & PROG_TYPE_LABEL) || pline->line == 0)
 			{
 				ret = sprintf(s, "%s", &pline->command[1]);
 				memset(&s[ret],'_',PROG_CMD_LEN-ret);
@@ -437,7 +437,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			else if (pline->type & PROG_TYPE_ASM) {
 				ret = sprintf(s, " %s", pline->command);
 				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);//DRAW_GRAY
+				memset(mask,DRAW_GRAY,ret);
 			}
 			else 
 			{
@@ -458,10 +458,16 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				memset(mask,DRAW_HILITE,ret);
 			}
 
-			//DRAW JUMP ARROWS
+			//Error warning
+			if (pline->type & PROG_ATTR_ERROR) //error
+			{
+				*s='!';
+				*mask=DRAW_BREAK;
+			}
+
+			//DRAW JUMP ARROWS 
 			if (pline->jumpto > 0) 
 			{
-				*select=DRAW_MASK;
 				
 				if (pline->jumpto < pline->line) 
 				{
@@ -806,14 +812,26 @@ void resetProgLines()
 
 int getProgLineType(int line) 
 {
+	t_wndprog_data *ppl;
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	if (ppl==NULL)
+		return false; 
 
+	return (ppl->type & PROG_TYPE);
+
+}
+
+int setProgLineAttr(int line,int type) 
+{
 	t_wndprog_data *ppl;
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 	if (ppl==NULL)
 		return false;
 
-	return (ppl->type & PROG_TYPE);
+	ppl->type &= PROG_TYPE;
+	ppl->type |= type;
 
+	return true;
 }
 
 int isProgLineComment(int line) 
