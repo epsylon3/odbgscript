@@ -371,22 +371,20 @@ int OllyLang::GetState()
 ulong OllyLang::GetFirstCodeLine(ulong from) //=0
 {
 	ulong nline=from;
-	string codeLine;
-	char lastchar;
 
 	// Check for label after (skip it/them)
 	if(nline < script.size()) {
 		
-		codeLine = trim(script[nline]);
-		lastchar = codeLine[codeLine.length() - 1];
 		// Check if its a label or comment
-		while(nline < script.size() && (lastchar == ':' || isProgLineComment(nline+1)))
+		while(nline < script.size() && (!(getProgLineType(nline+1) & PROG_TYPE_COMMAND)))
 		{
 			nline++;
-			codeLine = trim(script[nline]);
-			lastchar = codeLine[codeLine.length() - 1];
 		} 
+
 	}
+	if (nline>=script.size())
+		return false;
+
 	return nline;
 }
 
@@ -638,7 +636,11 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 		if(reason&&!PP_HWBREAK)
 		break_reason=reason;
 
-	if(EOB_row > -1)
+	if(bInternalBP) {
+		//dont process temporary bp (exec/ende Go command)
+		bInternalBP=false;
+	}
+	else if(EOB_row > -1)
 	{
 		script_pos = GetFirstCodeLine(EOB_row);
 		return true;
@@ -1033,12 +1035,18 @@ bool OllyLang::ParseLabels()
 	iter = script.begin();
 	string s;
 	int loc = 0;
+	t_wndprog_data *ppl;
 
 	while(iter != script.end())
 	{
 		s = *iter;
-		if(s.at(s.length() - 1) == ':')
+		if(s.at(s.length() - 1) == ':') {
 			labels.insert(pair<string, int>(s.substr(0, s.length() - 1), loc));
+
+			ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,loc+1);
+			ppl->type = PROG_TYPE_LABEL;
+
+		}
 		iter++;
 		loc++;
 	}
@@ -1420,7 +1428,7 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value)
 			value = flags.bitFlags.AF;
 		else if(stricmp(op.c_str(), "!cf") == 0)
 			value = flags.bitFlags.CF;
-		else if(stricmp(op.c_str(), "!sf") == 0)
+		else if(stricmp(op.c_str(), "!df") == 0)
 			value = flags.bitFlags.DF;
 		else if(stricmp(op.c_str(), "!of") == 0)
 			value = flags.bitFlags.OF;

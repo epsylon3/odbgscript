@@ -413,7 +413,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				memset(mask,DRAW_EIP,ret);
 				
 			} 
-			else if (pline->command[strlen(pline->command)-1]==':') 
+			else if (pline->type & PROG_TYPE_LABEL) 
 			{
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
@@ -425,8 +425,8 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				ret = sprintf(s, "%s", &pline->command);
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
-			} 
-			else if (pline->command[strlen(pline->command)-1] == ':' || pline->line == 0)
+			}
+			else if (pline->type & PROG_TYPE_LABEL || pline->line == 0)
 			{
 				ret = sprintf(s, "%s", &pline->command[1]);
 				memset(&s[ret],'_',PROG_CMD_LEN-ret);
@@ -446,7 +446,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*select=DRAW_MASK;
 				memset(mask,DRAW_EIP,ret);			
 			}
-			else if ((pline->type & PROG_TYPE_EXECUTED) && !(pline->type & PROG_TYPE_COMMENT) && ret>0) 
+			else if ((pline->type & PROG_ATTR_EXECUTED) && !(pline->type & PROG_TYPE_COMMENT) && ret>0) 
 			{
 				//Hilite executed lines
 				*select=DRAW_MASK;
@@ -487,7 +487,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				}
 				ret = sprintf(s, "%s", pline->result);
 			} 
-			else if (pline->command[strlen(pline->command)-1] == ':') 
+			else if (pline->type & PROG_TYPE_LABEL) 
 			{
 				ret=PROG_RES_LEN;
 				memset(s,'_',ret);
@@ -533,7 +533,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					memset(mask,DRAW_HILITE,ret);				
 				}
 			}
-			else if (pline->command[strlen(pline->command)-1] == ':') 
+			else if (pline->type & PROG_TYPE_LABEL) 
 			{
 				memset(s,'_',9);
 				ret=9;
@@ -558,7 +558,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					}
 				}
 			} 
-			else if (pline->command[strlen(pline->command)-1] == ':')
+			else if (pline->type & PROG_TYPE_LABEL)
 			{   
 				memset(s,'_',PROG_VAL_LEN);
 				ret=PROG_VAL_LEN;
@@ -610,16 +610,16 @@ int addProgLine(int line, string & command, bool is_comment)
 int setProgLineEIP(int line, int eip) 
 {
 
-	if (line>ollylang->script.size()) return 0;
+	if (line>ollylang->script.size()) return false;
 
 	t_wndprog_data *ppl;
 
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 
-	ppl->type |= PROG_TYPE_EXECUTED;
+	ppl->type |= PROG_ATTR_EXECUTED;
 
-	if (ppl->command[strlen(ppl->command)-1] == ':')
-		return 1;
+	//if (!(ppl->type & PROG_TYPE_COMMAND)
+	//	return true;
 
     ppl->eip = eip;
 	
@@ -631,7 +631,7 @@ int setProgLineEIP(int line, int eip)
 		}
 	}
 
-	return 1;
+	return true;
 }
 
 int setProgLineValue(int line, DWORD value) 
@@ -650,7 +650,7 @@ int setProgLineValue(int line, string  &value)
 	t_wndprog_data *ppl;
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 
-	if (ppl->command[strlen(ppl->command)-1] == ':')
+	if (!(ppl->type & PROG_TYPE_COMMAND))
 		return 1;
 
 	string values;
@@ -702,7 +702,7 @@ int setProgLineResult(int line, string& result)
 	
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 	
-	if (ppl->command[strlen(ppl->command)-1] == ':')
+	if (ppl->type & PROG_TYPE_LABEL)
 		return 1;
 
 	strncpy(ppl->result,CleanString(result).c_str(),PROG_RES_LEN);
@@ -765,7 +765,7 @@ void resetProgLines()
 		ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 		
 		//reset executed color
-		if (!(ppl->type & PROG_TYPE_COMMENT)) //ignore comments
+		if ((ppl->type & PROG_TYPE_COMMAND)) //ignore labels/comments
 			ppl->type &= PROG_TYPE_COMMAND;
 		
 		strcpy(ppl->result,"");	
@@ -778,6 +778,19 @@ void resetProgLines()
 		iter++;
 	}
 	InvalidateProgWindow();
+}
+
+
+int getProgLineType(int line) 
+{
+
+	t_wndprog_data *ppl;
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	if (ppl==NULL)
+		return false;
+
+	return (ppl->type & PROG_TYPE);
+
 }
 
 int isProgLineComment(int line) 

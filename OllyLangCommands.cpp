@@ -1082,6 +1082,8 @@ bool OllyLang::DoEXEC(string args)
 	// Pass EXECs
 	script_pos++;
 
+	require_ollyloop=1;
+
 	// Assemble and write code to memory (everything between EXEC and ENDE)
 	while(ToLower(script[script_pos]) != "ende")
 	{
@@ -1096,7 +1098,7 @@ bool OllyLang::DoEXEC(string args)
 			totallen += len;
 		}
 		script_pos++;
-
+		setProgLineEIP(script_pos,eip);
 		if (script_pos>script.size()) {
 			DoENDE("");
 			errorstr = "EXEC needs ENDE command !";
@@ -1120,6 +1122,10 @@ bool OllyLang::DoEXEC(string args)
 	thr->reg.ip = (ulong)pmemforexec;
 	thr->reg.modified = 1;
 	thr->regvalid = 1;
+
+	// tell to odbgscript to ignore next breakpoint
+	bInternalBP=true;
+
 	Broadcast(WM_USER_CHREG, 0, 0);
 	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
 	

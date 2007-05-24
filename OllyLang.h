@@ -118,6 +118,8 @@ private:
 
 	int EOB_row;
 	int EOE_row;
+
+	bool bInternalBP;
 	
 	string errorstr;
 

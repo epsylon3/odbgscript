@@ -60,6 +60,8 @@ BEGINSEARCH working ?
 2.1 What's new? 
 ---------------
 1.62 SVN ( May 2007)
+* DF/SF flags fixed
+
 
 1.61 (23 May 2007)
 + Script Window can now display comments (only comments with ";")
