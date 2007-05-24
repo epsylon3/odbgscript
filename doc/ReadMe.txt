@@ -51,7 +51,6 @@ which has taken a lot of time. Sorry about that.
 
 TODO:
 After Error Script Cursor
-STI/STO Script Cursor
 Edit Line
 Memory BP reason
 Save/Restore Script Breakpoints
@@ -60,8 +59,9 @@ BEGINSEARCH working ?
 2.1 What's new? 
 ---------------
 1.62 SVN ( May 2007)
++ Indent/color ASM Blocks (EXEC/ENDE)
 * DF/SF flags fixed
-
+* EOB with EXEC/ENDE fixed
 
 1.61 (23 May 2007)
 + Script Window can now display comments (only comments with ";")

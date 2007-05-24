@@ -990,7 +990,10 @@ bool OllyLang::DoDPE(string args)
 bool OllyLang::DoENDE(string args)
 {
 	// Free memory
-	return DelProcessMemoryBloc((DWORD) pmemforexec);
+	if (pmemforexec!=NULL)
+		DelProcessMemoryBloc((DWORD) pmemforexec);
+	pmemforexec=NULL;
+	return true;
 }
 
 bool OllyLang::DoERUN(string args)
@@ -1081,6 +1084,7 @@ bool OllyLang::DoEXEC(string args)
 
 	// Pass EXECs
 	script_pos++;
+	setProgLineResult(script_pos,variables["$RESULT"]);
 
 	require_ollyloop=1;
 
@@ -1099,6 +1103,7 @@ bool OllyLang::DoEXEC(string args)
 		}
 		script_pos++;
 		setProgLineEIP(script_pos,eip);
+		setProgLineResult(script_pos,variables["$RESULT"]);
 		if (script_pos>script.size()) {
 			DoENDE("");
 			errorstr = "EXEC needs ENDE command !";

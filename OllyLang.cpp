@@ -244,7 +244,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 	string scriptline;
 	int inc_pos = -1, linesAdded = 0;
 	int p;
-	bool comment_todisplay, in_comment = false;
+	bool comment_todisplay, in_asm=false, in_comment=false;
 
 	while(iter != toInsert.end())
 	{
@@ -311,6 +311,8 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			iter++;
 			continue;
 		} 
+		// ASM Blocks
+
 
 		scriptline = trim(scriptline);
 		if (scriptline=="") {
@@ -353,7 +355,17 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			script.insert(script.begin() + posInScript, scriptline);
 			linesAdded++;
 			posInScript++;
-			addProgLine(posInScript,scriptline,comment_todisplay);
+
+			if(in_asm && lcline == "ende") {
+				in_asm = false;
+			}
+
+			addProgLine(posInScript,scriptline,comment_todisplay*PROG_TYPE_COMMENT + in_asm*PROG_TYPE_ASM);
+
+			if(lcline == "exec") {
+				in_asm = true;
+			}
+
 		}
 
 		iter++;
@@ -570,17 +582,7 @@ bool OllyLang::Step(int forceStep)
 			InvalidateProgWindow();
 			return false;
 		} else {
-			if (variables["$RESULT"].vt == DW)
-				setProgLineResult(script_pos+1,variables["$RESULT"].dw);
-			else if (variables["$RESULT"].vt == FLT)
-				setProgLineResultFloat(script_pos+1,variables["$RESULT"].flt);
-			else {
-				if(variables["$RESULT"].str.length() && !variables["$RESULT"].isbuf)
-					setProgLineResult(script_pos+1,"\""+variables["$RESULT"].str+"\"");
-				else {
-					setProgLineResult(script_pos+1,variables["$RESULT"].str);
-				}
-			}
+			setProgLineResult(script_pos+1,variables["$RESULT"]);
 		}
 
 		if (script_state == SS_LOADED) {

@@ -4,6 +4,7 @@
 
 #define PROG_TYPE			0x0F
 #define PROG_TYPE_COMMAND	0x01
+#define PROG_TYPE_ASM		0x02
 #define PROG_TYPE_LABEL		0x04
 #define PROG_TYPE_COMMENT	0x08
 
@@ -34,11 +35,12 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 
 void InvalidateProgWindow(void);
 
-int addProgLine(int line, string & command, bool is_comment=false) ;
+int addProgLine(int line, string & command, int type=false);
 int setProgLineEIP(int line, int eip);
 int setProgLineValue(int line, string& value);
 int setProgLineValue(int line, DWORD value);
 int setProgLineValueFloat(int line, long double value);
+int setProgLineResult(int line, var& result);
 int setProgLineResult(int line, string& result);
 int setProgLineResult(int line, DWORD result);
 int setProgLineResultFloat(int line, long double result);

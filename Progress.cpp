@@ -434,6 +434,11 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);				
 			} 
+			else if (pline->type & PROG_TYPE_ASM) {
+				ret = sprintf(s, " %s", pline->command);
+				*select=DRAW_MASK;
+				memset(mask,DRAW_GRAY,ret);//DRAW_GRAY
+			}
 			else 
 			{
 				ret = sprintf(s, "%s", pline->command);
@@ -471,7 +476,18 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			} 
 		break;
 		case 2:
-			if (*pline->result != 0) 
+			if (pline->type & PROG_TYPE_LABEL) 
+			{
+				ret=PROG_RES_LEN;
+				memset(s,'_',ret);
+				*select=DRAW_MASK;
+				memset(mask,DRAW_GRAY,ret);				
+				
+				//ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");			
+				//ret=30;strcpy(s,"Duvdeijrsfgahztbcl");			
+				//memset(mask,DRAW_GRAPH,ret);
+			}
+			else if (*pline->result != NULL) 
 			{
 				if (plineBf)
 				{
@@ -486,21 +502,17 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					}
 				}
 				ret = sprintf(s, "%s", pline->result);
-			} 
-			else if (pline->type & PROG_TYPE_LABEL) 
-			{
-				ret=PROG_RES_LEN;
-				memset(s,'_',ret);
-				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);				
-				
-				//ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");			
-				//ret=30;strcpy(s,"Duvdeijrsfgahztbcl");			
-				//memset(mask,DRAW_GRAPH,ret);
 			}
 		break;
 		case 3:
-			if (pline->eip>0) 
+			if (pline->type & PROG_TYPE_LABEL) 
+			{
+				memset(s,'_',9);
+				ret=9;
+				*select=DRAW_MASK;
+				memset(mask,DRAW_GRAY,ret);				
+			}
+			else if (pline->eip>0) 
 			{
 				if (plineBf) 
 				{
@@ -533,16 +545,16 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					memset(mask,DRAW_HILITE,ret);				
 				}
 			}
-			else if (pline->type & PROG_TYPE_LABEL) 
-			{
-				memset(s,'_',9);
-				ret=9;
-				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);				
-			}
 		break;
 		case 4:
-			if (*pline->values != 0)
+			if (pline->type & PROG_TYPE_LABEL)
+			{   
+				memset(s,'_',PROG_VAL_LEN);
+				ret=PROG_VAL_LEN;
+				*select=DRAW_MASK;
+				memset(mask,DRAW_GRAY,ret);
+			}
+			else if (*pline->values != NULL)
 			{
 				if (pline->values[0] != ',') 
 					ret = sprintf(s, "%s", pline->values);
@@ -557,14 +569,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 						memset(mask,DRAW_HILITE,p-1);
 					}
 				}
-			} 
-			else if (pline->type & PROG_TYPE_LABEL)
-			{   
-				memset(s,'_',PROG_VAL_LEN);
-				ret=PROG_VAL_LEN;
-				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);
-			}
+			}  
 			break;
 
 	}
@@ -580,7 +585,7 @@ void InvalidateProgWindow(void)
 		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
 }
 
-int addProgLine(int line, string & command, bool is_comment) 
+int addProgLine(int line, string & command, int type) 
 {
 
 	t_wndprog_data pline={0};
@@ -591,10 +596,11 @@ int addProgLine(int line, string & command, bool is_comment)
 	strncat(pline.command,command.c_str(),PROG_CMD_LEN-2);
 	strcpy(pline.result,"");	
 	strcpy(pline.values,"");
-	if (is_comment)
-		pline.type = PROG_TYPE_COMMENT;
+	if (type)
+		pline.type = type;
 	else
 		pline.type = PROG_TYPE_COMMAND;
+
 	pline.eip = 0;
 		
 	ollylang->tProgLines.push_back(pline);
@@ -616,7 +622,8 @@ int setProgLineEIP(int line, int eip)
 
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 
-	ppl->type |= PROG_ATTR_EXECUTED;
+	if (!(ppl->type & PROG_TYPE_ASM))
+		ppl->type |= PROG_ATTR_EXECUTED;
 
 	//if (!(ppl->type & PROG_TYPE_COMMAND)
 	//	return true;
@@ -692,32 +699,21 @@ int setProgLineValueFloat(int line, long double value)
 	return setProgLineValue(line, str);
 }
 
-int setProgLineResult(int line, string& result)
+int setProgLineResult(int line, var& result)
 {
-
-	if (line>ollylang->script.size()) return 0;
-	
-	char values[PROG_VAL_LEN];
-	t_wndprog_data *ppl;
-	
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
-	
-	if (ppl->type & PROG_TYPE_LABEL)
-		return 1;
-
-	strncpy(ppl->result,CleanString(result).c_str(),PROG_RES_LEN);
-	if (strcmp(ppl->values,"")) 
-	{
-		if (ppl->values[0] != ',') 
-		{
-			strcpy(values,ppl->values);
-			strncpy(&ppl->values[1],values,PROG_VAL_LEN-2);
-			ppl->values[0]=',';
+	if (result.vt == DW)
+		setProgLineResult(line,result.dw);
+	else if (result.vt == FLT)
+		setProgLineResultFloat(line,result.flt);
+	else {
+		if(result.str.length() && !result.isbuf)
+			setProgLineResult(line,"\""+result.str+"\"");
+		else {
+			setProgLineResult(line,result.str);
 		}
 	}
-
 	InvalidateProgWindow();
-	return 1;
+	return true;
 }
 
 int setProgLineResult(int line, DWORD result) 
@@ -741,6 +737,33 @@ int setProgLineResultFloat(int line, long double result) {
 			break;
 	}
 	return setProgLineResult(line, str);
+}
+
+int setProgLineResult(int line, string& result)
+{
+
+	if (line>ollylang->script.size()) return 0;
+	
+	char values[PROG_VAL_LEN];
+	t_wndprog_data *ppl;
+	
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	
+	if (ppl->type & PROG_TYPE_LABEL)
+		return false;
+
+	strncpy(ppl->result,CleanString(result).c_str(),PROG_RES_LEN);
+	if (strcmp(ppl->values,"")) 
+	{
+		if (ppl->values[0] != ',') 
+		{
+			strcpy(values,ppl->values);
+			strncpy(&ppl->values[1],values,PROG_VAL_LEN-2);
+			ppl->values[0]=',';
+		}
+	}
+
+	return true;
 }
 
 void clearProgLines()
