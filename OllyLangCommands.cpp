@@ -13,14 +13,13 @@ bool OllyLang::DoADD(string args)
 		return false;
 
 	ulong dw1, dw2 ;
-	string str1, str2, tmp ;
+	string str1, str2;
 
 	if (GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 + dw2, buffer, 16);
-	    //tmp = strupr(ultoa(dw1 + dw2, buffer, 16));
-		//setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
@@ -31,6 +30,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", \"" + v1.str +"\"";
+		nIgnoreNextValuesHist=1;
 	    return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
@@ -41,7 +41,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", " + "\"" + v1.str + "\"";
-		//setProgLineValue(script_pos+1,(v1.str));
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	else if (GetANYOpValue(ops[0], str1) 
@@ -52,7 +52,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", " + "\"" + v1.str + "\"";
-		//setProgLineValue(script_pos+1,(v1.str));
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -117,6 +117,7 @@ bool OllyLang::DoAND(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 & dw2, buffer, 16);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -854,8 +855,9 @@ bool OllyLang::DoDIV(string args)
 			errorstr = "Division by 0";
 			return false;
 		}
-		   args = ops[0] + ", " + ultoa(dw1 / dw2, buffer, 16);
-	       return DoMOV(args);
+		args = ops[0] + ", " + ultoa(dw1 / dw2, buffer, 16);
+		nIgnoreNextValuesHist=1;
+		return DoMOV(args);
 	}
 	return false;
 }
@@ -3003,12 +3005,10 @@ bool OllyLang::DoOR(string args)
 		return false;
 
 	ulong dw1, dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 | dw2, buffer, 16);
-		tmp = strupr(ultoa(dw1 | dw2, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3025,6 +3025,7 @@ bool OllyLang::DoMUL(string args)
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 * dw2, buffer, 16);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3038,7 +3039,6 @@ bool OllyLang::DoNEG(string args)
 		return false;
 
 	ulong dw1;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		__asm
@@ -3050,8 +3050,7 @@ bool OllyLang::DoNEG(string args)
 			pop eax
 		}
 		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
-		tmp = strupr(ultoa(dw1, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3066,7 +3065,6 @@ bool OllyLang::DoNOT(string args)
 		return false;
 
 	ulong dw1;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		__asm
@@ -3078,8 +3076,7 @@ bool OllyLang::DoNOT(string args)
 			pop eax
 		}
 		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
-		tmp = strupr(ultoa(dw1, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3186,9 +3183,11 @@ bool OllyLang::DoPOP(string args)
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		args = ops[0] + ", [esp]";
+		nIgnoreNextValuesHist=1;
 		DoMOV(args);
 
 		args1 = "esp, esp+4";
+		nIgnoreNextValuesHist=1;
 		DoMOV(args1);
 
 		t_thread* pt = Findthread(Getcputhreadid());	
@@ -3240,9 +3239,11 @@ bool OllyLang::DoPUSH(string args)
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		args = "esp, esp-4";
+		nIgnoreNextValuesHist=1;
 		DoMOV(args);
 
 		args = "[esp], " + ops[0];
+		nIgnoreNextValuesHist=1;
 		DoMOV(args);
 
 		t_thread* pt = Findthread(Getcputhreadid());	
@@ -3476,7 +3477,6 @@ bool OllyLang::DoROL(string args)
 
 	ulong dw1;
 	BYTE dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) && GetBYTEOpValue(ops[1], dw2))
 	{
         
@@ -3492,8 +3492,7 @@ bool OllyLang::DoROL(string args)
 			pop eax
 		}
 		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
-		tmp = strupr(ultoa(dw1, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3508,7 +3507,6 @@ bool OllyLang::DoROR(string args)
 
 	ulong dw1;
 	BYTE dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetBYTEOpValue(ops[1], dw2))
 	{
@@ -3525,8 +3523,7 @@ bool OllyLang::DoROR(string args)
 			pop eax
 		}
 		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
-		tmp = strupr(ultoa(dw1, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3633,13 +3630,11 @@ bool OllyLang::DoSHL(string args)
 		return false;
 
 	ulong dw1, dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 << dw2, buffer, 16);
-		tmp = strupr(ultoa(dw1 << dw2, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3653,13 +3648,11 @@ bool OllyLang::DoSHR(string args)
 		return false;
 
 	ulong dw1, dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 >> dw2, buffer, 16);
-		tmp = strupr(ultoa(dw1 >> dw2, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3714,14 +3707,11 @@ bool OllyLang::DoSUB(string args)
 		return false;
 
 	ulong dw1, dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 - dw2, buffer, 16);
-		tmp = strupr(ultoa(dw1 - dw2, buffer, 16));
-		setProgLineValue(script_pos+1,tmp);
-		variables[ops[0]]=(dw1-dw2);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;
@@ -3883,8 +3873,10 @@ bool OllyLang::DoXCHG(string args)
 
 	if (GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2)) {
 		args = ops[0] + ", " + ultoa(dw2, buffer, 16);
+		nIgnoreNextValuesHist=1;
 		DoMOV(args);
 		args = ops[1] + ", " + ultoa(dw1, buffer, 16);
+		nIgnoreNextValuesHist=1;
 		DoMOV(args);
 		return true;
 	}
@@ -3901,13 +3893,11 @@ bool OllyLang::DoXOR(string args)
 		return false;
 
 	ulong dw1, dw2;
-	string tmp;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 ^ dw2, buffer, 16);
-		tmp = strupr(ultoa(dw1 ^ dw2, buffer, 16));
-        setProgLineValue(script_pos+1,tmp);
+		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}
 	return false;

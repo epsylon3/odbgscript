@@ -869,7 +869,8 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 					else 
 						break;
 				}
-				var_logging=true;
+				if (nIgnoreNextValuesHist==0)
+					var_logging=true;
 //				if (!sub_operand)
 					setProgLineValueFloat(script_pos+1,fltresult);
 				goto operation_ok;
@@ -947,7 +948,8 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 
 				ops[i]=value;
 
-				var_logging=true;
+				if (nIgnoreNextValuesHist==0)
+					var_logging=true;
 //				if (!sub_operand)
 					setProgLineValue(script_pos+1,result);
 				goto operation_ok;
@@ -997,11 +999,14 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				goto operation_ok;
 
 			operation_failed:
-				var_logging = true;	
+				if (nIgnoreNextValuesHist==0)
+					var_logging=true;
 				return false;
 
 			operation_ok:
 				var_logging=true;
+				if (nIgnoreNextValuesHist)
+					nIgnoreNextValuesHist--;
 
 			} //if find_first_of
 
@@ -1979,7 +1984,7 @@ bool OllyLang::DelProcessMemoryBloc(DWORD address)
 	return false;
 }
 
-bool OllyLang::ExecuteASM(string command)
+bool OllyLang::ExecuteASM(string command) //NOT FINISHED
 {
 	// Old eip
 	ulong eip;

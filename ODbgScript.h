@@ -7,15 +7,15 @@ using namespace std;
 #define VERSIONST      1               // plugin state (1svn 2beta 3final)
 
 ///long
-static char      wndprogclass[32];	   // Name of progress window class
-static char      wndlogclass[32];	   // Name of log window class
-static char      wndwatchclass[32];
+static char		wndprogclass[32];	   // Name of progress window class
+static char		wndlogclass[32];	   // Name of log window class
+static char		wndwatchclass[32];
 
-static int       focusonstop;            // Foreground on pause
+static int		focusonstop;            // Foreground on pause
 
-static bool	 dbgfocus=false;
+static bool		dbgfocus=false;
 
-static void*	 pmemforexec;
+static void*	pmemforexec;
 
 #define STRING_READSIZE 256
 

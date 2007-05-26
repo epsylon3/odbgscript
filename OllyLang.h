@@ -121,6 +121,7 @@ private:
 	int EOE_row;
 
 	bool bInternalBP;
+	ulong nIgnoreNextValuesHist;
 	
 	string errorstr;
 

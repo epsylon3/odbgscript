@@ -64,6 +64,8 @@ BEGINSEARCH working ?
 * DF/SF flags fixed
 * EOB with EXEC/ENDE fixed
 * After Error Script Cursor, also added "!" symbol in front of line
+* Fixed SUB <reg> command 
+* Fixed Value History in commands using DoMOV
 
 1.61 (23 May 2007)
 + Script Window can now display comments (only comments with ";")
