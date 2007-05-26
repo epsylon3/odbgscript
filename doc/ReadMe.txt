@@ -57,7 +57,7 @@ BEGINSEARCH working ?
 
 2.1 What's new? 
 ---------------
-1.62 SVN ( May 2007)
+1.62 (26 May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)
 + Added GCI parameter COMMAND to get asm command string (like OPCODE), SIZE, CONDITION, TYPE
 + TICK without variable set time from start in text, in "%d ms" format. log purpose.

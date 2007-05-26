@@ -394,8 +394,8 @@ ulong OllyLang::GetFirstCodeLine(ulong from) //=0
 		} 
 
 	}
-	if (nline>=script.size())
-		return false;
+	//if (nline>=script.size())
+	//	return false;
 
 	return nline;
 }

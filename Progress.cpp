@@ -462,6 +462,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			if (pline->type & PROG_ATTR_ERROR) //error
 			{
 				*s='!';
+				*select=DRAW_MASK;
 				*mask=DRAW_BREAK;
 			}
 
@@ -477,6 +478,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				{
 					*s='D';
 				}
+				*select=DRAW_MASK;
 				*mask=DRAW_GRAPH;
 
 			} 
