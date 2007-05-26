@@ -59,8 +59,9 @@ BEGINSEARCH working ?
 ---------------
 1.62 SVN ( May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)
-+ Added GCI parameter COMMAND to get asm command string
++ Added GCI parameter COMMAND to get asm command string (like OPCODE), SIZE, CONDITION, TYPE
 + TICK without variable set time from start in text, in "%d ms" format. log purpose.
++ Added SCMP,SCMPI size parameter, to compare addr data.
 * DF/SF flags fixed
 * EOB with EXEC/ENDE fixed
 * After Error Script Cursor, also added "!" symbol in front of line
@@ -848,8 +849,11 @@ GCI addr, info
 --------------
 Gets information about asm command
 "info" can be :
+	- COMMAND for asm command string (like OPCODE)
 	- DESTINATION for Destination of jump/call/return
-	- COMMAND for asm command string
+	- SIZE for number of command bytes
+	- TYPE for asm command string (one of C_xxx, see OllyDbg Plugin API)
+
 Example:
 	GCI eip, DESTINATION
 
@@ -1196,19 +1200,21 @@ Executes F9 in OllyDbg
 Example:
 	run
 
-SCMP dest, src
+SCMP dest, src [,size]
 -------------
 Compares strings dest to src. Works like it's ASM counterpart.
 Example: 
 	cmp x, "KERNEL32.DLL"
-	cmp [eax], "Hello World"
+	cmp [eax], "Hello World", 11.
+	je Label
 
-SCMPI dest, src
+SCMPI dest, src [,size]
 -------------
 Compares strings dest to src (case insentitive). Works like it's ASM counterpart.
 Example: 
 	cmp sVar, "KERNEL32.DLL"
-	cmp [eax], "Hello World"
+	cmp [eax], "Hello", 5
+	jne Label
 
 SETOPTION
 ---------

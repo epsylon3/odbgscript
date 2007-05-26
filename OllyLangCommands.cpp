@@ -708,13 +708,17 @@ bool OllyLang::DoBUF(string args)
 
 bool OllyLang::DoCMP(string args)
 {
-	string ops[2];
-
-	if(!CreateOperands(args, ops, 2))
-		return false;
-
-	ulong dw1 = 0, dw2 = 0;
+	string ops[3];
+	ulong dw1=0, dw2=0, size=0;
 	string s1, s2;
+
+//	if(!CreateOperands(args, ops, 3)) {
+		if(!CreateOperands(args, ops, 2))
+			return false;
+//	} else {
+//		GetDWOpValue(ops[2], size);
+//	}
+
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
@@ -1662,7 +1666,7 @@ bool OllyLang::DoGBPR(string args)
 			if (size>0) {
 				char i,j;
 				for (j=0;j<3;j++)
-					if (disasm.opaddr[j]!=0) 
+					if (disasm.opaddr[j]!=0 && disasm.opgood[j]) 
 					{
 						break_memaddr=disasm.opaddr[j];
 						for (i=0;i<4;i++) 
@@ -1709,17 +1713,32 @@ bool OllyLang::DoGCI(string args)
 
 			if (size<=0)
 				return false;
-			else if (param == "DESTINATION") 
-			{
-				variables["$RESULT"] = disasm.jmpaddr; 
-				return true;
-			}
 			else if (param == "COMMAND")
 			{
 				string s;
 				s.assign(disasm.result);
 				while (s.find("  ") != string::npos) ReplaceString(s,"  "," ");
 				variables["$RESULT"] = s; 
+				return true;
+			}
+			else if (param == "CONDITION") 
+			{
+				variables["$RESULT"] = disasm.condition; 
+				return true;
+			}
+			else if (param == "DESTINATION") 
+			{
+				variables["$RESULT"] = disasm.jmpaddr; 
+				return true;
+			}
+			else if (param == "SIZE") 
+			{
+				variables["$RESULT"] = size; 
+				return true;
+			}
+			else if (param == "TYPE") 
+			{
+				variables["$RESULT"] = disasm.cmdtype; 
 				return true;
 			}
 		}
@@ -3082,7 +3101,7 @@ bool OllyLang::DoNOT(string args)
 	return false;
 }
 
-
+//see also GCI
 bool OllyLang::DoOPCODE(string args)
 {
 	string ops[1];
@@ -3553,14 +3572,19 @@ bool OllyLang::DoRUN(string args)
 
 bool OllyLang::DoSCMP(string args)
 {
-	string ops[2];
-
-	if(!CreateOperands(args, ops, 2, true))
-		return false;
-
+	string ops[3];
+	ulong size=0;
 	string s1, s2;
-	if(GetSTROpValue(ops[0], s1) 
-		&& GetSTROpValue(ops[1], s2))
+
+	if(!CreateOperands(args, ops, 3)) {
+		if(!CreateOperands(args, ops, 2))
+			return false;
+	} else {
+		GetDWOpValue(ops[2], size);
+	}
+
+	if(GetSTROpValue(ops[0], s1, size) 
+		&& GetSTROpValue(ops[1], s2, size))
 	{
 		int res = s1.compare(s2);
 		if(res == 0)	
@@ -3585,14 +3609,19 @@ bool OllyLang::DoSCMP(string args)
 
 bool OllyLang::DoSCMPI(string args)
 {
-	string ops[2];
-
-	if(!CreateOperands(args, ops, 2, true))
-		return false;
-	
+	string ops[3];
+	ulong size=0;
 	string s1, s2;
-	if(GetSTROpValue(ops[0], s1) 
-		&& GetSTROpValue(ops[1], s2))
+
+	if(!CreateOperands(args, ops, 3)) {
+		if(!CreateOperands(args, ops, 2))
+			return false;
+	} else {
+		GetDWOpValue(ops[2], size);
+	}
+
+	if(GetSTROpValue(ops[0], s1, size) 
+		&& GetSTROpValue(ops[1], s2, size) )
 	{
 		int res = stricmp (s1.c_str(), s2.c_str());//s1.compare(s2,false);
 		if(res == 0)		
