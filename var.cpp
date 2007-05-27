@@ -39,7 +39,7 @@ var::var(string& rhs)
 	}
 }
 
-var::var(DWORD rhs)
+var::var(ulong rhs)
 {
 	vt = DW;
 	dw = rhs;
@@ -52,7 +52,7 @@ var::var(DWORD rhs)
 var::var(int rhs)
 {
 	vt = DW;
-	dw = (DWORD)rhs;
+	dw = (ulong)rhs;
 	flt = 0;
 	str = "";
 	size = sizeof(rhs);
@@ -100,7 +100,7 @@ var& var::operator=(const string& rhs)
 	return *this;
 }
 
-var& var::operator=(const DWORD& rhs)
+var& var::operator=(const ulong& rhs)
 {
 	vt = DW;
 	dw = rhs;
@@ -114,7 +114,7 @@ var& var::operator=(const DWORD& rhs)
 var& var::operator=(const int& rhs)
 {
 	vt = DW;
-	dw = (DWORD)rhs;
+	dw = (ulong)rhs;
 	flt = 0;
 	str = "";
 	size = sizeof(rhs);
@@ -207,12 +207,12 @@ var& var::operator+=(const string& rhs)
 
 		char dwbuf[12];
 		if (v.isbuf) {
-			//DWORD + BUFFER >> CONCATE HEX
+			//ulong + BUFFER >> CONCATE HEX
 			s = strbuffhex();
 			sprintf(dwbuf, "%08X",dw);
 			*this = "#"+((string)dwbuf)+s+"#";
 		} else {
-			//DWORD + STRING >> CONCATE ultoa+str
+			//ulong + STRING >> CONCATE ultoa+str
 			s = strupr(ultoa(dw, dwbuf, 16));
 			*this = s+v.str;
 		}
@@ -221,7 +221,7 @@ var& var::operator+=(const string& rhs)
 	return *this;
 }
 
-var& var::operator+=(const DWORD& rhs)
+var& var::operator+=(const ulong& rhs)
 {
 	if(vt == DW)
 		dw += rhs;
@@ -231,7 +231,7 @@ var& var::operator+=(const DWORD& rhs)
 		string s;
 		char dwbuf[12];
 		if (isbuf) {
-			//Concate Num Dword to a buffer (4 octets)
+			//Concate Num ulong to a buffer (4 octets)
 			s = strbuffhex();
 			sprintf(dwbuf, "%08X",rev(rhs));
 			*this = "#"+s+dwbuf+"#";
@@ -248,11 +248,11 @@ var& var::operator+=(const DWORD& rhs)
 var& var::operator+=(const int& rhs)
 {
 	if(vt == DW)
-		dw += (DWORD)rhs;
+		dw += (ulong)rhs;
 	else if(vt == FLT)
 		flt += rhs;
 	else if(vt == STR)
-		*this+=(DWORD) rhs;
+		*this+=(ulong) rhs;
 
 	return *this;
 }
@@ -315,7 +315,7 @@ int var::compare(const string& rhs) const
     return compare(tmp);
 }
 
-int var::compare(const DWORD& rhs) const
+int var::compare(const ulong& rhs) const
 {
 	var tmp(rhs);
 	return compare(tmp);
@@ -361,4 +361,25 @@ string var::strbuff(void)
 		return s;
 	} else
 		return str;
+}
+
+void var::resize(ulong newsize)
+{
+	if (vt==DW){
+		if (newsize==1) {
+			dw&=0xFF;
+		}
+		else if (newsize==2) {
+			dw&=0xFFFF;
+		}
+	} 
+	else if (vt==STR){
+		if (size > newsize) {
+			if (isbuf) {
+				*this = "#"+strbuff().substr(0,newsize)+"#";
+			} else {
+				*this = strbuff().substr(0,newsize);
+			}
+		}
+	}
 }

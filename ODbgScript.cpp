@@ -218,10 +218,11 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
 	//MRU Menu content, actions are 21..25
 		ZeroMemory(buff, sizeof(buff));
 		//strcpy(buff, "Run &Script{0 Open...|");
+		strcpy(buff, "0 Run &Script...|");
 		//mruGetMenu(&buff[strlen(buff)]);
 		strcpy(&buff[strlen(buff)],
-/*		"}|"
-		"1 Abort"
+		//"}|"
+/*		"1 Abort"
 		",2 Pause"
 		",3 Resume"
 		",4 Step"

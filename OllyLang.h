@@ -309,6 +309,7 @@ private:
 	string FormatAsmDwords(string asmLine);
 
 	DWORD AddProcessMemoryBloc(string data, int mode=PAGE_READWRITE);
+	DWORD AddProcessMemoryBloc(int size, int mode=PAGE_READWRITE);
 	bool  DelProcessMemoryBloc(DWORD address);
 
 	bool ExecuteASM(string command);

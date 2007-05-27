@@ -1965,7 +1965,18 @@ DWORD OllyLang::AddProcessMemoryBloc(string data, int mode)
 	DWORD pmem;
 
 	// Allocate memory for data
-	pmem = (DWORD) VirtualAllocEx(hDebugee, NULL, data.size(), MEM_COMMIT, PAGE_READWRITE);
+	pmem = (DWORD) VirtualAllocEx(hDebugee, NULL, data.size(), MEM_COMMIT, mode);
+
+	return pmem;
+}
+
+DWORD OllyLang::AddProcessMemoryBloc(int size, int mode)
+{
+	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+	DWORD pmem;
+
+	// Allocate memory for data
+	pmem = (DWORD) VirtualAllocEx(hDebugee, NULL, size, MEM_COMMIT, mode);
 
 	return pmem;
 }

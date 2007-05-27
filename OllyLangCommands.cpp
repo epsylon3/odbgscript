@@ -190,8 +190,6 @@ bool OllyLang::DoASM(string args)
 	{
 		cmd=FormatAsmDwords(cmd);
 
-		DoLOG("\""+cmd+"\"");
-
 		strcpy(buffer, cmd.c_str());
 		if((len = Assemble(buffer, addr, &model, 0, 1, error)) <= 0)
 		{
@@ -345,9 +343,11 @@ bool OllyLang::DoBEGINSEARCH(string args)
 
 bool OllyLang::DoENDSEARCH(string args)
 {
-	Havecopyofmemory(NULL,0,0);
-	delete [] search_buffer;
-	search_buffer=NULL;
+	if (search_buffer!=NULL) {
+		Havecopyofmemory(NULL,0,0);
+		delete [] search_buffer;
+		search_buffer=NULL;
+	}
 	return true;
 }
 
@@ -712,16 +712,25 @@ bool OllyLang::DoCMP(string args)
 	ulong dw1=0, dw2=0, size=0;
 	string s1, s2;
 
-//	if(!CreateOperands(args, ops, 3)) {
+	if(!CreateOperands(args, ops, 3)) {
 		if(!CreateOperands(args, ops, 2))
 			return false;
-//	} else {
-//		GetDWOpValue(ops[2], size);
-//	}
+	} else {
+		GetDWOpValue(ops[2], size);
+	}
 
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
+		if (size==1) {
+			dw1&=0xFF;
+			dw2&=0xFF;
+		}
+		else if (size==2) {
+			dw1&=0xFFFF;
+			dw2&=0xFFFF;
+		}
+
 		if(dw1 == dw2)
 		{
 			zf = 1;
@@ -739,10 +748,14 @@ bool OllyLang::DoCMP(string args)
 		}
 		return true;
 	}
-	else if(GetANYOpValue(ops[0], s1) 
-		    && GetANYOpValue(ops[1], s2))
+	else if(GetANYOpValue(ops[0], s1, true) // see also SCMP command, code is not finished here...
+		    && GetANYOpValue(ops[1], s2, true))
 	{
 		var v1=s1,v2=s2;
+		if (size>0) {
+			v1.resize(size);
+			v2.resize(size);
+		}
 		int res = v1.compare(v2); //Error if -2 (type mismatch)
 		if(res == 0)
 		{
@@ -1294,15 +1307,16 @@ bool OllyLang::DoFIND(string args)
 	return false;
 }
 
+//Buggy, could assemble different command code bytes, chinese idea
 bool OllyLang::DoFINDCMD(string args)
 {
 
 	string ops[2];
-	t_asmmodel model;
+	t_asmmodel model={0};
 	ulong addr;
 	string cmd,args1;
 	char buff[128]={0},opcode[64]={0},error[256]={0},tmp[64]={0};
-	int len;
+	int i,len,attempt=0,opsize=3;
 
 	if(!CreateOp(args, ops, 2))
 		return false;
@@ -1310,17 +1324,33 @@ bool OllyLang::DoFINDCMD(string args)
 	if (GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], cmd))
 	{
-         strcpy(buffer, cmd.c_str());
-		if((len = Assemble(buffer, addr, &model, 1, 3, error)) <= 0)
+		retry_alternative:
+
+		ulong tmpaddr=AddProcessMemoryBloc(0x100,PAGE_EXECUTE_READWRITE);
+
+        strcpy(buffer, cmd.c_str());
+		if((len = Assemble(buffer, tmpaddr, &model, attempt, opsize, error)) <= 0)
 		{
-			errorstr = "FINDCMD error!";
+			if (attempt!=0) {
+				DelProcessMemoryBloc(tmpaddr);
+				return true;
+			}
+
+			int pos=(cmd.length()+len);
+			if (pos>=0 && pos<cmd.length())
+				errorstr = "\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+			else
+				errorstr = "\nFINDCMD error !\n\n";
+			errorstr.append(error);
+			DelProcessMemoryBloc(tmpaddr);
 			return false;
 		}
 		else
 		{
 			sprintf(buff, "%s", (model.code));
 		}
-	    int i=0;
+
+	    i=0;
 		while(i<len)
 		{
 			itoa(buff[i],tmp,16);
@@ -1330,11 +1360,18 @@ bool OllyLang::DoFINDCMD(string args)
 
        args1 = ops[0] + ", " + "#" + opcode + "#";
 
-	   return DoFINDOP(args1);
+	   nIgnoreNextValuesHist=1;
+	   if (DoFINDOP(args1) && variables["$RESULT"].dw==0) {
+			attempt++;
+			goto retry_alternative;
+	   }
+
+	   DelProcessMemoryBloc(tmpaddr);
 	}
 	return false;
 }
 
+//Buggy, could assemble different command code bytes, chinese idea
 bool OllyLang::DoFINDCMDS(string args)
 {
 
@@ -1343,7 +1380,8 @@ bool OllyLang::DoFINDCMDS(string args)
 	ulong addr;
 	string cmds,args1,cmd;
 	char opcode[256]={0},buff[32]={0},tmp[64]={0},error[64]={0};
-	int len=0,length=0,startadr=0,endadr=0,lps=0,codelen=0;
+	int i,pos,len=0,length=0,startadr=0,endadr=0,lps=0,codelen=0;
+	int attempt=0,opsize=3;
 
 	if(!CreateOp(args, ops, 2))
 		return false;
@@ -1354,6 +1392,8 @@ bool OllyLang::DoFINDCMDS(string args)
 
 	  length = cmds.length();
  
+	  ulong tmpaddr=AddProcessMemoryBloc(0x100,PAGE_EXECUTE_READWRITE);
+
 	  while (len<length)
 	  {
 		endadr= cmds.find(";",startadr);
@@ -1365,16 +1405,23 @@ bool OllyLang::DoFINDCMDS(string args)
 		cmd=cmds.substr(startadr,lps);
        
 		strcpy(buffer, cmd.c_str());
-		if((codelen = Assemble(buffer, addr, &model, 1, 3, error)) <= 0)
+		if((codelen = Assemble(buffer, tmpaddr, &model, attempt, opsize, error)) <= 0)
 		{
-			errorstr = "FINDCMDS error!";
+			pos=(cmd.length()+codelen);
+			if (pos>=0 && pos<cmd.length())
+				errorstr = "\nFINDCMDS error on \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+			else
+				errorstr = "\nFINDCMDS error !\n\n";
+			errorstr.append(error);
+			DelProcessMemoryBloc(tmpaddr);
 			return false;
 		}
 		else
 		{
 			sprintf(buff, "%s", (model.code));
 		}
-		int i=0;
+
+		i=0;
 		while(i<codelen)
 		{
 			itoa(buff[i],tmp,16);
@@ -1385,6 +1432,7 @@ bool OllyLang::DoFINDCMDS(string args)
 		startadr=endadr+1;
 		len=len+lps+1;
 	  }
+	  DelProcessMemoryBloc(tmpaddr);
 
 	  args1 = ops[0] + ", " + "#" + opcode + "#";
 	  return DoFIND(args1);

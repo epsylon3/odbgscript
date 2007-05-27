@@ -57,6 +57,12 @@ BEGINSEARCH working ?
 
 2.1 What's new? 
 ---------------
+1.63 SVN
++ CMP size parameter, to compare byte/word values
++ Restored "Run Script" command in Ollydbg Main menu (without MRU)
+* ASM command was logged
+* FINDCMD(s) error report, assembled command is now in a free memory block
+
 1.62 (26 May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)
 + Added GCI parameter COMMAND to get asm command string (like OPCODE), SIZE, CONDITION, TYPE
@@ -625,13 +631,15 @@ Example:
 	buf s
 	log s // output "#313233#
 
-CMP dest, src
+CMP dest, src [,size]
 -------------
 Compares dest to src. Works like it's ASM counterpart.
-Works with strings too (case sensitive)
+see SCMP to compare strings or memory data
 Example: 
 	cmp y, x
 	cmp eip, 401000
+	je label
+	cmp cx, x, 2
 	je label
 
 CMT addr, text
@@ -771,15 +779,17 @@ Example:
 	find eip, #6A00E8# // find a PUSH 0 followed by some kind of call
 	find eip, #6A??E8# // find a PUSH 0 followed by some kind of call
 
-FINDCMD addr, cmd
------------------
+FINDCMD addr, cmdstr
+--------------------
 Assemble and search asm command
 Results are same than FIND Command
+Note:	Assembled code bytes could be multiples, it's not the best way to search for command
+		This Function could be updated in the future to search for text in disasm window.
 Example:
 	findcmd 401000, "nop"
 
-FINDCMDS addr, cmd
-------------------
+FINDCMDS addr, cmds
+-------------------
 Assemble and search asm serie of commands.
 Results are same than FIND Command
 Example:
@@ -1414,7 +1424,7 @@ with improvement ideas etc.
 
 R@dier for the great dumping engine.
 
-shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human
+shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong
 for ideas and bug report on the new ODbgScript
 
 And of course Olly for developing this great debugger!
