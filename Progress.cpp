@@ -354,7 +354,7 @@ void initProgTable() {
 	{
 		HICON ico=LoadIcon(hinstModule(),MAKEINTRESOURCE(IDI_ICON_SCRIPT)); 
 		SendMessage(ollylang->wndProg.hw,WM_SETICON,false,(long)ico); 
-		CloseHandle(ico);
+		//CloseHandle(ico);
 	}
 
 }

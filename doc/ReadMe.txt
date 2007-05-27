@@ -61,7 +61,7 @@ BEGINSEARCH working ?
 + CMP size parameter, to compare byte/word values
 + Restored "Run Script" command in Ollydbg Main menu (without MRU)
 * ASM command was logged
-* FINDCMD(s) error report, assembled command is now in a free memory block
+* FINDCMD(s) error report and code rewrite, now use Findallcommands ODBG API
 
 1.62 (26 May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)
@@ -781,17 +781,20 @@ Example:
 
 FINDCMD addr, cmdstr
 --------------------
-Assemble and search asm command
+Search asm command in Disasm Window
 Results are same than FIND Command
-Note:	Assembled code bytes could be multiples, it's not the best way to search for command
-		This Function could be updated in the future to search for text in disasm window.
+This function uses "Search For all Commands" Ollydbg so could find relative calls/jmp
+Warning: Reference Window is used and its content changed
+Uses FINDCMDS without ";" to search for different code bytes (but not really the next code position)
 Example:
-	findcmd 401000, "nop"
+	findcmd 401000, "push eax"
 
 FINDCMDS addr, cmds
 -------------------
 Assemble and search asm serie of commands.
 Results are same than FIND Command
+Try to use this command only for simple commands, assembly code bytes could be different.
+FINDCMDS doesn't search like FINDCMD, does not work with relative calls/jmp
 Example:
 	findcmds 401000, "nop;nop;nop"
 

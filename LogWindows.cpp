@@ -113,7 +113,7 @@ void initLogWindow() {
 	if (ollylang->wndLog.hw) {
 		HICON ico=LoadIcon(hinstModule(),MAKEINTRESOURCE(IDI_ICON_LOG)); 
 		SendMessage(ollylang->wndLog.hw,WM_SETICON,false,(long)ico);
-		CloseHandle(ico);
+//		CloseHandle(ico);
 	}
 }
 

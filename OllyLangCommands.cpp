@@ -1307,8 +1307,85 @@ bool OllyLang::DoFIND(string args)
 	return false;
 }
 
-//Buggy, could assemble different command code bytes, chinese idea
+//search for asm command in disasm window
 bool OllyLang::DoFINDCMD(string args)
+{
+	string ops[2];
+	if(!CreateOp(args, ops, 2))
+		return false;
+
+	string cmd;
+	ulong len,addr=0,base=0,size=0,attempt=0,opsize=3;
+	char error[256]={0};
+
+	Getdisassemblerrange(&base,&size);
+
+	t_table* tt;
+	ulong tmpaddr=AddProcessMemoryBloc(0x100,PAGE_EXECUTE_READWRITE);
+
+	if (GetDWOpValue(ops[0], addr) 
+		&& GetSTROpValue(ops[1], cmd))
+	{
+		if (addr<base || addr>=(base+size)) {
+			//outside debugger window range
+			goto return_false;
+		}
+
+		t_asmmodel model={0};
+
+		strcpy(buffer, cmd.c_str());
+		if((len = Assemble(buffer, tmpaddr, &model, attempt, opsize, error)) <= 0)
+		{
+			//if (attempt!=0) {
+			//	DelProcessMemoryBloc(tmpaddr);
+			//	return true;
+			//}
+
+			int pos=(cmd.length()+len);
+			if (pos>=0 && pos<cmd.length())
+				errorstr = "\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+			else
+				errorstr = "\nFINDCMD error !\n\n";
+			errorstr.append(error);
+			goto return_false;
+		}
+
+//MsgBox("2","");
+		t_dump* td;
+		td=(t_dump*) Plugingetvalue(VAL_CPUDASM);
+		if (td==NULL)
+				goto return_false;
+
+		variables["$RESULT"]=0;
+		if (Findallcommands(td,&model,addr,"FINDCMD")>0) {
+
+			tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
+			if (tt!=NULL) 
+			{
+
+				t_ref* tr;
+				if (tt->data.n > 1) { //for (int m=0; m < tt->data.n; m++) {
+				
+					tr=(t_ref*) Getsortedbyselection(&tt->data, 1); //0 is CPU initial
+					if (tr!=NULL)
+						variables["$RESULT"]=tr->addr;
+				}
+
+				if (tt->hw)
+					CloseWindow(tt->hw);
+			}
+			DelProcessMemoryBloc(tmpaddr);
+			return true;
+		}
+
+	}
+return_false:
+	DelProcessMemoryBloc(tmpaddr);
+	return false;
+}
+
+//Buggy, but try to to find any of assembled code bytes (not really the next one)
+bool OllyLang::DoFINDoneCMD(string args)
 {
 
 	string ops[2];
@@ -1338,9 +1415,9 @@ bool OllyLang::DoFINDCMD(string args)
 
 			int pos=(cmd.length()+len);
 			if (pos>=0 && pos<cmd.length())
-				errorstr = "\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+				errorstr = "\nFINDoneCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
 			else
-				errorstr = "\nFINDCMD error !\n\n";
+				errorstr = "\nFINDoneCMD error !\n\n";
 			errorstr.append(error);
 			DelProcessMemoryBloc(tmpaddr);
 			return false;
@@ -1371,7 +1448,7 @@ bool OllyLang::DoFINDCMD(string args)
 	return false;
 }
 
-//Buggy, could assemble different command code bytes, chinese idea
+//Buggy, could assemble different command code bytes, (from chinese code)
 bool OllyLang::DoFINDCMDS(string args)
 {
 
@@ -1389,6 +1466,12 @@ bool OllyLang::DoFINDCMDS(string args)
 	if (GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], cmds))
 	{
+
+	  if (cmds.find(";")==-1)
+	  {
+		nIgnoreNextValuesHist=1;
+		return DoFINDoneCMD(args);
+	  }
 
 	  length = cmds.length();
  

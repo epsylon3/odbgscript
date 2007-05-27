@@ -187,6 +187,7 @@ private:
 	bool DoFILL(string args);
 	bool DoFIND(string args);
 	bool DoFINDCMD(string args);
+	bool DoFINDoneCMD(string args);
 	bool DoFINDCMDS(string args);
 	bool DoFINDOP(string args);
 	bool DoFINDMEM(string args);
