@@ -62,6 +62,7 @@ BEGINSEARCH working ?
 + Restored "Run Script" command in Ollydbg Main menu (without MRU)
 * ASM command was logged
 * FINDCMD(s) error report and code rewrite, now use Findallcommands ODBG API
+* RET Script is reset after "Script finished" message, no more modal.
 
 1.62 (26 May 2007)
 + Indent/color ASM Blocks (EXEC/ENDE)

@@ -1518,6 +1518,7 @@ bool OllyLang::DoFINDCMDS(string args)
 	  DelProcessMemoryBloc(tmpaddr);
 
 	  args1 = ops[0] + ", " + "#" + opcode + "#";
+	  nIgnoreNextValuesHist=1;
 	  return DoFIND(args1);
 	}
 	return false;
@@ -1599,7 +1600,6 @@ bool OllyLang::DoFINDOP(string args)
 
 		do 
 		{
-
 			ulong nextaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
 //			endaddr = Disassembleforward(0, tmem->base, tmem->size, addr, 1, 0); 
 			ok = Readcommand(addr, cmd);
@@ -1932,6 +1932,7 @@ bool OllyLang::DoGMA(string args)
 				sMod.assign(tmod->name,SHORTLEN);
 				if (stricmp(sMod.c_str(),str.c_str())==0) {
 					Int2Hex(tmem->base, str);
+					nIgnoreNextValuesHist=1;
 					return DoGMI(str+","+ops[1]);		
 				}
 			}
@@ -3590,8 +3591,10 @@ bool OllyLang::DoRESET(string args)
 
 bool OllyLang::DoRET(string args)
 {
+	//MsgBox("Script finished", "ODbgScript");
+	MessageBox(0, "Script finished", "ODbgScript", MB_ICONINFORMATION | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
 	Reset();
-	MessageBox(hwmain, "Script finished", "ODbgScript", MB_ICONINFORMATION | MB_OK | MB_TOPMOST);
+	//hwmain
 	return true;
 }
 
