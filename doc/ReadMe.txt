@@ -58,6 +58,7 @@ BEGINSEARCH working ?
 2.1 What's new? 
 ---------------
 1.63 SVN
++ Added ASM third parameter to get alternative code bytes.
 + GREF command to get Addresses from Reference Window (for FINDCMD, FINDCMDS)
 + CMP size parameter, to compare byte/word values
 + Restored "Run Script" command in Ollydbg Main menu (without MRU)
