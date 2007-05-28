@@ -1314,52 +1314,90 @@ bool OllyLang::DoFINDCMD(string args)
 	if(!CreateOp(args, ops, 2))
 		return false;
 
-	string cmd;
-	ulong len,addr=0,base=0,size=0,attempt=0,opsize=3;
+	bool bRefVisible=false,bResetDisam=false;
+	string cmd, cmds;
+	int len,pos;
+	ulong addr=0,base=0,size=0,attempt,opsize=3,disamsel=0;
+	int startadr=0,endadr=0,lps=0,length,ncmd=0,cmdpos=0;
 	char error[256]={0};
 
 	Getdisassemblerrange(&base,&size);
 
+	//Get initial Ref Window State
 	t_table* tt;
+	tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
+	if (tt!=NULL)
+		bRefVisible=(tt->hw!=0);
+
+	t_dump* td;
+	td=(t_dump*) Plugingetvalue(VAL_CPUDASM);
+	if (td==NULL)
+		return false;
+
 	ulong tmpaddr=AddProcessMemoryBloc(0x100,PAGE_EXECUTE_READWRITE);
 
 	if (GetDWOpValue(ops[0], addr) 
-		&& GetSTROpValue(ops[1], cmd))
+		&& GetSTROpValue(ops[1], cmds))
 	{
 		if (addr<base || addr>=(base+size)) {
 			//outside debugger window range
-			goto return_false;
+			disamsel=td->sel0;
+			Setdisasm(addr,0,0);
+			bResetDisam=true;
 		}
 
 		t_asmmodel model={0};
+		t_extmodel models[NSEQ][NMODELS]={0};
 
-		strcpy(buffer, cmd.c_str());
-		if((len = Assemble(buffer, tmpaddr, &model, attempt, opsize, error)) <= 0)
+		length = cmds.length();
+		while (cmdpos<length && ncmd<NSEQ)
 		{
-			//if (attempt!=0) {
-			//	DelProcessMemoryBloc(tmpaddr);
-			//	return true;
-			//}
 
-			int pos=(cmd.length()+len);
-			if (pos>=0 && pos<cmd.length())
-				errorstr = "\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
-			else
-				errorstr = "\nFINDCMD error !\n\n";
-			errorstr.append(error);
-			goto return_false;
+			endadr= cmds.find(";",startadr);
+			if (endadr==-1)
+			{
+				endadr=length;
+			}
+			lps=endadr-startadr;
+
+			cmd=cmds.substr(startadr,lps);
+			
+			attempt=0;
+			strcpy(buffer, cmd.c_str());
+
+			do {
+
+				if((len = Assemble(buffer, tmpaddr, &model, attempt, opsize, error)) <= 0)
+				{
+					if (attempt!=0) {
+						break;
+					}
+
+					pos=(cmd.length()+len);
+					if (pos>=0 && pos<cmd.length())
+						errorstr = "\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+					else
+						errorstr = "\nFINDCMD error !\n\n";
+					errorstr.append(error);
+					goto return_false;
+				}
+				memcpy(&models[ncmd][attempt],&model,sizeof(model));
+				attempt++;
+
+			} while (len>0 && attempt<NMODELS);
+
+			startadr=endadr+1;
+			cmdpos+=lps+1;
+
+			ncmd++;
 		}
 
-//MsgBox("2","");
-		t_dump* td;
-		td=(t_dump*) Plugingetvalue(VAL_CPUDASM);
-		if (td==NULL)
-				goto return_false;
-
 		variables["$RESULT"]=0;
-		if (Findallcommands(td,&model,addr,"FINDCMD")>0) {
+		if (Findallsequences(td,models,addr,NULL)>0) {
+			
+			if (tt==NULL)
+				tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
 
-			tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
 			if (tt!=NULL) 
 			{
 
@@ -1371,83 +1409,26 @@ bool OllyLang::DoFINDCMD(string args)
 						variables["$RESULT"]=tr->addr;
 				}
 
-				if (tt->hw)
-					CloseWindow(tt->hw);
+				if (tt->hw && !bRefVisible) {
+					//CloseWindow(tt->hw);
+					DestroyWindow(tt->hw);
+					tt->hw=0;
+				}
 			}
-			DelProcessMemoryBloc(tmpaddr);
-			return true;
 		}
+		DelProcessMemoryBloc(tmpaddr);
+		if (bResetDisam)
+			Setdisasm(disamsel,0,0);
+		return true;
 
 	}
 return_false:
+	if (bResetDisam)
+		Setdisasm(disamsel,0,0);
 	DelProcessMemoryBloc(tmpaddr);
 	return false;
 }
-
-//Buggy, but try to to find any of assembled code bytes (not really the next one)
-bool OllyLang::DoFINDoneCMD(string args)
-{
-
-	string ops[2];
-	t_asmmodel model={0};
-	ulong addr;
-	string cmd,args1;
-	char buff[128]={0},opcode[64]={0},error[256]={0},tmp[64]={0};
-	int i,len,attempt=0,opsize=3;
-
-	if(!CreateOp(args, ops, 2))
-		return false;
-
-	if (GetDWOpValue(ops[0], addr) 
-		&& GetSTROpValue(ops[1], cmd))
-	{
-		retry_alternative:
-
-		ulong tmpaddr=AddProcessMemoryBloc(0x100,PAGE_EXECUTE_READWRITE);
-
-        strcpy(buffer, cmd.c_str());
-		if((len = Assemble(buffer, tmpaddr, &model, attempt, opsize, error)) <= 0)
-		{
-			if (attempt!=0) {
-				DelProcessMemoryBloc(tmpaddr);
-				return true;
-			}
-
-			int pos=(cmd.length()+len);
-			if (pos>=0 && pos<cmd.length())
-				errorstr = "\nFINDoneCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
-			else
-				errorstr = "\nFINDoneCMD error !\n\n";
-			errorstr.append(error);
-			DelProcessMemoryBloc(tmpaddr);
-			return false;
-		}
-		else
-		{
-			sprintf(buff, "%s", (model.code));
-		}
-
-	    i=0;
-		while(i<len)
-		{
-			itoa(buff[i],tmp,16);
-			i++;
-			strcat(opcode,tmp);
-		}
-
-       args1 = ops[0] + ", " + "#" + opcode + "#";
-
-	   nIgnoreNextValuesHist=1;
-	   if (DoFINDOP(args1) && variables["$RESULT"].dw==0) {
-			attempt++;
-			goto retry_alternative;
-	   }
-
-	   DelProcessMemoryBloc(tmpaddr);
-	}
-	return false;
-}
-
+/*
 //Buggy, could assemble different command code bytes, (from chinese code)
 bool OllyLang::DoFINDCMDS(string args)
 {
@@ -1523,6 +1504,7 @@ bool OllyLang::DoFINDCMDS(string args)
 	}
 	return false;
 }
+*/
 
 bool OllyLang::DoFINDOP(string args)
 {
@@ -2367,6 +2349,38 @@ bool OllyLang::DoGPP(string args)
 		}
 	}
 	return true;
+}
+
+//Get Reference Window Address at Offset
+bool OllyLang::DoGREF(string args)
+{
+	string ops[1];
+	ulong line;
+
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	if(GetDWOpValue(ops[0], line))
+	{
+		t_table* tt;
+		tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
+		if (tt!=NULL) 
+		{
+			if (tt->data.n > line) {
+			
+				t_ref* tr;
+				tr=(t_ref*) Getsortedbyselection(&tt->data, line); //0 is CPU initial
+				if (tr!=NULL)
+					variables["$RESULT"]=tr->addr;
+			}
+			else
+			{
+				variables["$RESULT"] = 0;
+			}
+			return true;
+		}
+	}
+	return false;
 }
 
 //Get Relative Offset
@@ -3937,9 +3951,9 @@ bool OllyLang::DoTICK(string args)
 	GetDWOpValue(ops[1], timeref);
 
 	if (is_variable(ops[0])) {
-		variables[ops[0]] = this->tickcount;
+		variables[ops[0]] = tickcount;
 		if (timeref)
-			variables["$RESULT"]=this->tickcount-timeref;
+			variables["$RESULT"]=tickcount-timeref;
 		return true;
 	}
 	return false;

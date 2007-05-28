@@ -187,7 +187,6 @@ private:
 	bool DoFILL(string args);
 	bool DoFIND(string args);
 	bool DoFINDCMD(string args);
-	bool DoFINDoneCMD(string args);
 	bool DoFINDCMDS(string args);
 	bool DoFINDOP(string args);
 	bool DoFINDMEM(string args);
@@ -204,6 +203,7 @@ private:
 	bool DoGPA(string args);
 	bool DoGPP(string args);
 	bool DoGPI(string args);
+	bool DoGREF(string args);
 	bool DoGRO(string args);
 	bool DoHANDLE(string args);
 	bool DoHISTORY(string args);

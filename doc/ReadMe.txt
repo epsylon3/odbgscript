@@ -58,10 +58,11 @@ BEGINSEARCH working ?
 2.1 What's new? 
 ---------------
 1.63 SVN
++ GREF command to get Addresses from Reference Window (for FINDCMD, FINDCMDS)
 + CMP size parameter, to compare byte/word values
 + Restored "Run Script" command in Ollydbg Main menu (without MRU)
 * ASM command was logged
-* FINDCMD(s) error report and code rewrite, now use Findallcommands ODBG API
+* Rewrote FINDCMD(S), now use Findallsequences ODBG API, FINDCMD=FINDCMDS
 * RET Script is reset after "Script finished" message, no more modal.
 
 1.62 (26 May 2007)
@@ -782,22 +783,21 @@ Example:
 
 FINDCMD addr, cmdstr
 --------------------
-Search asm command in Disasm Window
-Results are same than FIND Command
-This function uses "Search For all Commands" Ollydbg so could find relative calls/jmp
+Search for asm command
+This command uses "Search for All Sequences" Ollydbg function so could find relative calls/jmp
 Warning: Reference Window is used and its content changed
-Uses FINDCMDS without ";" to search for different code bytes (but not really the next code position)
+You can use GREF to get next results in disasm window range
 Example:
 	findcmd 401000, "push eax"
+	msg $RESULT
 
 FINDCMDS addr, cmds
 -------------------
-Assemble and search asm serie of commands.
-Results are same than FIND Command
-Try to use this command only for simple commands, assembly code bytes could be different.
-FINDCMDS doesn't search like FINDCMD, does not work with relative calls/jmp
+Same as FINDCMD
+Search asm serie of commands.
 Example:
 	findcmds 401000, "nop;nop;nop"
+	msg $RESULT
 
 FINDOP addr, what
 -----------------
@@ -927,6 +927,16 @@ GPI key
 -------
 Gets process information, one of :
 HPROCESS,PROCESSID,HMAINTHREAD,MAINTHREADID,MAINBASE,PROCESSNAME,EXEFILENAME,CURRENTDIR,SYSTEMDIR
+
+GREF line
+---------
+Get Address from Reference Window at Line
+Example:
+	FINDCMD "push eax"
+	GREF 1
+	msg $RESULT
+	GREF 2
+	msg $RESULT
 
 GRO addr
 --------

@@ -102,7 +102,7 @@ OllyLang::OllyLang()
 	commands["fill"] = &OllyLang::DoFILL;
 	commands["find"] = &OllyLang::DoFIND;
 	commands["findcmd"] = &OllyLang::DoFINDCMD;
-	commands["findcmds"] = &OllyLang::DoFINDCMDS;
+	commands["findcmds"] = &OllyLang::DoFINDCMD;
 	commands["findop"] = &OllyLang::DoFINDOP;
 	commands["findmem"] = &OllyLang::DoFINDMEM;
 	commands["free"] = &OllyLang::DoFREE;
@@ -119,6 +119,7 @@ OllyLang::OllyLang()
 	commands["gpi"] = &OllyLang::DoGPI;
 	commands["gpp"] = &OllyLang::DoGPP;
 	commands["gro"] = &OllyLang::DoGRO;
+	commands["gref"] = &OllyLang::DoGREF;
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["inc"] = &OllyLang::DoINC;
@@ -448,6 +449,8 @@ bool OllyLang::Reset()
 	pgr_scriptpos = script_pos+1; 
 	resetProgLines();
 	tickcount_startup=0;
+	tickcount=0;
+	tickcounthi=0;
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;
