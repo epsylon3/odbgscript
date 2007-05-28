@@ -2366,7 +2366,7 @@ bool OllyLang::DoGREF(string args)
 		tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
 		if (tt!=NULL) 
 		{
-			if (tt->data.n > line) {
+			if (line < tt->data.n) {
 			
 				t_ref* tr;
 				tr=(t_ref*) Getsortedbyselection(&tt->data, line); //0 is CPU initial
@@ -4024,6 +4024,23 @@ bool OllyLang::DoTOCND(string args)
 	return false;
 }
 
+
+bool OllyLang::DoUNICODE(string args)
+{
+	string ops[1];
+	ulong dw;
+
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	if(GetDWOpValue(ops[0], dw)) {
+		bUnicode=(dw!=0);
+		return true;
+	}
+
+	return false;
+}
+
 bool OllyLang::DoVAR(string args)
 {
 	string ops[1];
@@ -4087,9 +4104,8 @@ bool OllyLang::DoWRT(string args)
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-    char spath[MAX_PATH];
-    strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-    string path = spath;
+    string path;
+	path.assign((char*)Plugingetvalue(VAL_EXEFILENAME));
 
     path = path.substr(0, path.rfind('\\') + 1);
  
@@ -4128,9 +4144,8 @@ bool OllyLang::DoWRTA(string args)
 			return false;
 	}
 	
-    char spath[MAX_PATH];
-    strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-    string path = spath;
+    string path;
+	path.assign((char*)Plugingetvalue(VAL_EXEFILENAME));
 
     path = path.substr(0, path.rfind('\\') + 1);
 

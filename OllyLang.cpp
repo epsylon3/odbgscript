@@ -186,6 +186,7 @@ OllyLang::OllyLang()
 	commands["to"] = &OllyLang::DoTO;
 	commands["tocnd"] = &OllyLang::DoTOCND;
 	commands["ubp"] = &OllyLang::DoBP;
+	commands["unicode"] = &OllyLang::DoUNICODE;
 	commands["var"] = &OllyLang::DoVAR;
 	commands["xor"] = &OllyLang::DoXOR;
 	commands["xchg"] = &OllyLang::DoXCHG;
@@ -207,6 +208,7 @@ OllyLang::OllyLang()
 	hwndinput = 0;
 
 	showVarHistory=true;
+	bUnicode=false;
 }
 
 OllyLang::~OllyLang()

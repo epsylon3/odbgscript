@@ -91,6 +91,8 @@ private:
 	// Possible flag names
 	set<string> flag_names;
 
+	bool bUnicode;
+
 	union eflags
 	{
 		DWORD dwFlags;
@@ -266,6 +268,7 @@ private:
 	bool DoTICND(string args);
 	bool DoTO(string args);
 	bool DoTOCND(string args);
+	bool DoUNICODE(string args);
 	bool DoVAR(string args);
 	bool DoXOR(string args);
 	bool DoXCHG(string args);

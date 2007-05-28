@@ -61,8 +61,9 @@ BEGINSEARCH working ?
 + GREF command to get Addresses from Reference Window (for FINDCMD, FINDCMDS)
 + CMP size parameter, to compare byte/word values
 + Restored "Run Script" command in Ollydbg Main menu (without MRU)
++ Added UNICODE (0/1) command to set Unicode Mode (for future unicode support)
 * ASM command was logged
-* Rewrote FINDCMD(S), now use Findallsequences ODBG API, FINDCMD=FINDCMDS
+* Rewrote FINDCMD(S), now use Findallsequences ODBG API, can use R8, R16, R32 keywords
 * RET Script is reset after "Script finished" message, no more modal.
 
 1.62 (26 May 2007)
@@ -783,21 +784,30 @@ Example:
 
 FINDCMD addr, cmdstr
 --------------------
-Search for asm command
+Search for asm command(s), you can search for series also with ";" separator.
 This command uses "Search for All Sequences" Ollydbg function so could find relative calls/jmp
 Warning: Reference Window is used and its content changed
 You can use GREF to get next results in disasm window range
-Example:
-	findcmd 401000, "push eax"
+
+Example 1:
+	mov line,1
+	findcmd eip, "xor R32,R32"
+  next:
+	gref line
+	cmp $RESULT,0
+	je finished
+	inc line
+	jmp next
+  finished:
+
+Example 2:
+	findcmd 401000, "nop;nop;nop"
 	msg $RESULT
 
-FINDCMDS addr, cmds
--------------------
+
+FINDCMDS (this function name could be deleted in future versions)
+--------
 Same as FINDCMD
-Search asm serie of commands.
-Example:
-	findcmds 401000, "nop;nop;nop"
-	msg $RESULT
 
 FINDOP addr, what
 -----------------
@@ -1174,7 +1184,7 @@ Example:
 
 REPL addr, find, repl, len
 --------------------------
-Replace find with repl starting att addr for len bytes.
+Replace "find" with "repl" starting at "addr" for "len" bytes.
 Wildcards are allowed
 Example:
 	repl eip, #6a00#, #6b00#, 10
@@ -1187,20 +1197,20 @@ Exits script.
 Example:
 	ret
 
-REV
----
+REV what
+--------
 Reverse dword bytes.
 Example:
 	rev 01020304
 	//$RESULT = 04030201
 
 ROL op, count
-------
+-------------
 Assembly Operation "rol eax, cl"
 save in the target (first) operand.
 
 ROR op, count
-------
+-------------
 Assembly Operation "ror eax, cl"
 Example:
 	mov x, 00000010
@@ -1220,7 +1230,7 @@ Example:
 
 RUN
 ---
-Executes F9 in OllyDbg
+Executes F9 in OllyDbg, you can also use ERUN to ignore exceptions
 Example:
 	run
 
@@ -1242,9 +1252,8 @@ Example:
 
 SETOPTION
 ---------
-Chinese Translated :
-Assigns out the debugging to set the (Option) menu, after setting, after determination continues to execute the script
-Notice: This option is for may in execute in the script process to be possible to assign out the debugging setting to be unusual, track and so on setting
+Open the OllyDBG Options Window, to change debugging parameters.
+Script will continue on close.
 
 SHL dest, src
 -------------
@@ -1332,6 +1341,13 @@ Traces over calls until cond is true
 Example:
 	tocnd "eip > 40100A" // will stop when eip > 40100A
 
+UNICODE enable
+--------------
+Set Unicode Mode, not used for the moment
+Example: 
+	UNICODE 1
+	...
+
 VAR
 ---
 Declare a variable to be used in the script.
@@ -1366,6 +1382,7 @@ Example:
 	wrta sFile, ABCD, ""
 	wrta sFile, "Windows CR, "\r\n"
 
+
 3.2 Labels
 ----------
 Labels are defined bu using the label name followed by a colon.
@@ -1394,7 +1411,6 @@ and see progression of your script.
 You can set script breakpoints, debug the script, edit variables and also 
 execute commands manually.
 
-------------------------------
 
 4. Integration with other plugins
 ---------------------------------
@@ -1410,16 +1426,14 @@ if(hMod) // Check that the other plugin is present and loaded
 		pFunc("myscript.txt"); // Execute exported function
 }
 
-------------------------------
 
 5. Contact us
 -------------
 To contact us you can post your question in the forum or go on IRC 
 and message Epsylon3 or SHaG on EFnet. 
 
-You can also mail SHaG to shag-at-apsvans-dot-com.
+You can also use Sourceforge.net Forums or Bug Trackers
 
-------------------------------
 
 6. License and source code
 --------------------------
@@ -1429,7 +1443,6 @@ you see fit. However please name me in your documentation/about box and if
 the project you need my code for is on a larger scale please also notify 
 me - I am curious.
 
-------------------------------
 
 7. Thanks!
 ----------
@@ -1441,6 +1454,5 @@ R@dier for the great dumping engine.
 shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong
 for ideas and bug report on the new ODbgScript
 
-And of course Olly for developing this great debugger!
+And of course Olly for this great debugger!
 
-------------------------------
