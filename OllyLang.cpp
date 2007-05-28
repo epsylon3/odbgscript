@@ -1392,8 +1392,9 @@ bool OllyLang::GetAddrOpValue(string op, DWORD &value)
         return true;
 }
 
-bool OllyLang::GetDWOpValue(string op, DWORD &value)
+bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 {
+	value=default_val;
 
 	if(is_register(op))
 	{

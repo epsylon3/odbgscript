@@ -174,14 +174,14 @@ bool OllyLang::DoASK(string args)
 
 bool OllyLang::DoASM(string args)
 {
-	string ops[2];
+	string ops[3],cmd;
+	ulong addr, attempt=0;
 
-	if(!CreateOperands(args, ops, 2))
-		return false;
+	if(!CreateOperands(args, ops, 3))
+		if(!CreateOperands(args, ops, 2))
+			return false;
 
-	t_asmmodel model;
-	ulong addr;
-	string cmd;
+	t_asmmodel model={0};
 	char error[255] = {0};
 	int len = 0;
 
@@ -190,8 +190,10 @@ bool OllyLang::DoASM(string args)
 	{
 		cmd=FormatAsmDwords(cmd);
 
+		GetDWOpValue(ops[2], attempt);
+
 		strcpy(buffer, cmd.c_str());
-		if((len = Assemble(buffer, addr, &model, 0, 1, error)) <= 0)
+		if((len = Assemble(buffer, addr, &model, attempt, 3, error)) <= 0)
 		{
 			errorstr = error;
 			return false;

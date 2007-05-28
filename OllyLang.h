@@ -284,7 +284,7 @@ private:
 	bool CreateOperands(string& args, string ops[], uint len, bool preferstr=false);
 	bool CreateOp(string& args, string ops[], uint len, bool preferstr=false);
 	bool GetBYTEOpValue(string op, BYTE &value);
-	bool GetDWOpValue(string op, DWORD &value);
+	bool GetDWOpValue(string op, DWORD &value, DWORD default_val=0);
 	bool GetAddrOpValue(string op, DWORD &value);
 	bool GetFLTOpValue(string op, long double &value);
 	bool GetSTROpValue(string op, string &value, int size=0);

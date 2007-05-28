@@ -492,9 +492,10 @@ Example:
 	je cancel_pressed
 	mov eip, $RESULT
 	
-ASM addr, command
------------------
-Assemble a command at some address.
+ASM addr, command [,version]
+----------------------------
+Assemble a command at some address. 
+Change version number (0,1,...) to get alternative code bytes, if possible.
 Returns bytes assembled in the reserved $RESULT variable
 Example:
 	asm eip, "mov eax, ecx"
