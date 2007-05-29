@@ -515,6 +515,7 @@ bool OllyLang::Reset()
 {
 	variables.clear();
 	bpjumps.clear();
+	calls.clear();
 	char s[10] = {0};
 	sprintf(s,"%i.%i", VERSIONHI, VERSIONLO);
 	string str(s);
