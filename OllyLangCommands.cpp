@@ -192,8 +192,7 @@ bool OllyLang::DoASM(string args)
 
 		GetDWOpValue(ops[2], attempt);
 
-		strcpy(buffer, cmd.c_str());
-		if((len = Assemble(buffer, addr, &model, attempt, 3, error)) <= 0)
+		if((len = Assemble((char*) cmd.c_str(), addr, &model, attempt, 3, error)) <= 0)
 		{
 			errorstr = error;
 			return false;
@@ -224,6 +223,7 @@ bool OllyLang::DoASMTXT(string args)
     char buff[128]={0},opcode[4096]={0},error[256]={0};
 	long len = 0,lens = 0,line = 0;
 	ulong addr;
+	int ii;
 
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1],asmfile))
@@ -239,12 +239,12 @@ bool OllyLang::DoASMTXT(string args)
 			{
 				line++;
 				asmline=FormatAsmDwords(asmline);
-				len=Assemble((char*)asmline.c_str(), 0, &model, 0, 1, error);                     
-				int ii = sprintf(buff, "%s", (model.code));
+				len=Assemble((char*) asmline.c_str(), 0, &model, 0, 3, error);                     
+				ii = sprintf(buff, "%s", (model.code));
 				strncat(opcode,buff,len);
 				lens = (lens + len);
 			} 
-			Writememory(opcode, addr, lens, MM_SILENT|MM_DELANAL);
+			Writememory(opcode, addr, lens, MM_DELANAL);
 			Broadcast(WM_USER_CHALL, 0, 0);
 			variables["$RESULT"] = lens;
 			variables["$RESULT_1"] = line;
@@ -3961,7 +3961,7 @@ bool OllyLang::DoTICK(string args)
 	string ops[2];
 	if(!CreateOperands(args, ops, 2))
 		if(args=="" || !CreateOperands(args, ops, 1)) {
-			char tmpbuf[256];
+			char tmpbuf[256]={0};
 			sprintf(tmpbuf,"%u ms",this->tickcount/1000);
 			string s; s.assign(tmpbuf);
 			variables["$RESULT"]=s;
@@ -3972,7 +3972,7 @@ bool OllyLang::DoTICK(string args)
 		DoVAR(ops[0]);
 	}
 
-	ulong timeref=0;
+	ulong timeref;
 	GetDWOpValue(ops[1], timeref);
 
 	if (is_variable(ops[0])) {

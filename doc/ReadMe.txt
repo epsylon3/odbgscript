@@ -57,13 +57,14 @@ BEGINSEARCH working ?
 
 2.1 What's new? 
 ---------------
-1.63 SVN
+1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size
 + Added ASM third parameter to get alternative code bytes.
 + GREF command to get Addresses from Reference Window (for FINDCMD, FINDCMDS)
 + CMP size parameter, to compare byte/word values
 + Restored "Run Script" command in Ollydbg Main menu (without MRU)
 + Added UNICODE (0/1) command to set Unicode Mode (for future unicode support)
+* First TICK value fixed
 * ASM command was logged
 * Rewrote FINDCMD(S), now use Findallsequences ODBG API, can use R8, R16, R32 keywords
 * RET Script is reset after "Script finished" message, no more modal.

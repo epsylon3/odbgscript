@@ -544,10 +544,16 @@ bool OllyLang::Step(int forceStep)
 		
 			// Command found, execute it
 			func = commands[command];
-			//i64 = MyGetTickCount(0);
 			old_pos = script_pos;
+
+			if (command=="tick") {
+				//for first tick.
+				i64 = MyGetTickCount(tickcount_startup);
+				this->tickcount = i64.LowPart;
+				this->tickcounthi = i64.HighPart;
+			}
+
 			result = (this->*func)(args);
-			//i64.QuadPart = MyGetTickCount(i64.QuadPart);
 			i64 = MyGetTickCount(tickcount_startup);
 			this->tickcount = i64.LowPart;
 			this->tickcounthi = i64.HighPart;
