@@ -70,6 +70,10 @@ public:
 	bool OnBreakpoint(int reason, int details);
 	bool OnException(DWORD ExceptionCode);
 
+	// For ODBG_Plugincmd (external calls)
+	bool isCommand(string cmd);
+	bool callCommand(string cmd, string args);
+
 	// The script that is being executed
 	vector<string> script;
 	// Variables that exist

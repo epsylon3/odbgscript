@@ -2142,4 +2142,23 @@ bool OllyLang::ExecuteASM(string command) //NOT FINISHED
 	return true;
 }
 
+
+bool OllyLang::isCommand(string cmd)
+{
+	return (commands.find(cmd) != commands.end());
+}
+
+bool OllyLang::callCommand(string cmd, string args)
+{
+	if(commands.find(cmd) != commands.end())
+	{
+		// Command found, execute it
+		PFCOMMAND func = commands[cmd];
+
+		return (this->*func)(args);
+	}
+	return false;
+}
+
+
 #include "OllyLangCommands.cpp"

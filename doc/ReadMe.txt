@@ -50,14 +50,16 @@ The development of the plugin has been a bit slow, I've got a job programming xr
 which has taken a lot of time. Sorry about that.
 
 TODO:
-Memory BP reason
+Memory BP reason (to enhance)
 BEGINSEARCH working ?
 More Search Reference commands
+Get Trace Addr
 
 2.1 What's new? 
 ---------------
 1.64 (SVN)
-+ Added CALL command to call Labels (use RET to return)
++! Added ability to call ODBGScript command(s) from OllyDbg Conditional Log Breakpoints
++! Added CALL command to call Labels (use RET to return)
 + Added GBPM command to get last memory breakpoint address, beta function affected on GBPR call
 + Script keeps breakpoints on reload if bp script lines were not modified.
 + Edit script line (to do temporary fix, not saved on disk)

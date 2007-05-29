@@ -531,10 +531,21 @@ reg - pointer to registers of thread that caused application to pause, may be NU
 cmd - null-terminated command to plugin.
 */
 {
-#ifdef _DEBUG
-			Addtolist(0, -1, cmd);
-			return 0;
-#endif
+	if (reason!=PP_EVENT)
+		return 0;
+
+	int p;
+	string scmd,args;
+	scmd.assign(cmd);
+	if ((p=scmd.find_first_of(" \t\r\n"))!=string::npos) {
+		args=trim(scmd.substr(p+1));
+		scmd=trim(scmd.substr(0,p));
+	}
+	if (ollylang->isCommand(scmd)) {
+		ollylang->callCommand(scmd,args);
+		return 1;
+	}
+
 	return 0; //dont stop to other plugins
 }
 
