@@ -226,6 +226,7 @@ private:
 	bool DoLOG(string args);
 	bool DoLOGBUF(string args);
     bool DoLM(string args);
+	bool DoMEMCOPY(string args);
 	bool DoMOV(string args);
 	bool DoMSG(string args);
 	bool DoMSGYN(string args);

@@ -58,6 +58,7 @@ BEGINSEARCH working ?
 2.1 What's new? 
 ---------------
 1.63 SVN
++ Added MEMCPY function, and optimized MOV [dst],[src],size
 + Added ASM third parameter to get alternative code bytes.
 + GREF command to get Addresses from Reference Window (for FINDCMD, FINDCMDS)
 + CMP size parameter, to compare byte/word values
@@ -1075,8 +1076,8 @@ LOGBUF var [,linecount [,separator]]
 ------------------------------------
 Logs a string or buffer like a memory dump, usefull for long data
 
-MOV dest, src [,maxsize]
--------------
+MOV dest, src [,size]
+---------------------
 Move src to dest.
 Src can be a long hex string in the format #<some hex numbers>#, for example #1234#.
 Remember that the number of digits in the hex string must be even, i.e. 2, 4, 6, 8 etc.
@@ -1088,6 +1089,21 @@ Example:
 	mov !CF, 1
 	mov !DF, !PF
 	mov [403000], "Hello world"
+
+MEMCPY dest,src,size
+--------------------
+Copy app. memory from "src" address to "dst" address.
+This function is same as mov [dst],[src],size
+Example: 
+	gma "OLE32",CODEBASE
+	mov base, $RESULT
+	gma "OLE32",CODESIZE
+	mov size, $RESULT
+	alloc size
+	mov dst, $RESULT
+	MEMCPY dst,base,size
+	...
+	free dst
 
 MSG message
 -----------

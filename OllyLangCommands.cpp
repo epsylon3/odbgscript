@@ -2870,6 +2870,18 @@ bool OllyLang::DoLOGBUF(string args)
 	return false;
 }
 
+bool OllyLang::DoMEMCOPY(string args)
+{
+	string ops[3];
+
+	if(!CreateOperands(args, ops, 3))
+		return false;
+
+	args="["+ops[0]+"],["+ops[1]+"],"+ops[2];
+
+	return DoMOV(args);
+}
+
 bool OllyLang::DoMOV(string args)
 {
 	string ops[3];
@@ -3044,22 +3056,33 @@ bool OllyLang::DoMOV(string args)
 	else if(UnquoteString(ops[0], '[', ']'))
 	{
 		// Dest is memory address
-		//int len;
-		if(tmpops.find('+')!=-1)
-		{
-		    GetAddrOpValue(tmpops,addr);
-			goto ok;                     //jmp ok
-		}
 		if(GetDWOpValue(ops[0], addr))
-		{
-ok:
+		{ 
 			if (addr==0)
 			{
 				DoLOG("\"WARNING: writing to address 0 !\"");
 				return true;
 			}
 
-			if (GetDWOpValue(ops[1], dw) && maxsize <= 4)
+			tmpops=ops[1];
+			if (maxsize > 128 && UnquoteString(ops[1], '[', ']'))
+			{
+				//Optimized Mem Copy
+				ulong src;
+				if (!GetDWOpValue(ops[1], src) || src==0) {
+					DoLOG("\"WARNING: copy from address 0 !\"");
+					return true;
+				}
+				char* copybuffer= new char[maxsize];
+				if (maxsize != Readmemory((void*) copybuffer, src, maxsize, MM_RESTORE)) {
+					delete[] copybuffer;
+					return false;
+				}
+				Writememory((void*) copybuffer, addr, maxsize, MM_DELANAL);
+				delete[] copybuffer;
+				Broadcast(WM_USER_CHALL, 0, 0);
+			}
+			else if (GetDWOpValue(ops[1], dw) && maxsize <= 4)
 			{
 				if (maxsize==0) maxsize=4;
 				dw = resizeDW(dw,maxsize);
