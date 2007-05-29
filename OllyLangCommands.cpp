@@ -1765,6 +1765,12 @@ bool OllyLang::DoGAPI(string args)
     return false;
 }
 
+bool OllyLang::DoGBPM(string args)
+{
+	variables["$RESULT"]=break_memaddr;
+	return true;
+}
+
 //Get Breakpoint Reason
 bool OllyLang::DoGBPR(string args)
 {

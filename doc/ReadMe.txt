@@ -58,6 +58,7 @@ More Search Reference commands
 ---------------
 1.64 (SVN)
 + Added CALL command to call Labels (use RET to return)
++ Added GBPM command to get last memory breakpoint address, beta function affected on GBPR call
 + Script keeps breakpoints on reload if bp script lines were not modified.
 + Edit script line (to do temporary fix, not saved on disk)
 
@@ -864,9 +865,13 @@ Example:
 	GAPI 401000 (call kernel32.ExitProcess)
 	GAPI the EIP // examined whether the current code is API calls, is not then returns to 0
 
+GBPM (beta)
+----
+Get last memory breakpoint address, affects $RESULT with dword value
+ 
 GBPR
 ----
-Gets last breakpoint reason, affects $RESULT with dword value
+Get last breakpoint reason, affects $RESULT with dword value
 Example:
 	GBPR
 	cmp $RESULT, 10

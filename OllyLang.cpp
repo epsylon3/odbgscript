@@ -108,6 +108,7 @@ OllyLang::OllyLang()
 	commands["findmem"] = &OllyLang::DoFINDMEM;
 	commands["free"] = &OllyLang::DoFREE;
 	commands["gapi"] = &OllyLang::DoGAPI;
+	commands["gbpm"] = &OllyLang::DoGBPM;
 	commands["gbpr"] = &OllyLang::DoGBPR;
 	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
@@ -528,6 +529,8 @@ bool OllyLang::Reset()
 	tickcount_startup=0;
 	tickcount=0;
 	tickcounthi=0;
+	break_memaddr=0;
+	break_reason=0;
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;

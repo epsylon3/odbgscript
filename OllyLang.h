@@ -200,6 +200,7 @@ private:
 	bool DoFINDMEM(string args);
 	bool DoFREE(string args);
 	bool DoGAPI(string args);
+	bool DoGBPM(string args);
 	bool DoGBPR(string args);
 	bool DoGCI(string args);
 	bool DoGCMT(string args);
