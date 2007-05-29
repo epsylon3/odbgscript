@@ -47,6 +47,9 @@ public:
 	// Public methods
 //	int GetState();
 	bool LoadScript(LPSTR fileName);
+	bool SaveBreakPoints(LPSTR fileName);
+	bool LoadBreakPoints(LPSTR fileName);
+
 	bool Pause();
 	bool Resume();
 	bool Reset();
@@ -124,7 +127,7 @@ private:
 
 	bool bInternalBP;
 	ulong nIgnoreNextValuesHist;
-	
+
 	string errorstr;
 
 	DWORD tickcount;

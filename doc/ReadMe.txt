@@ -57,6 +57,9 @@ BEGINSEARCH working ?
 
 2.1 What's new? 
 ---------------
+1.64 (SVN)
++ Script keeps breakpoints on reload if code lines were not modified.
+
 1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size
 + Added ASM third parameter to get alternative code bytes.

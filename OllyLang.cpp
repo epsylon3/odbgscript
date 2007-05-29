@@ -404,8 +404,76 @@ ulong OllyLang::GetFirstCodeLine(ulong from) //=0
 	return nline;
 }
 
+bool OllyLang::SaveBreakPoints(LPSTR fileName) {
+
+	Pluginwritestringtoini(hinstModule(), "BP_FILE", fileName);	
+
+	int i,bpcnt=1;
+	char* buffer[5]={0};
+	string s,sline;
+
+	t_wndprog_data *ppl;
+	for (i=1;i<script.size();i++) {
+		ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,i);
+		if (ppl==NULL)
+			return false; 
+		if (ppl->pause) {
+			s="BP_";
+			sprintf((char*)buffer,"%04u",bpcnt);
+			s.append((char*)buffer);
+			sprintf((char*)buffer,"%u",i);
+			sline.assign((char*)buffer);
+			sline.append(",");
+			sline.append(ppl->command);
+			Pluginwritestringtoini(hinstModule(), (char*)s.c_str(), (char*)sline.c_str());			
+			bpcnt++;
+		}
+	}
+}
+
+bool OllyLang::LoadBreakPoints(LPSTR fileName) {
+
+	string s;
+	char* sbuffer[MAX_PATH]={0};
+	Pluginreadstringfromini(hinstModule(), "BP_FILE", (char*)sbuffer, "");
+	s.assign((char*)sbuffer);
+
+	if (s.compare(fileName)!=0)
+		return false;
+
+	int i,bpcnt=0,p;
+	char* ibuffer[5]={0};
+
+	t_wndprog_data *ppl;
+	do {
+		bpcnt++;
+		s="BP_";
+		sprintf((char*)ibuffer,"%04u",bpcnt);
+		s.append((char*)ibuffer);
+		Pluginreadstringfromini(hinstModule(), (char*)s.c_str(), (char*)sbuffer, "");		
+		s.assign((char*)sbuffer);
+		if (s!="") {
+
+			if ((p=s.find(","))!=string::npos) {
+				sscanf(s.substr(0,p).c_str(),"%u",&i);
+				s.erase(0,p+1);
+				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,i);
+				if (ppl!=NULL) {
+					if (s.compare(ppl->command)==0)
+						ppl->pause=1; 
+				}
+			}
+
+		}
+
+	} while (s!="");
+}
+
 bool OllyLang::LoadScript(LPSTR file)
 {
+
+	SaveBreakPoints(file);
+
 	script.clear();
 	labels.clear();
  	clearProgLines();
@@ -426,6 +494,8 @@ bool OllyLang::LoadScript(LPSTR file)
 
 	pgr_scriptpos=GetFirstCodeLine()+1;
 	setProgLineEIP(pgr_scriptpos,0);
+
+	LoadBreakPoints(file);
 
 	return true;
 }
