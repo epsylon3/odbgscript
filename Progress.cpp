@@ -76,7 +76,10 @@ t_wndprog_data *ppl;
 				
 				AppendMenu(menu,MF_STRING, 35,"Abort\tESC");
 
-			};
+				if (ppl->type & PROG_TYPE_COMMAND) {
+					AppendMenu(menu,MF_DEFAULT,37,"&Edit line\tE");
+				}
+			}
 			if (ollylang->labels.size() > 0) 
 			{
 				mLabels=CreatePopupMenu();
@@ -162,16 +165,19 @@ t_wndprog_data *ppl;
 					ShellExecute(hwndOllyDbg(),"open",ollylang->scriptpath.c_str(),NULL,ollylang->currentdir.c_str(),SW_SHOWDEFAULT);
 					return 1;
 				case 31: // Follow in Disassembler 
-					Setcpu(0,ppl->eip,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					if (ppl!=NULL) Setcpu(0,ppl->eip,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					InvalidateRect(hw, NULL, FALSE);
 					return 1;
 				case 32: // Toggle Script BP
-					if (ppl->pause) ppl->pause=0; else ppl->pause=1;
+					if (ppl!=NULL) if (ppl->pause) ppl->pause=0; else ppl->pause=1;
 					InvalidateRect(hw, NULL, FALSE);
 					return 1;
 				case 36:
-                    ppl->pause=1;
+                    if (ppl!=NULL) ppl->pause=1;
                     ollylang->Resume();
+				    return 1;
+				case 37:
+					if (ppl!=NULL) editProgLine(ppl);
 				    return 1;
 				case 33: // Step
 					ollylang->Pause(); //for right click step when running
@@ -277,6 +283,14 @@ t_wndprog_data *ppl;
 				return 1;
 			
 			}
+			else if (wp=='E') 
+			{
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
+				if (ppl!=NULL) 
+					editProgLine(ppl);
+				return 1;
+			
+			}
 			else if (wp==' ') 
 			{ // Pause/Resume
 
@@ -336,14 +350,14 @@ void initProgTable() {
     ollylang->wndProg.bar.mode[3]=BAR_NOSORT;
 
     ollylang->wndProg.bar.name[4]="Values <---";
-    ollylang->wndProg.bar.defdx[4]=60;
+    ollylang->wndProg.bar.defdx[4]=100;
     ollylang->wndProg.bar.mode[4]=BAR_NOSORT;
 
-	ollylang->wndProg.bar.name[5]="Comments";
-	ollylang->wndProg.bar.defdx[5]=40;
-	ollylang->wndProg.bar.mode[5]=BAR_NOSORT;
+	//ollylang->wndProg.bar.name[5]="Comments";
+	//ollylang->wndProg.bar.defdx[5]=40;
+	//ollylang->wndProg.bar.mode[5]=BAR_NOSORT;
 
-	ollylang->wndProg.bar.nbar=6;
+	ollylang->wndProg.bar.nbar=5;
     ollylang->wndProg.mode=TABLE_COPYMENU|TABLE_APPMENU|TABLE_SAVEPOS|TABLE_ONTOP|TABLE_HILMENU|TABLE_WIDECOL;
     ollylang->wndProg.drawfunc=wndprog_get_text;
 	}
@@ -382,7 +396,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 	t_dump *cpuasm;
 	int p;
 
-	cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
+	cpuasm = (t_dump*) Plugingetvalue(VAL_CPUDASM);
 
     ret = sprintf(s,"");
 
@@ -398,21 +412,21 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			{
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
-			} 			
+			}
 			if (pline->pause) 
 			{
 				//Hilite Breakpoint
 				*select=DRAW_MASK;
 				memset(mask,DRAW_BREAK,ret);
 
-			} 
+			}
 			else if (pline->line == ollylang->pgr_scriptpos) 
 			{
 				//Hilite Current Line	
 				*select=DRAW_MASK;
 				memset(mask,DRAW_EIP,ret);
 				
-			} 
+			}
 			else if (pline->type & PROG_TYPE_LABEL) 
 			{
 				*select=DRAW_MASK;
@@ -433,7 +447,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				ret=PROG_CMD_LEN;
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);				
-			} 
+			}
 			else if (pline->type & PROG_TYPE_ASM) {
 				ret = sprintf(s, " %s", pline->command);
 				*select=DRAW_MASK;
@@ -591,6 +605,27 @@ void InvalidateProgWindow(void)
 {
 	if (ollylang->wndProg.hw!=NULL)	
 		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
+}
+
+bool editProgLine(t_wndprog_data *ppl) 
+{
+	string s;
+	s=ollylang->script[ppl->line-1];
+
+	if (Gettext("Edit script line...",(char*)s.c_str(),0,0,FIXEDFONT)) {
+		strcpy(ppl->command," ");
+		strncat(ppl->command,(char*) s.c_str(),PROG_CMD_LEN-2);
+		
+		s=trim(s);
+		if (s.find(";")==0)
+			ppl->type &= PROG_TYPE_COMMENT;
+		else
+			ppl->type &= !PROG_TYPE_COMMENT;
+
+		InvalidateProgWindow();
+		return true;
+	}
+	return false;
 }
 
 int addProgLine(int line, string & command, int type) 

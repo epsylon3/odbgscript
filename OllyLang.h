@@ -78,6 +78,8 @@ public:
 	map<string, int> labels;
 	// Breakpoint Auto Jumps 
 	map<int, int> bpjumps;
+	// Call/Ret in script
+	vector<ulong> calls;
 
 	bool showVarHistory;
 
@@ -170,6 +172,7 @@ private:
 	bool DoBPWM(string args);
 	bool DoBPX(string args);
 	bool DoBUF(string args);
+	bool DoCALL(string args);
 	bool DoCMP(string args);
 	bool DoCMT(string args);
 	bool DoCOB(string args);

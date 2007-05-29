@@ -276,8 +276,6 @@ extc int _export cdecl ExecuteScript(const char* const filename)
 	return 0;
 }
 
-
-
 // Receives commands from main menu.
 extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item) 
 {

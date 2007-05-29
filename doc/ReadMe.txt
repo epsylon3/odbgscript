@@ -50,15 +50,16 @@ The development of the plugin has been a bit slow, I've got a job programming xr
 which has taken a lot of time. Sorry about that.
 
 TODO:
-Edit Line
 Memory BP reason
-Save/Restore Script Breakpoints
 BEGINSEARCH working ?
+More Search Reference commands
 
 2.1 What's new? 
 ---------------
 1.64 (SVN)
-+ Script keeps breakpoints on reload if code lines were not modified.
++ Added CALL command to call Labels (use RET to return)
++ Script keeps breakpoints on reload if bp script lines were not modified.
++ Edit script line (to do temporary fix, not saved on disk)
 
 1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size

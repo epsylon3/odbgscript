@@ -79,6 +79,7 @@ OllyLang::OllyLang()
 	commands["bpwm"] = &OllyLang::DoBPWM;
 	commands["bpx"] = &OllyLang::DoBPX;
 	commands["buf"] = &OllyLang::DoBUF;
+	commands["call"] = &OllyLang::DoCALL;
 	commands["cmp"] = &OllyLang::DoCMP;
 	commands["cmt"] = &OllyLang::DoCMT;
 	commands["cob"] = &OllyLang::DoCOB;
@@ -429,6 +430,7 @@ bool OllyLang::SaveBreakPoints(LPSTR fileName) {
 			bpcnt++;
 		}
 	}
+	return true;
 }
 
 bool OllyLang::LoadBreakPoints(LPSTR fileName) {
@@ -467,16 +469,18 @@ bool OllyLang::LoadBreakPoints(LPSTR fileName) {
 		}
 
 	} while (s!="");
+
+	return true;
 }
 
 bool OllyLang::LoadScript(LPSTR file)
 {
 
-	SaveBreakPoints(file);
+	SaveBreakPoints((char*)scriptpath.c_str());
 
 	script.clear();
 	labels.clear();
- 	clearProgLines();
+ 	clearProgLines(); 
 	Reset();
 
 	scriptpath = file;	

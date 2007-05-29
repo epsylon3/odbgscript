@@ -707,6 +707,19 @@ bool OllyLang::DoBUF(string args)
 	return false;
 }
 
+bool OllyLang::DoCALL(string args)
+{
+	if (args=="") 
+		return false;
+
+	if (labels.find(args)!=labels.end()) 
+	{
+		calls.push_back(script_pos);
+		return DoJMP(args);
+	}
+	errorstr="Label not found";
+	return false;
+}
 
 bool OllyLang::DoCMP(string args)
 {
@@ -3630,10 +3643,13 @@ bool OllyLang::DoRESET(string args)
 
 bool OllyLang::DoRET(string args)
 {
-	//MsgBox("Script finished", "ODbgScript");
-	MessageBox(0, "Script finished", "ODbgScript", MB_ICONINFORMATION | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
-	Reset();
-	//hwmain
+	if (calls.size==0) {
+		MessageBox(0, "Script finished", "ODbgScript", MB_ICONINFORMATION | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
+		Reset();
+	} else {
+		script_pos = calls[calls.size()-1];
+		calls.pop_back(); 
+	}
 	return true;
 }
 

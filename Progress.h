@@ -52,3 +52,5 @@ int  setProgLineAttr(int line,int type) ;
 
 void clearProgLines();
 void resetProgLines();
+
+bool editProgLine(t_wndprog_data *ppl) ;
