@@ -57,7 +57,7 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.64 (SVN)
+1.64 (30 May 2007)
 +! Added ability to call ODBGScript command(s) from OllyDbg Conditional Log Breakpoints
 +! Added CALL command to call Labels (use RET to return)
 + Added FINDCALLS command to find (and filter) intermodular calls.
@@ -67,6 +67,7 @@ Get Trace Addr
 + Added GREF alone (to get lines count in reference window)
 * Enhanced Script window Focus
 * Error messagebox no more modal
+* Fixed 1.63 bug witn pointers containing operator (now accept all operators)
 
 1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size

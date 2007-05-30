@@ -3153,7 +3153,11 @@ bool OllyLang::DoMOV(string args)
 	}
 	else if(UnquoteString(ops[0], '[', ']'))
 	{
-		// Dest is memory address
+		// Destination is memory address
+		// Get Address from Operators (+_*...)
+		nIgnoreNextValuesHist=1;
+		CreateOperands(ops[0], &ops[0], 1);
+
 		if(GetDWOpValue(ops[0], addr))
 		{ 
 			if (addr==0)
@@ -3165,6 +3169,9 @@ bool OllyLang::DoMOV(string args)
 			tmpops=ops[1];
 			if (maxsize > 128 && UnquoteString(ops[1], '[', ']'))
 			{
+				//Get Addr from Operators
+				CreateOperands(ops[1], &ops[1], 1);
+
 				//Optimized Mem Copy
 				ulong src;
 				if (!GetDWOpValue(ops[1], src) || src==0) {

@@ -1038,10 +1038,11 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 
 				ops[i]=value;
 
-				if (nIgnoreNextValuesHist==0)
+				if (nIgnoreNextValuesHist==0) {
 					var_logging=true;
 //				if (!sub_operand)
 					setProgLineValue(script_pos+1,result);
+				}
 				goto operation_ok;
 
 			//STRING OPERATIONS

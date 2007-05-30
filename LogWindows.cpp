@@ -99,7 +99,7 @@ void initLogWindow() {
     ollylang->wndLog.bar.mode[0]=BAR_NOSORT;
 
 	ollylang->wndLog.bar.name[1]="Message"; 
-    ollylang->wndLog.bar.defdx[1]=100;
+    ollylang->wndLog.bar.defdx[1]=130;
     ollylang->wndLog.bar.mode[1]=BAR_NOSORT;
 
 	ollylang->wndLog.bar.nbar=2;
