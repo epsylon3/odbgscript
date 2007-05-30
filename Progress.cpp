@@ -76,9 +76,7 @@ t_wndprog_data *ppl;
 				
 				AppendMenu(menu,MF_STRING, 35,"Abort\tESC");
 
-				if (ppl->type & PROG_TYPE_COMMAND) {
-					AppendMenu(menu,MF_DEFAULT,37,"&Edit line\tE");
-				}
+				AppendMenu(menu,MF_DEFAULT,37,"&Edit line\tE");
 			}
 			if (ollylang->labels.size() > 0) 
 			{
@@ -617,10 +615,13 @@ bool editProgLine(t_wndprog_data *ppl)
 		strncat(ppl->command,(char*) s.c_str(),PROG_CMD_LEN-2);
 		
 		s=trim(s);
-		if (s.find(";")==0)
-			ppl->type &= PROG_TYPE_COMMENT;
-		else
-			ppl->type &= !PROG_TYPE_COMMENT;
+		if (s.find(";")==0) {
+			ppl->type = PROG_TYPE_COMMENT;
+		}
+		else 
+		{
+			ppl->type = PROG_TYPE_COMMAND;
+		}
 
 		InvalidateProgWindow();
 		return true;
