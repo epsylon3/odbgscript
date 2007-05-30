@@ -281,6 +281,9 @@ bool OllyLang::DoATOI(string args)
 
 bool OllyLang::DoBC(string args)
 {
+	if (args=="")
+		return DoBCA(args);
+
 	string ops[1];
 
 	if (!CreateOperands(args, ops, 1))
@@ -289,12 +292,71 @@ bool OllyLang::DoBC(string args)
 	ulong dw;
 	if (GetDWOpValue(ops[0], dw))
 	{
-		Deletebreakpoints(dw, dw + 1, 0);
+		Deletebreakpoints(dw, dw + 1, true);
 		Broadcast(WM_USER_CHALL, 0, 0);
 		require_ollyloop = 1;
 		return true;
 	}
 	return false;
+}
+
+//clear all loaded breakpoints
+bool OllyLang::DoBCA(string args)
+{
+	t_table *bptable;
+	t_bpoint *bpoint;
+	bptable=(t_table *)Plugingetvalue(VAL_BREAKPOINTS);
+	if (bptable!=NULL) 
+	{
+		for (int b=bptable->data.n-1; b>=0;b--) {
+			bpoint=(t_bpoint *)Getsortedbyselection(&(bptable->data),b);
+			if (bpoint!=NULL) {
+				Deletesorteddata(&(bptable->data),bpoint->addr);
+			}
+		}
+	}
+	Broadcast(WM_USER_CHALL, 0, 0);
+	require_ollyloop = 1;
+	return true;
+}
+
+bool OllyLang::DoBD(string args)
+{
+	if (args=="")
+		return DoBDA(args);
+
+	string ops[1];
+	if (!CreateOperands(args, ops, 1))
+		return false;
+
+	ulong dw;
+	if(GetDWOpValue(ops[0], dw))
+	{
+		Setbreakpoint(dw, TY_DISABLED, 0);
+		Broadcast(WM_USER_CHALL, 0, 0);
+		require_ollyloop = 1;
+		return true;
+	}
+	return false;
+}
+
+//disable all loaded breakpoints
+bool OllyLang::DoBDA(string args)
+{
+	t_table *bptable;
+	t_bpoint *bpoint;
+	bptable=(t_table *)Plugingetvalue(VAL_BREAKPOINTS);
+	if (bptable!=NULL) {
+		for (int b=bptable->data.n-1; b>=0;b--) {
+			bpoint=(t_bpoint *)Getsortedbyselection(&(bptable->data),b);
+			if (bpoint!=NULL) {
+			  Setbreakpoint(bpoint->addr, TY_DISABLED, bpoint->cmd);
+			}
+		}
+	}
+	Broadcast(WM_USER_CHALL, 0, 0);
+	require_ollyloop = 1;
+	return true;
 }
 
 bool OllyLang::DoBEGINSEARCH(string args)
@@ -371,24 +433,6 @@ bool OllyLang::DoBP(string args)
 	return false;
 }
 
-bool OllyLang::DoBD(string args)
-{
-	string ops[1];
-
-	if (!CreateOperands(args, ops, 1))
-		return false;
-
-	ulong dw;
-	if(GetDWOpValue(ops[0], dw))
-	{
-		Setbreakpoint(dw, TY_DISABLED, 0);
-		Broadcast(WM_USER_CHALL, 0, 0);
-		require_ollyloop = 1;
-		return true;
-	}
-	return false;
-}
-
 bool OllyLang::DoBPCND(string args)
 {
 	string ops[2];
@@ -444,7 +488,7 @@ bool OllyLang::DoBPGOTO(string args)
 	return false;
 }
 
-bool OllyLang::DoBPHWCALL(string args)
+bool OllyLang::DoBPHWCA(string args)
 {
 	int i = 0;
 	while(i < 4)
@@ -459,6 +503,9 @@ bool OllyLang::DoBPHWCALL(string args)
 
 bool OllyLang::DoBPHWC(string args)
 {
+	if (args=="")
+		return DoBPHWCA(args);
+
 	string ops[1];
 
 	if (!CreateOperands(args, ops, 1))
@@ -668,7 +715,7 @@ bool OllyLang::DoBPX(string args)
 			}
 			else 
 			{
-				 Deletebreakpoints(pref->addr,pref->addr+1,0);
+				 Deletebreakpoints(pref->addr,pref->addr+1,true);
 				 bpnmb++;
 			}
 		}
@@ -4256,7 +4303,12 @@ bool OllyLang::DoWRT(string args)
 		if(hFile != INVALID_HANDLE_VALUE) 
 		{
 			//SetFilePointer(hFile, 0, 0, FILE_BEGIN);
-			WriteFile(hFile, data.c_str(), data.length(), &dwAccBytes, NULL);
+//			if (bUnicode) {
+//				if (data.length()>1 && data[1]!=0)
+//					data=Str2Unicode(data);
+//				WriteFile(hFile, data.c_str(), data.length(), &dwAccBytes, NULL);
+//			} else
+				WriteFile(hFile, data.c_str(), data.length(), &dwAccBytes, NULL);
 			CloseHandle(hFile);
 		}
 		return dwAccBytes;
@@ -4298,7 +4350,13 @@ bool OllyLang::DoWRTA(string args)
 		if(hFile != INVALID_HANDLE_VALUE) 
 		{
 			SetFilePointer(hFile, 0, 0, FILE_END);
-			WriteFile(hFile, data.c_str(), data.length(), &dwAccBytes, NULL);
+//			if (bUnicode) {
+//				if (data.length()>1 && data[1]!=0)
+//					data=Str2Unicode(data);
+//				WriteFile(hFile, data.c_str(), data.length(), &dwAccBytes, NULL);
+//			} else
+				WriteFile(hFile, data.c_str(), data.length(), &dwAccBytes, NULL);
+
 			CloseHandle(hFile);
 		}
 		return dwAccBytes;

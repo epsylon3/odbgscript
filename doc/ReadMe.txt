@@ -57,6 +57,11 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.65 (SVN)
++ BPHWC without parameter clears all hardware breakpoints (same as BPHWCALL, which could be removed/renamed)
++ BC without parameter clears all loaded breakpoints (Breakpoints Window)
++ BD without parameter disables all loaded breakpoints 
+
 1.64 (30 May 2007)
 +! Added ability to call ODBGScript command(s) from OllyDbg Conditional Log Breakpoints
 +! Added CALL command to call Labels (use RET to return)
@@ -67,7 +72,7 @@ Get Trace Addr
 + Added GREF alone (to get lines count in reference window)
 * Enhanced Script window Focus
 * Error messagebox no more modal
-* Fixed 1.63 bug witn pointers containing operator (now accept all operators)
+* Fixed 1.63 bug with pointers containing operator (now accept all operators)
 
 1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size
@@ -596,9 +601,10 @@ Example:
 	...
 	jmp NextBP
 
-BPHWC addr
-----------
-Delete hardware breakpoint at a specified address
+BPHWC [addr]
+------------
+Delete hardware breakpoint at a specified address.
+Without address, clear all hardware breakpoints.
 Example:
 	bphwc 401000
 	
@@ -1241,7 +1247,7 @@ Example:
 
 RET
 ---
-Exits script.
+Exits script or return from CALL.
 Example:
 	ret
 
@@ -1474,6 +1480,8 @@ if(hMod) // Check that the other plugin is present and loaded
 		pFunc("myscript.txt"); // Execute exported function
 }
 
+You can also execute script commands via OllyDBG ODBG_plugincmd() 
+and in Conditional Log Breakpoints.
 
 5. Contact us
 -------------

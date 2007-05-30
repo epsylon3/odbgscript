@@ -69,7 +69,7 @@ OllyLang::OllyLang()
 	commands["bpcnd"] = &OllyLang::DoBPCND;
 	commands["bpd"] = &OllyLang::DoBPD;
 	commands["bpgoto"] = &OllyLang::DoBPGOTO;
-	commands["bphwcall"] = &OllyLang::DoBPHWCALL;
+	 commands["bphwcall"] = &OllyLang::DoBPHWCA;
 	commands["bphwc"] = &OllyLang::DoBPHWC;
 	commands["bphws"] = &OllyLang::DoBPHWS;
 	commands["bpl"] = &OllyLang::DoBPL;

@@ -228,6 +228,28 @@ string CleanString(string &s)
 	return str;
 }
 
+string Str2Unicode(char* s,ulong len) 
+{
+	string sOut;
+	sOut.resize(len*2);
+    for(ulong i=0;i<len;i++) 
+    { 
+        sOut[i*2] = s[i]; 
+    }
+	return sOut;
+}
+
+string Str2Unicode(string &s)
+{
+	string sOut;
+	ulong len=s.size();
+	sOut.resize(len*2);
+    for(ulong i=0;i<len;i++) 
+    { 
+        sOut[i*2] = s[i]; 
+    }
+	return sOut;
+}
 
 bool is_hexwild(string& s)
 {

@@ -160,13 +160,15 @@ private:
 	bool DoASMTXT(string args);
 	bool DoATOI(string args);
 	bool DoBC(string args);
+	bool DoBCA(string args);
 	bool DoBD(string args);
+	bool DoBDA(string args);
 	bool DoBEGINSEARCH(string args);
 	bool DoBP(string args);
 	bool DoBPCND(string args);
 	bool DoBPD(string args);
 	bool DoBPGOTO(string args);
-	bool DoBPHWCALL(string args);
+	bool DoBPHWCA(string args);
 	bool DoBPHWC(string args);
 	bool DoBPHWS(string args);
 	bool DoBPL(string args);
