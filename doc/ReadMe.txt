@@ -60,9 +60,11 @@ Get Trace Addr
 1.64 (SVN)
 +! Added ability to call ODBGScript command(s) from OllyDbg Conditional Log Breakpoints
 +! Added CALL command to call Labels (use RET to return)
++ Added FINDCALLS command to find (and filter) intermodular calls.
 + Added GBPM command to get last memory breakpoint address, beta function affected on GBPR call
 + Script keeps breakpoints on reload if bp script lines were not modified.
 + Edit script line (to do temporary fix, not saved on disk)
++ Added GREF alone (to get lines count in reference window)
 
 1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size
@@ -793,11 +795,23 @@ Example:
 	find eip, #6A00E8# // find a PUSH 0 followed by some kind of call
 	find eip, #6A??E8# // find a PUSH 0 followed by some kind of call
 
+FINDCALLS addr [,name]
+----------------------
+Find all intermodular calls (dll calls) in the disasm area.
+You can filter results by label (case insensitive) with the optionnal second parameter.
+Reference Window is used and its content changed
+Then can use GREF to get results count and retrieve them.
+
+Example:
+	findcalls eip, "exit"
+	gref
+	msg $RESULT
+
 FINDCMD addr, cmdstr
 --------------------
 Search for asm command(s), you can search for series also with ";" separator.
 This command uses "Search for All Sequences" Ollydbg function so could find relative calls/jmp
-Warning: Reference Window is used and its content changed
+Reference Window is used and its content changed
 You can use GREF to get next results in disasm window range
 
 Example 1:
@@ -953,9 +967,10 @@ GPI key
 Gets process information, one of :
 HPROCESS,PROCESSID,HMAINTHREAD,MAINTHREADID,MAINBASE,PROCESSNAME,EXEFILENAME,CURRENTDIR,SYSTEMDIR
 
-GREF line
----------
-Get Address from Reference Window at Line
+GREF [line]
+-----------
+Get Address from Reference Window at Line. First line is 1 because 0 is CPU Initial EIP.
+Without parameter, GREF results the Reference Window number of entries.
 Example:
 	FINDCMD "push eax"
 	GREF 1

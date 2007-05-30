@@ -102,8 +102,9 @@ OllyLang::OllyLang()
 	commands["exec"] = &OllyLang::DoEXEC;
 	commands["fill"] = &OllyLang::DoFILL;
 	commands["find"] = &OllyLang::DoFIND;
+	commands["findcalls"] = &OllyLang::DoFINDCALLS;
 	commands["findcmd"] = &OllyLang::DoFINDCMD;
-	commands["findcmds"] = &OllyLang::DoFINDCMD;
+	 commands["findcmds"] = &OllyLang::DoFINDCMD;
 	commands["findop"] = &OllyLang::DoFINDOP;
 	commands["findmem"] = &OllyLang::DoFINDMEM;
 	commands["free"] = &OllyLang::DoFREE;

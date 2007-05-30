@@ -1322,6 +1322,84 @@ bool OllyLang::DoFIND(string args)
 	return false;
 }
 
+bool OllyLang::DoFINDCALLS(string args)
+{
+	string ops[2];
+	if(!CreateOp(args, ops, 2))
+		if (args=="")
+			return false;
+
+	bool bRefVisible=false,bResetDisam=false;
+	ulong addr,base,size,disamsel=0;
+
+	Getdisassemblerrange(&base,&size);
+
+	//Get initial Ref Window State
+	t_table* tt;
+	tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
+	if (tt!=NULL)
+		bRefVisible=(tt->hw!=0);
+
+	t_dump* td;
+	td=(t_dump*) Plugingetvalue(VAL_CPUDASM);
+	if (td==NULL)
+		return false;
+
+	if (GetDWOpValue(ops[0], addr))
+	{
+		if (addr<base || addr>=(base+size)) {
+			//outside debugger window range
+			disamsel=td->sel0;
+			Setdisasm(addr,0,0);
+			bResetDisam=true;
+		}
+
+		variables["$RESULT"]=0;
+		if (Findalldllcalls(td,addr,NULL)>0) {
+			
+			if (tt==NULL)
+				tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
+
+			if (tt!=NULL) 
+			{
+				t_ref* tr;
+
+				if (tt->data.n > 1) 
+				{ 
+					//Filter results
+					string filter;
+					if (GetSTROpValue(ops[1], filter) && filter!="") {
+						//filter=ToLower(filter);
+						(char*) buffer[TEXTLEN+1];
+						for (int nref=tt->data.n-1;nref>0;nref--) {
+							tr=(t_ref*) Getsortedbyselection(&tt->data, nref);
+							if (tr!=NULL && tr->dest!=0) {
+								//ZeroMemory(buffer,TEXTLEN+1);
+								//Decodename(tr->dest,NM_LABEL,buffer);
+								Findlabel(tr->dest,buffer);
+								if (stricmp(buffer,filter.c_str())!=0)
+									Deletesorteddata(&tt->data,tr->addr);
+							}
+						}
+					}
+
+					tr=(t_ref*) Getsortedbyselection(&tt->data, 1); //0 is CPU initial
+					if (tr!=NULL)
+						variables["$RESULT"]=tr->addr;
+				}
+
+				if (tt->hw && !bRefVisible) {
+					DestroyWindow(tt->hw);
+					tt->hw=0;
+				}
+			}
+		}
+		if (bResetDisam)
+			Setdisasm(disamsel,0,0);
+		return true;
+	}
+	return false;
+}
 //search for asm command in disasm window
 bool OllyLang::DoFINDCMD(string args)
 {
@@ -1332,7 +1410,7 @@ bool OllyLang::DoFINDCMD(string args)
 	bool bRefVisible=false,bResetDisam=false;
 	string cmd, cmds;
 	int len,pos;
-	ulong addr=0,base=0,size=0,attempt,opsize=3,disamsel=0;
+	ulong addr,base,size,attempt,opsize=3,disamsel=0;
 	int startadr=0,endadr=0,lps=0,length,ncmd=0,cmdpos=0;
 	char error[256]={0};
 
@@ -1415,17 +1493,15 @@ bool OllyLang::DoFINDCMD(string args)
 
 			if (tt!=NULL) 
 			{
-
 				t_ref* tr;
-				if (tt->data.n > 1) { //for (int m=0; m < tt->data.n; m++) {
-				
+				if (tt->data.n > 1)
+				{
 					tr=(t_ref*) Getsortedbyselection(&tt->data, 1); //0 is CPU initial
 					if (tr!=NULL)
 						variables["$RESULT"]=tr->addr;
 				}
 
 				if (tt->hw && !bRefVisible) {
-					//CloseWindow(tt->hw);
 					DestroyWindow(tt->hw);
 					tt->hw=0;
 				}
@@ -2378,28 +2454,30 @@ bool OllyLang::DoGREF(string args)
 	string ops[1];
 	ulong line;
 
-	if(!CreateOperands(args, ops, 1))
-		return false;
+	CreateOperands(args, ops, 1);
 
-	if(GetDWOpValue(ops[0], line))
+	t_table* tt;
+	tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
+
+	variables["$RESULT"] = 0;
+
+	//Get Ref. Addr
+	if (tt!=NULL) 
 	{
-		t_table* tt;
-		tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
-		if (tt!=NULL) 
+		if(ops[0]!="" && GetDWOpValue(ops[0], line))
 		{
-			if (line < tt->data.n) {
-			
+			if (line < tt->data.n) 
+			{
 				t_ref* tr;
-				tr=(t_ref*) Getsortedbyselection(&tt->data, line); //0 is CPU initial
+				tr=(t_ref*) Getsortedbyselection(&tt->data, line); //0 is CPU initial sel.
 				if (tr!=NULL)
 					variables["$RESULT"]=tr->addr;
 			}
-			else
-			{
-				variables["$RESULT"] = 0;
-			}
-			return true;
+		} else {
+			//Get Ref. Count
+			variables["$RESULT"] = tt->data.n;
 		}
+		return true;
 	}
 	return false;
 }

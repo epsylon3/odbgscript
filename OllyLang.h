@@ -198,8 +198,8 @@ private:
 	bool DoEXEC(string args);
 	bool DoFILL(string args);
 	bool DoFIND(string args);
+	bool DoFINDCALLS(string args);
 	bool DoFINDCMD(string args);
-	bool DoFINDCMDS(string args);
 	bool DoFINDOP(string args);
 	bool DoFINDMEM(string args);
 	bool DoFREE(string args);
