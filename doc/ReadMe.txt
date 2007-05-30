@@ -65,6 +65,8 @@ Get Trace Addr
 + Script keeps breakpoints on reload if bp script lines were not modified.
 + Edit script line (to do temporary fix, not saved on disk)
 + Added GREF alone (to get lines count in reference window)
+* Enhanced Script window Focus
+* Error messagebox no more modal
 
 1.63 (29 May 2007)
 + Added MEMCPY function, and optimized MOV [dst],[src],size

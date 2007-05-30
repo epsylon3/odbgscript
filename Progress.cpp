@@ -605,6 +605,14 @@ void InvalidateProgWindow(void)
 		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
 }
 
+void FocusProgWindow(void)
+{
+	if (ollylang->wndProg.hw!=NULL)	{
+		SetForegroundWindow(ollylang->wndProg.hw);
+		SetFocus(ollylang->wndProg.hw);
+	}
+}
+
 bool editProgLine(t_wndprog_data *ppl) 
 {
 	string s;

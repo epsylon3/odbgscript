@@ -35,6 +35,7 @@ int wndprog_sort_function(const t_sortheader *p1,const t_sortheader *p2,const in
 int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int column);
 
 void InvalidateProgWindow(void);
+void FocusProgWindow(void);
 
 int  addProgLine(int line, string & command, int type=false);
 int  setProgLineEIP(int line, int eip);

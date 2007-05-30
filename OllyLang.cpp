@@ -665,10 +665,9 @@ bool OllyLang::Step(int forceStep)
 			setProgLineAttr(script_pos+1,PROG_ATTR_ERROR);
 			if(errorstr != "")
 			{
-				message.append(errorstr);
-				message.append("\n");
+				message += errorstr;
 			}
-			MessageBox(hwmain, message.c_str(), "OllyScript error!", MB_ICONERROR | MB_OK);
+			MessageBox(0, message.c_str(), "OllyScript error!", MB_ICONERROR | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
 			errorstr = "";
 			script_pos++;
 			pgr_scriptpos=script_pos+1;
