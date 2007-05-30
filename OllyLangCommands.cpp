@@ -1400,6 +1400,7 @@ bool OllyLang::DoFINDCALLS(string args)
 	}
 	return false;
 }
+
 //search for asm command in disasm window
 bool OllyLang::DoFINDCMD(string args)
 {
@@ -2475,7 +2476,7 @@ bool OllyLang::DoGREF(string args)
 			}
 		} else {
 			//Get Ref. Count
-			variables["$RESULT"] = tt->data.n;
+			variables["$RESULT"] = tt->data.n-1;
 		}
 		return true;
 	}
