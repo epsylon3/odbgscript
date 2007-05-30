@@ -534,17 +534,19 @@ Example:
 	itoa "F"
 	itoa "10", 10.
 
-BC addr
--------
+BC [addr]
+---------
 Clear unconditional breakpoint at addr.
+Without parameter, the command clears all loaded breakpoints 
 Example:
 	bc 401000
 	bc x
 	bc eip
 
-BD addr
---------
+BD [addr]
+---------
 Disables breakpoint at addr.
+Without parameter, the command disables all loaded breakpoints 
 Example:
 	bp 401000
 	BD 401000
@@ -628,7 +630,7 @@ Example:
 	
 BPMC
 ----
-Clear memory breakpoint.
+Clear the memory breakpoint.
 Example:
 	bpmc
 
@@ -657,7 +659,7 @@ Example:
 	log s // output "#313233#
 
 CMP dest, src [,size]
--------------
+---------------------
 Compares dest to src. Works like it's ASM counterpart.
 see SCMP to compare strings or memory data
 Example: 
@@ -716,7 +718,7 @@ Example:
 	dm 401000, 1F, "c:\dump.bin"
 
 DMA addr, size, file
--------------------
+--------------------
 Dumps memory of specified size from specified address to specified file appending to that file if it exists
 Example:
 	dma 401000, 1F, "c:\dump.bin"
