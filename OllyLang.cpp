@@ -95,7 +95,7 @@ OllyLang::OllyLang()
 	commands["endsearch"] = &OllyLang::DoENDSEARCH;
 	commands["erun"] = &OllyLang::DoERUN;
 	commands["esti"] = &OllyLang::DoESTI;
-	commands["esto"] = &OllyLang::DoERUN;
+	 commands["esto"] = &OllyLang::DoERUN;
 	commands["eob"] = &OllyLang::DoEOB;
 	commands["eoe"] = &OllyLang::DoEOE;
 	commands["eval"] = &OllyLang::DoEVAL;
@@ -132,12 +132,12 @@ OllyLang::OllyLang()
 	commands["jb"] = &OllyLang::DoJB;
 	commands["jbe"] = &OllyLang::DoJBE;
 	commands["je"] = &OllyLang::DoJE;
-	commands["jg"] = &OllyLang::DoJA;
-	commands["jge"] = &OllyLang::DoJAE;
+	 commands["jg"] = &OllyLang::DoJA;
+	 commands["jge"] = &OllyLang::DoJAE;
 	commands["jmp"] = &OllyLang::DoJMP;
 	commands["jne"] = &OllyLang::DoJNE;
-	commands["jnz"] = &OllyLang::DoJNE;
-	commands["jz"] = &OllyLang::DoJE;
+	 commands["jnz"] = &OllyLang::DoJNE;
+	 commands["jz"] = &OllyLang::DoJE;
 	commands["key"] = &OllyLang::DoKEY;
 	commands["lbl"] = &OllyLang::DoLBL;
     commands["lc"] = &OllyLang::DoLC;
@@ -189,7 +189,7 @@ OllyLang::OllyLang()
 	commands["ticnd"] = &OllyLang::DoTICND;
 	commands["to"] = &OllyLang::DoTO;
 	commands["tocnd"] = &OllyLang::DoTOCND;
-	commands["ubp"] = &OllyLang::DoBP;
+	 commands["ubp"] = &OllyLang::DoBP;
 	commands["unicode"] = &OllyLang::DoUNICODE;
 	commands["var"] = &OllyLang::DoVAR;
 	commands["xor"] = &OllyLang::DoXOR;
@@ -409,6 +409,9 @@ ulong OllyLang::GetFirstCodeLine(ulong from) //=0
 
 bool OllyLang::SaveBreakPoints(LPSTR fileName) {
 
+	if (strcmp(fileName,"")==0)
+		return false;
+
 	Pluginwritestringtoini(hinstModule(), "BP_FILE", fileName);	
 
 	int i,bpcnt=1;
@@ -432,6 +435,11 @@ bool OllyLang::SaveBreakPoints(LPSTR fileName) {
 			bpcnt++;
 		}
 	}
+	//clean last one
+	s="BP_";
+	sprintf((char*)buffer,"%04u",bpcnt);
+	s.append((char*)buffer);
+	Pluginwritestringtoini(hinstModule(), (char*)s.c_str(), "");			
 	return true;
 }
 
@@ -442,7 +450,7 @@ bool OllyLang::LoadBreakPoints(LPSTR fileName) {
 	Pluginreadstringfromini(hinstModule(), "BP_FILE", (char*)sbuffer, "");
 	s.assign((char*)sbuffer);
 
-	if (s.compare(fileName)!=0)
+	if (stricmp(fileName,s.c_str())!=0)
 		return false;
 
 	int i,bpcnt=0,p;

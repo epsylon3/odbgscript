@@ -3214,7 +3214,7 @@ bool OllyLang::DoMOV(string args)
 			}
 
 			tmpops=ops[1];
-			if (maxsize > 128 && UnquoteString(ops[1], '[', ']'))
+			if (maxsize > 8 && UnquoteString(ops[1], '[', ']'))
 			{
 				//Get Addr from Operators
 				CreateOperands(ops[1], &ops[1], 1);

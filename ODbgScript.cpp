@@ -558,6 +558,7 @@ extc int _export cdecl ODBG_Pluginclose()
 		ollylang->hwndinput=0;
 	}
 
+	ollylang->SaveBreakPoints((char*)ollylang->scriptpath.c_str());
 
 	Pluginwriteinttoini(hinstModule(),"Restore Script window",(ollylang->wndProg.hw!=NULL));
 	Pluginwriteinttoini(hinstModule(),"Restore Script Log",(ollylang->wndLog.hw!=NULL));

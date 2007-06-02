@@ -61,6 +61,7 @@ Get Trace Addr
 + BPHWC without parameter clears all hardware breakpoints (same as BPHWCALL, which could be removed/renamed)
 + BC without parameter clears all loaded breakpoints (Breakpoints Window)
 + BD without parameter disables all loaded breakpoints 
+* Breakpoints saving enhanced, and saving/restore on restart.
 
 1.64 (30 May 2007)
 +! Added ability to call ODBGScript command(s) from OllyDbg Conditional Log Breakpoints
