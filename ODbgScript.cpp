@@ -90,13 +90,25 @@ extc int _export cdecl ODBG_Plugininit(int ollydbgversion, HWND hw, ulong *featu
 }
 
 // This function is called each time OllyDbg passes main Windows loop. When
-// debugged application stops, bring command line window in foreground.
+// debugged application stops, b ring command line window in foreground.
 extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent) 
 {	
 	t_status status; 
 	status = Getstatus();
 	script_state = ollylang->script_state;
 	
+    // module load event. kept for future use. http://www.openrce.org/articles/full_view/25
+    /*if (debugevent && debugevent->dwDebugEventCode == LOAD_DLL_DEBUG_EVENT) {
+		string filename;
+		if (str_filename_from_handle(debugevent->u.LoadDll.hFile, filename)) {
+			MsgBox(filename,""); 
+		}
+	}
+	*/
+
+	if (debugevent && debugevent->dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT && debugevent->u.DebugString.nDebugStringLength>0)
+		MsgBox(debugevent->u.DebugString.lpDebugStringData,"");
+
 	// Check for breakpoint jumps
 	if(script_state == SS_RUNNING && debugevent && debugevent->dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
 	{

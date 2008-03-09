@@ -685,3 +685,123 @@ LARGE_INTEGER MyGetTickCount(ULONGLONG timeref, bool bUseTickCount)
 	free(lpPerformanceCount);
 	return result;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Thanks Pedram Amini for this function (From Olly BP Manager).
+//
+BOOL get_filename_from_handle (HANDLE h_file, char *target_filename)
+{
+    HANDLE h_filemap;
+    DWORD  file_size_hi = 0;
+    char   filename[MAX_PATH + 1];
+    char   *stripped;
+    void   *mem;
+
+    HMODULE h_psapi=NULL;
+	lpfGetMappedFileName pGetMappedFileName = NULL;
+
+    //dynamically resolve function pointer.
+    //if (!pGetMappedFileName) {
+		// resolve function pointers.
+		if ((h_psapi = LoadLibraryEx("psapi.dll",NULL,LOAD_WITH_ALTERED_SEARCH_PATH)) != NULL)
+			pGetMappedFileName = (lpfGetMappedFileName)  GetProcAddress(h_psapi, "GetMappedFileNameA");
+	
+		if (!pGetMappedFileName) 
+			return FALSE;
+	//}
+
+	// initialize the filename variable.
+    // memset(filename, 0, sizeof(filename));
+	ZeroMemory(filename, sizeof(filename));
+
+    // get the file size and ensure it's not zero.
+    if (GetFileSize(h_file, &file_size_hi) == 0)
+        return FALSE;
+
+    // create a file mapping object.
+    if ((h_filemap = CreateFileMapping(h_file, NULL, PAGE_READONLY, 0, 1, NULL)) == NULL)
+        return FALSE;
+
+    // create a file mapping to get the file name.
+    if ((mem = MapViewOfFile(h_filemap, FILE_MAP_READ, 0, 0, 1)) == NULL)
+        return FALSE;
+
+    // get the mapped file's name.
+    if (!pGetMappedFileName (GetCurrentProcess(), mem, filename, MAX_PATH))
+        return FALSE;
+
+    // strip the device path and copy the name to the target buffer.
+    stripped = strrchr(filename, '\\');
+    strncpy(target_filename, stripped + 1, 256);
+
+    // cleanup.
+    UnmapViewOfFile(mem);
+    CloseHandle(h_filemap);
+
+    return TRUE;
+}
+
+BOOL str_filename_from_handle (HANDLE h_file, string &target_filename)
+{
+	char strbuf[256];
+	bool result;
+	result=get_filename_from_handle(h_file,strbuf);
+	target_filename.assign(strbuf);
+	return result;
+}
+
+/* need ntdll.h, http://www.koders.com/c/fid189758E75BE39CF44E8BE174A7E0CC4605194FDE.aspx
+BOOL str_filename_from_handle2 (HANDLE h_file, string &target_filename)
+{
+    UNICODE_STRING AdjustedName;
+    UNICODE_STRING FullDosName;
+    NTSTATUS Status;
+    PLDR_DATA_TABLE_ENTRY tmpModule;
+    HANDLE SectionHandle;
+    ULONG ViewSize;
+    PVOID ImageBase;
+    PIMAGE_NT_HEADERS NtHeaders;
+    BOOLEAN MappedAsDataFile;
+    PVOID ArbitraryUserPointer;
+
+	// Map the dll into the process 
+
+    ViewSize = 0;
+    ImageBase = 0;
+    ArbitraryUserPointer = NtCurrentTeb()->Tib.ArbitraryUserPointer;
+    NtCurrentTeb()->Tib.ArbitraryUserPointer = FullDosName.Buffer;
+    Status = NtMapViewOfSection(SectionHandle,
+                                NtCurrentProcess(),
+                                &ImageBase,
+                                0,
+                                0,
+                                NULL,
+                                &ViewSize,
+                                0,
+                                MEM_COMMIT,
+                                PAGE_READONLY);
+    NtCurrentTeb()->Tib.ArbitraryUserPointer = ArbitraryUserPointer;
+    if (!NT_SUCCESS(Status))
+      {
+        DPRINT1("map view of section failed (Status 0x%08lx)\n", Status);
+        RtlFreeUnicodeString(&FullDosName);
+        NtClose(SectionHandle);
+        return(Status);
+      }
+    if (NULL != BaseAddress)
+      {
+        *BaseAddress = ImageBase;
+      }
+
+    //Get and check the NT headers
+    NtHeaders = RtlImageNtHeader(ImageBase);
+    if (NtHeaders == NULL)
+      {
+        DPRINT1("RtlImageNtHeaders() failed\n");
+        NtUnmapViewOfSection (NtCurrentProcess (), ImageBase);
+        NtClose (SectionHandle);
+        RtlFreeUnicodeString(&FullDosName);
+        return STATUS_UNSUCCESSFUL;
+      }
+}
+*/

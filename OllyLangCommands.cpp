@@ -143,9 +143,8 @@ bool OllyLang::DoASK(string args)
 		if (wndProg.hw!=NULL)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 
-		HINSTANCE hi = (HINSTANCE)GetModuleHandle("ODbgScript.dll");
 		HWND hw = 0; //not modal but dialog need to be closed on plugin close.
-		char* returned_buffer = (char*)DialogBoxParam(hi, MAKEINTRESOURCE(IDD_INPUT), hw, (DLGPROC) InputDialogProc, (LPARAM)title.c_str());
+		char* returned_buffer = (char*)DialogBoxParam(hinstModule(), MAKEINTRESOURCE(IDD_INPUT), hw, (DLGPROC) InputDialogProc, (LPARAM)title.c_str());
 		if ((BYTE)returned_buffer != NULL)
 		{
 			string returned = returned_buffer;
