@@ -532,8 +532,8 @@ ATOI str [, base=16.]
 Converts a string to integer
 Returns the integer in the reserved $RESULT variable
 Example:
-	itoa "F"
-	itoa "10", 10.
+	atoi "F"
+	atoi "10", 10.
 
 BC [addr]
 ---------
