@@ -1277,6 +1277,7 @@ bool OllyLang::DoFIND(string args)
 	{
 		itoa(rev(dw),buffer,16);
 		string data1=buffer;
+		transform( data1.begin(),data1.end(), data1.begin(),(int(*)(int)) toupper );
 		while(data1.length() < data.length())
 			data1.insert(0,"0");
 		while (data1.length() > data.length())
