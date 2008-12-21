@@ -57,6 +57,10 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.66 (21 Dec 2008)
++ GOPI (Get Operand Information) to get asm operand informations (TYPE, SIZE, ADDR, DATA, GOOD)
+* Fixed OPCODE, GCI, GAPI, REF commands, ReadMemory replaced by ReadCommand (bug on Vista ?)
+
 1.65 (SVN)
 + BPHWC without parameter clears all hardware breakpoints (same as BPHWCALL, which could be removed/renamed)
 + BC without parameter clears all loaded breakpoints (Breakpoints Window)
@@ -964,6 +968,22 @@ GO addr
 Executes to specified address (like G in SoftIce)
 Example:
 	go 401005
+
+GOPI addr, index, info
+--------------
+Gets information about operands of asm command
+
+"index" is between 1 and 3
+
+"info" can be :
+	- TYPE Type of operand (extended set DEC_xxx, see OllyDbg Plugin API)
+	- SIZE Size of operand, bytes
+	- GOOD Whether address and data valid
+	- ADDR Address if memory, index if register
+	- DATA Actual value (only integer operands)
+
+Example:
+	GOPI eip, 1, SIZE
 
 GPA proc, lib, [0,1]
 --------------------

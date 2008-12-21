@@ -1847,7 +1847,9 @@ bool OllyLang::DoGAPI(string args)
 
 	if(GetDWOpValue(ops[0], addr)){
 		BYTE buffer[MAXCMDSIZE];
-		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+		//size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+		size=Readcommand(addr,(char *) buffer);
+
 		
 		if (size>0) {
 			t_disasm disasm;
@@ -1962,7 +1964,8 @@ bool OllyLang::DoGCI(string args)
 		transform(param.begin(), param.end(), param.begin(), toupper);
 
 		BYTE buffer[MAXCMDSIZE];
-		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+//		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+		size=Readcommand(addr,(char *) buffer);
 
 		if (size>0) 
 		{
@@ -2299,6 +2302,70 @@ bool OllyLang::DoGO(string args)
 
 	return false;
 }
+
+//Get Code Information
+bool OllyLang::DoGOPI(string args)
+{
+    string ops[3], param;
+	ulong addr,size,index;
+
+	if(!CreateOp(args, ops, 3))
+		return false;
+
+	if ( GetDWOpValue(ops[0], addr) 
+	   && GetDWOpValue(ops[1], index) 
+	   && GetSTROpValue("\""+ops[2]+"\"", param) )
+	{
+
+		index--;
+		if (index < 0 || index > 2) {
+			errorstr = "Bad operand index (1-3) !";
+			return false;
+		}
+
+		transform(param.begin(), param.end(), param.begin(), toupper);
+
+		BYTE buffer[MAXCMDSIZE]={0};
+//		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+		size=Readcommand(addr,(char *) buffer);
+
+		if (size>0) 
+		{
+			t_disasm disasm;
+			size=Disasm(buffer,size,addr,NULL,&disasm,DISASM_ALL,Getcputhreadid());
+
+			if (size<=0)
+				return false;
+			else if (param == "TYPE")
+			{
+				variables["$RESULT"] = disasm.optype[index]; // Type of operand (extended set DEC_xxx)
+				return true;
+			}
+			else if (param == "SIZE") 
+			{
+				variables["$RESULT"] = disasm.opsize[index]; // Size of operand, bytes
+				return true;
+			}
+			else if (param == "GOOD") 
+			{
+				variables["$RESULT"] = disasm.opgood[index]; // Whether address and data valid
+				return true;
+			}
+			else if (param == "ADDR") 
+			{
+				variables["$RESULT"] = disasm.opaddr[index]; // Address if memory, index if register
+				return true;
+			}
+			else if (param == "DATA") 
+			{
+				variables["$RESULT"] = disasm.opdata[index]; // Actual value (only integer operands)
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 
 //gpa "LoadLibraryA","kernel32.dll"
 bool OllyLang::DoGPA(string args)
@@ -3429,7 +3496,8 @@ bool OllyLang::DoOPCODE(string args)
 	if(GetDWOpValue(ops[0], addr))
 	{
 		BYTE buffer[MAXCMDSIZE];
-		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+//		size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+		size=Readcommand(addr,(char *) buffer);
 		
 		if (size>0) 
 		{
@@ -3632,7 +3700,9 @@ bool OllyLang::DoREF(string args)
 			
 			//Info to get destination address
 			BYTE buffer[MAXCMDSIZE];
-			size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+//			size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
+			size=Readcommand(addr,(char *) buffer);
+
 			t_disasm disasm;
 			size=Disasm(buffer, size, addr, NULL, &disasm, DISASM_SIZE, NULL);
 			if (size==0)

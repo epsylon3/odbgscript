@@ -118,6 +118,7 @@ OllyLang::OllyLang()
 	commands["gmi"] = &OllyLang::DoGMI;
 	commands["gn"] = &OllyLang::DoGN;
 	commands["go"] = &OllyLang::DoGO;
+	commands["gopi"] = &OllyLang::DoGOPI;	
 	commands["gpa"] = &OllyLang::DoGPA;
 	commands["gpi"] = &OllyLang::DoGPI;
 	commands["gpp"] = &OllyLang::DoGPP;

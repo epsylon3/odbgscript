@@ -215,6 +215,7 @@ private:
 	bool DoGMI(string args);
 	bool DoGN(string args);
 	bool DoGO(string args);
+	bool DoGOPI(string args);
 	bool DoGPA(string args);
 	bool DoGPP(string args);
 	bool DoGPI(string args);
