@@ -57,6 +57,9 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.67 (6 Feb 2009)
+* Fixed a bad pointer on debug event which could crash Ollydbg
+
 1.66 (21 Dec 2008)
 + GOPI (Get Operand Information) to get asm operand informations (TYPE, SIZE, ADDR, DATA, GOOD)
 * Fixed OPCODE, GCI, GAPI, REF commands, ReadMemory replaced by ReadCommand (bug on Vista ?)

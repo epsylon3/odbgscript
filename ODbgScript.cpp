@@ -106,7 +106,8 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 	}
 	*/
 
-	if (debugevent && debugevent->dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT && debugevent->u.DebugString.nDebugStringLength>0)
+	if (debugevent && debugevent->dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT && debugevent->u.DebugString.nDebugStringLength>0
+		&& !IsBadCodePtr((FARPROC)debugevent->u.DebugString.lpDebugStringData))
 		MsgBox(debugevent->u.DebugString.lpDebugStringData,"");
 
 	// Check for breakpoint jumps
