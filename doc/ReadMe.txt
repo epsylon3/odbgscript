@@ -58,7 +58,8 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.67 (6 Feb 2009)
-* Fixed a bad pointer on debug event which could crash Ollydbg
+* Fixed ASM command with [pointers]
+* Fixed a bad pointer on debug event which could crash Ollydbg (thanks to hnedka)
 
 1.66 (21 Dec 2008)
 + GOPI (Get Operand Information) to get asm operand informations (TYPE, SIZE, ADDR, DATA, GOOD)
@@ -1533,8 +1534,8 @@ with improvement ideas etc.
 
 R@dier for the great dumping engine.
 
-shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong
-for ideas and bug report on the new ODbgScript
+shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong,
+hnedka for ideas and bug report on the new ODbgScript
 
 And of course Olly for this great debugger!
 
