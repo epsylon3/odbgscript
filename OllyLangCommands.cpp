@@ -135,6 +135,10 @@ bool OllyLang::DoASK(string args)
 	string ops[1];
 	string title;
 
+	//Reset $RESULT, (when dialog closed)
+	variables["$RESULT"] = 0;
+	variables["$RESULT_1"] = 0;
+
 	if(!CreateOperands(args, ops, 1))
 		return false;
 

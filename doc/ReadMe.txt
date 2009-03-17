@@ -60,6 +60,7 @@ Get Trace Addr
 1.67 (6 Feb 2009)
 * Fixed ASM command with [pointers]
 * Fixed a bad pointer on debug event which could crash Ollydbg (thanks to hnedka)
+* Set $RESULT to 0 on ASK dialog close
 
 1.66 (21 Dec 2008)
 + GOPI (Get Operand Information) to get asm operand informations (TYPE, SIZE, ADDR, DATA, GOOD)
