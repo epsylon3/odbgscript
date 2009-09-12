@@ -58,6 +58,7 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.68 (SVN 12 Sep 2009)
+* Fixed ASMTXT with 00 opcode
 * Fixed "INC a" when "a" is a variable and a has value 9
 
 1.67 (6 Feb 2009)

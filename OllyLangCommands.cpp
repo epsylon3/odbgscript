@@ -202,7 +202,7 @@ bool OllyLang::DoASM(string args)
 			return false;
 		}
 		else
-		{
+		{ 
 			Writememory(model.code, addr, len, MM_SILENT|MM_DELANAL);
 			Broadcast(WM_USER_CHALL, 0, 0);
 			variables["$RESULT"] = len;
@@ -222,11 +222,11 @@ bool OllyLang::DoASMTXT(string args)
 	   return false;
 
 	FILE *fp = NULL;
-    t_asmmodel model;
+    t_asmmodel model={0};
 	string asmfile;
-    char buff[128]={0},opcode[4096]={0},error[256]={0};
-	long len = 0,lens = 0,line = 0;
-	ulong addr;
+    char opcode[4096]={0},error[256]={0};
+	long len = 0,line = 0;
+	ulong addr, p, lens = 0,attempt = 0;
 	int ii;
 
 	if(GetDWOpValue(ops[0], addr) 
@@ -239,14 +239,14 @@ bool OllyLang::DoASMTXT(string args)
 			(asmfile.c_str(), ios::in);
 			fin.open(asmfile.c_str());
 
+			p = (ulong) opcode;
 			while(getline(fin, asmline))
 			{
 				line++;
 				asmline=FormatAsmDwords(asmline);
-				len=Assemble((char*) asmline.c_str(), 0, &model, 0, 3, error);                     
-				ii = sprintf(buff, "%s", (model.code));
-				strncat(opcode,buff,len);
-				lens = (lens + len);
+				len=Assemble((char*) asmline.c_str(), addr+lens, &model, attempt, 3, error);                     
+				memcpy((void*) (p + lens),&model.code,len);
+				lens += len;
 			} 
 			Writememory(opcode, addr, lens, MM_DELANAL);
 			Broadcast(WM_USER_CHALL, 0, 0);
