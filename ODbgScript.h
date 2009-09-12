@@ -3,8 +3,8 @@
 using namespace std;
 
 #define VERSIONHI      1               // High plugin version
-#define VERSIONLO      67              // Low plugin version
-#define VERSIONST      3               // plugin state (0hacked, 1svn 2beta 3official release)
+#define VERSIONLO      68              // Low plugin version
+#define VERSIONST      1               // plugin state (0hacked, 1svn 2beta 3official release)
 
 ///long
 static char		wndprogclass[32];	   // Name of progress window class

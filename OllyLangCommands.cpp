@@ -18,7 +18,8 @@ bool OllyLang::DoADD(string args)
 	if (GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 + dw2, buffer, 16);
+		// "0" to force hexa constant
+		args = ops[0] + ",0" + ultoa(dw1 + dw2, buffer, 16); 
 		nIgnoreNextValuesHist=1;
 		return DoMOV(args);
 	}

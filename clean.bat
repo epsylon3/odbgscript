@@ -1,4 +1,4 @@
-cd "C:\VS6\MyProjects\ODbgScript"
+cd "D:\VC\MyProjects\ODbgScript"
 move Release\ODbgScript.dll .\
 del /Q /F Release\*.*
 del /Q /F Debug\*.*
