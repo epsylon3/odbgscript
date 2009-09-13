@@ -20,10 +20,20 @@ INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 // This is the table for Script Execution
 typedef struct t_dbgmemblock {
 
-	void *	hmem;		//Memory Adress
-	ulong	size;
-	int		script_pos;
-	bool	autoclean;
+	void *	hmem;		 //Memory Adress
+	ulong	size;		 //Block Size
+	int		script_pos;	 //Registred at script pos
+	bool	autoclean;	 //On script restart/change
+
+	ulong	free_at_eip; //To free memory block used in ASM commands
+	
+	//Optional actions to do
+	bool	restore_registers;
+	bool	listmemory;
+
+	//Delayed Result Origin
+	bool	result_register;
+	int		reg_to_return;
 
 } t_dbgmemblock; 
 
@@ -67,6 +77,7 @@ public:
 	bool Resume();
 	bool Reset();
 	bool Step(int forceStep);
+	bool ProcessAddonAction();
 
 	// Script Window
 	ulong GetFirstCodeLine(ulong from=0);
@@ -88,10 +99,10 @@ public:
 	bool callCommand(string cmd, string args);
 
 	// Free Allocated Virtual Memory
-	bool clearMemBlocks();
-	void regBlockToFree(void * hMem);
-	void regBlockToFree(void * hMem, ulong size);
-	bool eraseMemBlock(void * hMem);
+	bool freeMemBlocks();
+	void regBlockToFree(t_dbgmemblock &block);
+	void regBlockToFree(void * hMem, ulong size, bool autoclean);
+	bool unregMemBlock(void * hMem);
 
 	// The script that is being executed
 	vector<string> script;
@@ -108,7 +119,7 @@ public:
 
 	int script_state;
 	bool require_ollyloop;
-
+	bool require_addonaction;
 
 private:
 	
@@ -359,6 +370,8 @@ private:
 	// Save / Restore Registers
 	struct t_reg_backup
 	{
+		int loaded;
+
 		DWORD eax;
 		DWORD ebx;
 		DWORD ecx;
@@ -368,6 +381,8 @@ private:
 
 		DWORD esp;
 		DWORD ebp;
+
+		DWORD eip;
 	} reg_backup;
 	
 	bool SaveRegisters(bool stackToo);

@@ -57,6 +57,10 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.69 (SVN)
++ Added system to free memory blocks allocated directly after Ollydbg processed asm command(s)
++ LOADLIB now returns address of loaded library (delayed result)
+
 1.68 (13 Sep 2009)
 + LOADLIB command to load a library in debugged program
 + PUSHA/POPA commands to Save/Restore Registers
@@ -1128,16 +1132,17 @@ LM addr, size, filename
 load Dm file to mem
 LM is the opposite of the DM command
 Example:
-  lm 0x401000, 0x100, "test.bin"
+	lm 0x401000, 0x100, "test.bin"
 
 LOADLIB dllname
 ---------------
 Load a dll into debugged program memory
 Could be usefull to set breakpoints on dynamically loaded library
+Returns address of loaded library
 Example:
-  PUSHA
+	pusha
 	loadlib "user32.dll"
-  POPA
+	popa
   
 LOG src [,prefix]
 -----------------

@@ -140,6 +140,17 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 	if(status == STAT_STOPPED && (script_state == SS_RUNNING || script_state == SS_LOADED))
 	{
 
+		if (ollylang->require_addonaction) {
+			try
+			{
+				ollylang->ProcessAddonAction();
+			}
+			catch( ... )
+			{
+				MessageBox(hwndOllyDbg(), "An error occured in the plugin!\nPlease contact Epsylon3.", "ODbgScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+			}
+		}
+
 		try
 		{
 			ollylang->Step(0);

@@ -84,7 +84,7 @@ bool OllyLang::DoALLOC(string args)
 		Listmemory();
 		require_ollyloop=1;
 
-		regBlockToFree((void *)addr, size);
+		regBlockToFree((void *)addr, size, false);
 		return true;
 	}
 	return false;
@@ -1173,8 +1173,6 @@ bool OllyLang::DoEXEC(string args)
 	script_pos++;
 	setProgLineResult(script_pos,variables["$RESULT"]);
 
-	require_ollyloop=1;
-
 	// Assemble and write code to memory (everything between EXEC and ENDE)
 	while(ToLower(script[script_pos]) != "ende")
 	{
@@ -1206,6 +1204,7 @@ bool OllyLang::DoEXEC(string args)
 	len = Assemble(buffer, (ulong)pmemforexec + totallen, &model, 0, 0, error);
 	if (len < 0) {
 		errorstr = error;
+		return false;
 	} else {
 		WriteProcessMemory(hDebugee, (LPVOID)((ulong)pmemforexec + totallen), model.code, len, 0);
 	}
@@ -1221,7 +1220,16 @@ bool OllyLang::DoEXEC(string args)
 	Broadcast(WM_USER_CHREG, 0, 0);
 	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
 	
-	regBlockToFree(pmemforexec);
+	t_dbgmemblock block={0};
+	block.hmem = pmemforexec;
+	block.size = 0x1000;
+	block.script_pos = script_pos;
+	block.free_at_eip = eip;
+	block.autoclean = true;
+
+	regBlockToFree(block);
+	require_addonaction = 1;
+	require_ollyloop = 1;
 
 	return true;
 }
@@ -1838,14 +1846,15 @@ bool OllyLang::DoFREE(string args)
 		require_ollyloop=1;
 		if (size==0)
 			if (DelProcessMemoryBloc(addr)) {
-				eraseMemBlock(hMem);
+				unregMemBlock(hMem);
+				Listmemory();
 				return true;
 			}
 		else {
 			
 			HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
 			variables["$RESULT"] = (DWORD) VirtualFreeEx(hDbgPrc,hMem,size,MEM_DECOMMIT);
-			eraseMemBlock(hMem);
+			unregMemBlock(hMem);
 			Listmemory();
 			return true;
 		}
@@ -2933,6 +2942,7 @@ bool OllyLang::DoLOADLIB(string args)
 	ulong fnload;
 
 	SaveRegisters(true);
+	variables["$RESULT"] = 0;
 
 	nIgnoreNextValuesHist++;
 	DoGPA("\"LoadLibraryA\",\"kernel32.dll\"");
@@ -2947,6 +2957,19 @@ bool OllyLang::DoLOADLIB(string args)
 	
 	Writememory((void*)str.c_str(), (ulong) hMem, str.length(), MM_DELANAL|MM_SILENT);
 
+	//t_thread* pt = Findthread(Getcputhreadid());
+
+	t_dbgmemblock block={0};
+	block.hmem = hMem;
+	block.size = 0x1000;
+	block.script_pos = script_pos;
+	block.free_at_eip = reg_backup.eip;
+	block.result_register = true;
+	block.reg_to_return = REG_EAX;
+	block.restore_registers = true;
+	block.listmemory = true;
+	block.autoclean = true;
+
 	nIgnoreNextValuesHist++;
 	if (DoPUSH(bfdlladdr)) {
 
@@ -2954,23 +2977,23 @@ bool OllyLang::DoLOADLIB(string args)
 		sprintf(bffnloadlib,"%09X",fnload);
 		string libPtrToLoad = bffnloadlib;
 
-		ExecuteASM("call "+libPtrToLoad);
-				
-		t_thread* pt = Findthread(Getcputhreadid());
+		ExecuteASM("call "+libPtrToLoad);	
 
-		variables["$RESULT"] = pt->reg.r[REG_EAX];
+		variables["$RESULT"] = 0;
+
+		// result returned after process
+		// variables["$RESULT"] = pt->reg.r[REG_EAX];
+
+		// Free memory block after next ollyloop
+		regBlockToFree(block);
+		require_addonaction = 1;
+		require_ollyloop = 1;
+		
+		return true;
 	}
-	Listmemory();
-	DoREFRESH("");
 	
-	//free allocated memory bloc (need to be done after executeASM which requiere olly loop)
-	//VirtualFreeEx(hDbgPrc,hMem,size+1,MEM_DECOMMIT);
-	
-	regBlockToFree(hMem);
 
-	RestoreRegisters(true);
-
-	return true;
+	return false;
 }
 
 bool OllyLang::DoLOG(string args)
@@ -3679,7 +3702,10 @@ bool OllyLang::DoPOP(string args)
 
 bool OllyLang::DoPOPA(string args)
 {
-	return RestoreRegisters(true);
+	bool result = RestoreRegisters(true);
+	if (result)
+		require_ollyloop=1;
+	return result;
 }
 
 bool OllyLang::DoPREOP(string args)
