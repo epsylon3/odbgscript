@@ -75,7 +75,7 @@ PostBuild_Cmds=copy.bat
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G5 /Zp1 /MTd /Gi /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /FR /J /FD /GZ /c
+# ADD CPP /nologo /G6 /Zp1 /MTd /Gi /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /FR /J /FD /GZ /c
 # SUBTRACT CPP /Gy /u /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /win32

@@ -83,6 +83,8 @@ bool OllyLang::DoALLOC(string args)
 		//Refresh Memory Window
 		Listmemory();
 		require_ollyloop=1;
+
+		regBlockToFree((void *)addr, size);
 		return true;
 	}
 	return false;
@@ -227,7 +229,7 @@ bool OllyLang::DoASMTXT(string args)
     char opcode[4096]={0},error[256]={0};
 	long len = 0,line = 0;
 	ulong addr, p, lens = 0,attempt = 0;
-	int ii;
+
 
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1],asmfile))
@@ -1219,6 +1221,8 @@ bool OllyLang::DoEXEC(string args)
 	Broadcast(WM_USER_CHREG, 0, 0);
 	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
 	
+	regBlockToFree(pmemforexec);
+
 	return true;
 }
 
@@ -1825,16 +1829,23 @@ bool OllyLang::DoFREE(string args)
 		return false;
 	}
 
+	void * hMem;
 	ulong addr, size;
 	if(GetDWOpValue(ops[0], addr) && GetDWOpValue(ops[1], size))
 	{
+		hMem = (void*)addr;
 		//To Refresh Memory Window
 		require_ollyloop=1;
 		if (size==0)
-			return DelProcessMemoryBloc(addr);
+			if (DelProcessMemoryBloc(addr)) {
+				eraseMemBlock(hMem);
+				return true;
+			}
 		else {
+			
 			HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
-			variables["$RESULT"] = (DWORD) VirtualFreeEx(hDbgPrc,(void*)addr,size,MEM_DECOMMIT);
+			variables["$RESULT"] = (DWORD) VirtualFreeEx(hDbgPrc,hMem,size,MEM_DECOMMIT);
+			eraseMemBlock(hMem);
 			Listmemory();
 			return true;
 		}
@@ -2401,6 +2412,7 @@ bool OllyLang::DoGPA(string args)
 
 			if (dontfree) {
 
+				nIgnoreNextValuesHist++;
 				DoGPA("\"LoadLibraryA\",\"kernel32.dll\"");
 
 				HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
@@ -2905,6 +2917,59 @@ bool OllyLang::DoLEN(string args)
 		return false;
 
 	variables["$RESULT"] = (int) str.length();
+	return true;
+}
+
+bool OllyLang::DoLOADLIB(string args)
+{
+	string ops[1],str;
+
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	if(!GetSTROpValue(ops[0], str))
+		return false;
+
+	ulong fnload;
+
+	SaveRegisters(true);
+
+	nIgnoreNextValuesHist++;
+	DoGPA("\"LoadLibraryA\",\"kernel32.dll\"");
+	fnload = variables["$RESULT"].dw;
+
+	//alloc memory bloc to store DLL name
+	HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
+	void * hMem = VirtualAllocEx(hDbgPrc,NULL,0x1000,MEM_RESERVE|MEM_COMMIT,PAGE_EXECUTE_READWRITE);
+
+	char bfdlladdr[10]={0};
+	sprintf(bfdlladdr, "%09lX", hMem);
+	
+	Writememory((void*)str.c_str(), (ulong) hMem, str.length(), MM_DELANAL|MM_SILENT);
+
+	nIgnoreNextValuesHist++;
+	if (DoPUSH(bfdlladdr)) {
+
+		char bffnloadlib[10]={0};
+		sprintf(bffnloadlib,"%09X",fnload);
+		string libPtrToLoad = bffnloadlib;
+
+		ExecuteASM("call "+libPtrToLoad);
+				
+		t_thread* pt = Findthread(Getcputhreadid());
+
+		variables["$RESULT"] = pt->reg.r[REG_EAX];
+	}
+	Listmemory();
+	DoREFRESH("");
+	
+	//free allocated memory bloc (need to be done after executeASM which requiere olly loop)
+	//VirtualFreeEx(hDbgPrc,hMem,size+1,MEM_DECOMMIT);
+	
+	regBlockToFree(hMem);
+
+	RestoreRegisters(true);
+
 	return true;
 }
 
@@ -3612,6 +3677,11 @@ bool OllyLang::DoPOP(string args)
 	return false;
 }
 
+bool OllyLang::DoPOPA(string args)
+{
+	return RestoreRegisters(true);
+}
+
 bool OllyLang::DoPREOP(string args)
 {
 	string ops[1];
@@ -3650,11 +3720,11 @@ bool OllyLang::DoPUSH(string args)
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		args = "esp, esp-4";
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		DoMOV(args);
 
 		args = "[esp], " + ops[0];
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		DoMOV(args);
 
 		t_thread* pt = Findthread(Getcputhreadid());	
@@ -3666,6 +3736,10 @@ bool OllyLang::DoPUSH(string args)
 	return false;
 }
 
+bool OllyLang::DoPUSHA(string args)
+{
+	return SaveRegisters(true);
+}
 
 bool OllyLang::DoREADSTR(string args)
 {

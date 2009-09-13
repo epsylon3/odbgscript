@@ -57,7 +57,10 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.68 (SVN 12 Sep 2009)
+1.68 (13 Sep 2009)
++ LOADLIB command to load a library in debugged program
++ PUSHA/POPA commands to Save/Restore Registers
++ Added an automatic memory block cleaning system, which cleans memory allocated by some script commands (ASM, LOADLIB)
 * Fixed ASMTXT with 00 opcode
 * Fixed "INC a" when "a" is a variable and a has value 9
 
@@ -1106,7 +1109,7 @@ Example:
 	lbl eip, "NiceJump"
 
 LC
-----
+--
 Clear Main Log Window
 
 LCLR
@@ -1114,21 +1117,30 @@ LCLR
 Clear Script Log Window
 
 LEN str
---------------
+-------
 Get length of a string
 Example:
 	len "NiceJump"
 	msg $RESULT
 
 LM addr, size, filename
--------
+-----------------------
 load Dm file to mem
 LM is the opposite of the DM command
 Example:
   lm 0x401000, 0x100, "test.bin"
 
+LOADLIB dllname
+---------------
+Load a dll into debugged program memory
+Could be usefull to set breakpoints on dynamically loaded library
+Example:
+  PUSHA
+	loadlib "user32.dll"
+  POPA
+  
 LOG src [,prefix]
--------
+-----------------
 Logs src to OllyDbg log window.
 If src is a constant string the string is logged as it is.
 If src is a variable or register its logged with its name.
@@ -1234,8 +1246,11 @@ Example:
 
 POP dw
 ------
-
 Retrieve dword from stack
+
+POPA
+-----
+RESTORE all registers from plugin memory (saved with PUSHA)
 
 PREOP addr
 ----------
@@ -1247,6 +1262,11 @@ Example:
 PUSH dw
 -------
 Add dword to stack
+
+PUSHA
+-----
+Save all register in plugin memory (to be restored by POPA)
+Stack is not used by this command
 
 READSTR str, len
 -------

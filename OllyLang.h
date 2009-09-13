@@ -17,6 +17,16 @@ INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 #include "Progress.h"
 #include "LogWindows.h"
 
+// This is the table for Script Execution
+typedef struct t_dbgmemblock {
+
+	void *	hmem;		//Memory Adress
+	ulong	size;
+	int		script_pos;
+	bool	autoclean;
+
+} t_dbgmemblock; 
+
 class OllyLang
 {
 public:
@@ -32,6 +42,9 @@ public:
 	
 	string scriptpath;
 	string currentdir;
+
+	//allocated memory blocks to free at end of script
+	vector<t_dbgmemblock> tMemBlocks;
 
 	//to know if dialog is opened, to destroy on reset
 	HWND hwndinput;
@@ -74,6 +87,12 @@ public:
 	bool isCommand(string cmd);
 	bool callCommand(string cmd, string args);
 
+	// Free Allocated Virtual Memory
+	bool clearMemBlocks();
+	void regBlockToFree(void * hMem);
+	void regBlockToFree(void * hMem, ulong size);
+	bool eraseMemBlock(void * hMem);
+
 	// The script that is being executed
 	vector<string> script;
 	// Variables that exist
@@ -89,6 +108,7 @@ public:
 
 	int script_state;
 	bool require_ollyloop;
+
 
 private:
 	
@@ -236,7 +256,8 @@ private:
 	bool DoLBL(string args);
 	bool DoLC(string args);	
 	bool DoLCLR(string args);
-	bool DoLEN(string args);
+	bool DoLEN(string args);	
+	bool DoLOADLIB(string args); bool _DoLOADLIB(void);
 	bool DoLOG(string args);
 	bool DoLOGBUF(string args);
     bool DoLM(string args);
@@ -253,8 +274,10 @@ private:
 	bool DoOPENTRACE(string args);
 	bool DoPAUSE(string args);
 	bool DoPOP(string args);
+	bool DoPOPA(string args);
 	bool DoPREOP(string args);
 	bool DoPUSH(string args);
+	bool DoPUSHA(string args);
 	bool DoREADSTR(string args);
 	bool DoREFRESH(string args);
 	bool DoREPL(string args);
@@ -332,4 +355,22 @@ private:
 	bool  DelProcessMemoryBloc(DWORD address);
 
 	bool ExecuteASM(string command);
+
+	// Save / Restore Registers
+	struct t_reg_backup
+	{
+		DWORD eax;
+		DWORD ebx;
+		DWORD ecx;
+		DWORD edx;
+		DWORD esi;
+		DWORD edi;
+
+		DWORD esp;
+		DWORD ebp;
+	} reg_backup;
+	
+	bool SaveRegisters(bool stackToo);
+	bool RestoreRegisters(bool stackToo);
+
 };

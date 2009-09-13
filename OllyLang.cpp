@@ -144,6 +144,7 @@ OllyLang::OllyLang()
     commands["lc"] = &OllyLang::DoLC;
     commands["lclr"] = &OllyLang::DoLCLR;
     commands["len"] = &OllyLang::DoLEN;
+	commands["loadlib"] = &OllyLang::DoLOADLIB;
     commands["lm"] = &OllyLang::DoLM;
 	commands["log"] = &OllyLang::DoLOG;
 	commands["logbuf"] = &OllyLang::DoLOGBUF;
@@ -160,8 +161,10 @@ OllyLang::OllyLang()
 	commands["opentrace"] = &OllyLang::DoOPENTRACE;
 	commands["pause"] = &OllyLang::DoPAUSE;
 	commands["pop"] = &OllyLang::DoPOP;
+	commands["popa"] = &OllyLang::DoPOPA;
 	commands["preop"] = &OllyLang::DoPREOP;
 	commands["push"] = &OllyLang::DoPUSH;
+	commands["pusha"] = &OllyLang::DoPUSHA;
 	commands["readstr"] = &OllyLang::DoREADSTR;
 	commands["refresh"] = &OllyLang::DoREFRESH;
 	commands["ref"] = &OllyLang::DoREF;
@@ -223,6 +226,7 @@ OllyLang::~OllyLang()
 
 	labels.clear();
 	script.clear();
+	tMemBlocks.clear();
 	clearProgLines();
 	clearLogLines();
 	Reset();
@@ -523,6 +527,7 @@ bool OllyLang::Pause()
 
 bool OllyLang::Reset()
 {
+	clearMemBlocks();
 	variables.clear();
 	bpjumps.clear();
 	calls.clear();
@@ -2162,6 +2167,8 @@ bool OllyLang::ExecuteASM(string command) //NOT FINISHED
 	DbgMsgHex(pmemexec);
 //	DelProcessMemoryBloc(pmemexec);
 
+	regBlockToFree(hDebugee);	
+
 	return true;
 }
 
@@ -2183,5 +2190,103 @@ bool OllyLang::callCommand(string cmd, string args)
 	return false;
 }
 
+void OllyLang::regBlockToFree(void * hMem)
+{
+	t_dbgmemblock block={0};
+	block.hmem = hMem;
+	block.size = 0x1000;
+	block.script_pos = script_pos;
+	block.autoclean = true;
+
+	tMemBlocks.push_back(block);
+}
+
+void OllyLang::regBlockToFree(void * hMem, ulong size)
+{
+	t_dbgmemblock block={0};
+	block.hmem = hMem;
+	block.size = size;
+	block.script_pos = script_pos;
+	block.autoclean = false; //for ALLOC FREE
+
+	tMemBlocks.push_back(block);
+}
+
+bool OllyLang::eraseMemBlock(void * hMem)
+{
+	t_dbgmemblock * block;
+	for (int b=0; b<tMemBlocks.size(); b++) {
+		block = &tMemBlocks[b];
+		if (block->hmem = hMem) {
+			tMemBlocks.erase(block);
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool OllyLang::clearMemBlocks()
+{
+	if (!tMemBlocks.empty()) {
+
+		t_dbgmemblock * block;	
+		HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
+
+		while (tMemBlocks.size() > 0) {
+			block = &tMemBlocks[tMemBlocks.size()-1];
+			if (block->autoclean)
+				VirtualFreeEx(hDbgPrc,block->hmem,block->size,MEM_DECOMMIT);
+			tMemBlocks.pop_back();
+		}
+
+		tMemBlocks.clear();
+		return true;
+	}
+	return false;
+}
+
+bool OllyLang::SaveRegisters(bool stackToo)
+{
+
+	t_thread* pt = Findthread(Getcputhreadid());			
+
+	reg_backup.eax = pt->reg.r[REG_EAX];
+	reg_backup.ebx = pt->reg.r[REG_EBX];
+	reg_backup.ecx = pt->reg.r[REG_ECX];
+	reg_backup.edx = pt->reg.r[REG_EDX];
+	reg_backup.esi = pt->reg.r[REG_ESI];
+	reg_backup.edi = pt->reg.r[REG_EDI];
+
+	if (stackToo) {
+		reg_backup.esp = pt->reg.r[REG_ESP];
+		reg_backup.ebp = pt->reg.r[REG_EBP];
+	}
+
+	return true;
+}
+
+bool OllyLang::RestoreRegisters(bool stackToo)
+{
+	t_thread* pt = Findthread(Getcputhreadid());			
+
+	pt->reg.r[REG_EAX] = reg_backup.eax;
+	pt->reg.r[REG_EBX] = reg_backup.ebx;
+	pt->reg.r[REG_ECX] = reg_backup.ecx;
+	pt->reg.r[REG_EDX] = reg_backup.edx;
+	pt->reg.r[REG_ESI] = reg_backup.esi;
+	pt->reg.r[REG_EDI] = reg_backup.edi;
+
+	if (stackToo) {
+		pt->reg.r[REG_ESP] = reg_backup.esp;
+		pt->reg.r[REG_EBP] = reg_backup.ebp;
+	}
+
+	pt->reg.modified = 1;
+	pt->regvalid = 1;
+	Broadcast(WM_USER_CHREG, 0, 0);
+
+	return true;
+}
 
 #include "OllyLangCommands.cpp"

@@ -66,7 +66,7 @@ LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,68,1,0
+ FILEVERSION 1,68,3,0
  PRODUCTVERSION 1,10,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -85,7 +85,7 @@ BEGIN
             VALUE "Comments", "Visual Version of OllyScript\0"
             VALUE "CompanyName", "Epsylon3\0"
             VALUE "FileDescription", "ODbgScript\0"
-            VALUE "FileVersion", "1, 68, 1, 0\0"
+            VALUE "FileVersion", "1, 68, 3, 0\0"
             VALUE "InternalName", "ODbgScript\0"
             VALUE "LegalCopyright", "Copyright © 2007\0"
             VALUE "LegalTrademarks", "\0"
