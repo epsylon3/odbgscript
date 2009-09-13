@@ -217,6 +217,7 @@ OllyLang::OllyLang()
 
 	require_ollyloop = 0;
 	require_addonaction = 0;
+	nIgnoreNextValuesHist = 0;
 
 	showVarHistory=true;
 	bUnicode=false;
@@ -311,6 +312,11 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			p=scriptline.find(";");
 			if (p==0) {
 				comment_todisplay=1;
+				scriptline.erase(p,1);
+				scriptline = ";" + trim(scriptline);
+				while(scriptline.find("\t")!=string::npos)
+					scriptline.replace(scriptline.find("\t"),1," ");
+
 			}
 			else if (scriptline.find("\"")!=string::npos) {
 
@@ -326,7 +332,6 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			continue;
 		} 
 		// ASM Blocks
-
 
 		scriptline = trim(scriptline);
 		if (scriptline=="") {
@@ -549,6 +554,9 @@ bool OllyLang::Reset()
 	tickcounthi=0;
 	break_memaddr=0;
 	break_reason=0;
+	require_ollyloop = 0;
+	require_addonaction = 0;
+	nIgnoreNextValuesHist = 0;
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;
@@ -925,6 +933,8 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 {
 
 	vector<string> v;
+	bool bResult = true;
+
 	if (len==1 || (split(v, args, ',') && v.size() == len))
 	{
 		if (len==1) v.push_back(args);
@@ -1137,19 +1147,22 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				goto operation_ok;
 
 			operation_failed:
-				if (nIgnoreNextValuesHist==0)
-					var_logging=true;
-				return false;
+				bResult = false;
+				break;
 
 			operation_ok:
-				var_logging=true;
-				if (nIgnoreNextValuesHist)
-					nIgnoreNextValuesHist--;
+				bResult = bResult;
 
 			} //if find_first_of
 
 		} //for
-		return true;
+
+		if (nIgnoreNextValuesHist>0)
+			nIgnoreNextValuesHist--;
+		if (nIgnoreNextValuesHist==0)
+			var_logging=true;
+
+		return bResult;
 	}
 	return false;
 }

@@ -20,7 +20,7 @@ bool OllyLang::DoADD(string args)
 	{
 		// "0" to force hexa constant
 		args = ops[0] + ",0" + ultoa(dw1 + dw2, buffer, 16); 
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
@@ -31,7 +31,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", \"" + v1.str +"\"";
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 	    return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
@@ -42,7 +42,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", " + "\"" + v1.str + "\"";
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	else if (GetANYOpValue(ops[0], str1) 
@@ -53,7 +53,7 @@ bool OllyLang::DoADD(string args)
 		v1+=v2;
 
 		args = ops[0] + ", " + "\"" + v1.str + "\"";
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -120,7 +120,7 @@ bool OllyLang::DoAND(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 & dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -941,7 +941,7 @@ bool OllyLang::DoDIV(string args)
 			return false;
 		}
 		args = ops[0] + ", " + ultoa(dw1 / dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -1606,7 +1606,7 @@ bool OllyLang::DoFINDCMDS(string args)
 
 	  if (cmds.find(";")==-1)
 	  {
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoFINDoneCMD(args);
 	  }
 
@@ -1655,7 +1655,7 @@ bool OllyLang::DoFINDCMDS(string args)
 	  DelProcessMemoryBloc(tmpaddr);
 
 	  args1 = ops[0] + ", " + "#" + opcode + "#";
-	  nIgnoreNextValuesHist=1;
+	  nIgnoreNextValuesHist++;
 	  return DoFIND(args1);
 	}
 	return false;
@@ -2087,7 +2087,7 @@ bool OllyLang::DoGMA(string args)
 				sMod.assign(tmod->name,SHORTLEN);
 				if (stricmp(sMod.c_str(),str.c_str())==0) {
 					Int2Hex(tmem->base, str);
-					nIgnoreNextValuesHist=1;
+					nIgnoreNextValuesHist++;
 					return DoGMI(str+","+ops[1]);		
 				}
 			}
@@ -2654,7 +2654,7 @@ bool OllyLang::DoGRO(string args)
 
 bool OllyLang::DoHANDLE(string args)
 {
-	string ops[2];
+	string ops[3];
 	bool useCaption=true;
 
 	if(!CreateOperands(args, ops, 3)) {
@@ -2944,7 +2944,6 @@ bool OllyLang::DoLOADLIB(string args)
 	SaveRegisters(true);
 	variables["$RESULT"] = 0;
 
-	nIgnoreNextValuesHist++;
 	DoGPA("\"LoadLibraryA\",\"kernel32.dll\"");
 	fnload = variables["$RESULT"].dw;
 
@@ -2977,6 +2976,7 @@ bool OllyLang::DoLOADLIB(string args)
 		sprintf(bffnloadlib,"%09X",fnload);
 		string libPtrToLoad = bffnloadlib;
 
+		nIgnoreNextValuesHist++;
 		ExecuteASM("call "+libPtrToLoad);	
 
 		variables["$RESULT"] = 0;
@@ -3362,7 +3362,7 @@ bool OllyLang::DoMOV(string args)
 	{
 		// Destination is memory address
 		// Get Address from Operators (+_*...)
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		CreateOperands(ops[0], &ops[0], 1);
 
 		if(GetDWOpValue(ops[0], addr))
@@ -3504,7 +3504,7 @@ bool OllyLang::DoOR(string args)
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 | dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -3521,7 +3521,7 @@ bool OllyLang::DoMUL(string args)
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 * dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -3546,7 +3546,7 @@ bool OllyLang::DoNEG(string args)
 			pop eax
 		}
 		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -3572,7 +3572,7 @@ bool OllyLang::DoNOT(string args)
 			pop eax
 		}
 		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -3674,26 +3674,27 @@ bool OllyLang::DoPOP(string args)
 {
 	string ops[1],args1;
 
+	nIgnoreNextValuesHist++;
+	var_logging=false;
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
 	ulong dw,dw1;
-
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		args = ops[0] + ", [esp]";
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist+=2;
 		DoMOV(args);
 
 		args1 = "esp, esp+4";
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist+=1;
 		DoMOV(args1);
 
 		t_thread* pt = Findthread(Getcputhreadid());	
-//		int regname = GetRegNr("esp");
      	dw1 = (pt->reg.r[4] -4);
+
 		Readmemory(&dw, dw1, 4, MM_DELANAL|MM_SILENT);
-		setProgLineValue(script_pos+1,dw);
+
 		return true;
 	}
 
@@ -3743,10 +3744,11 @@ bool OllyLang::DoPUSH(string args)
 
 	ulong dw,dw1;
 
+	//var_logging=false;
 	if(GetDWOpValue(ops[0], dw1))
 	{
 		args = "esp, esp-4";
-		nIgnoreNextValuesHist++;
+		nIgnoreNextValuesHist+=2;
 		DoMOV(args);
 
 		args = "[esp], " + ops[0];
@@ -3756,7 +3758,8 @@ bool OllyLang::DoPUSH(string args)
 		t_thread* pt = Findthread(Getcputhreadid());	
      	dw1 = pt->reg.r[4];
 		Readmemory(&dw, dw1, 4, MM_DELANAL|MM_SILENT);
-		setProgLineValue(script_pos+1,dw);
+		if (nIgnoreNextValuesHist==0)
+			setProgLineValue(script_pos+1,dw);
 		return true;
 	}
 	return false;
@@ -4011,7 +4014,7 @@ bool OllyLang::DoROL(string args)
 			pop eax
 		}
 		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -4042,7 +4045,7 @@ bool OllyLang::DoROR(string args)
 			pop eax
 		}
 		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -4163,7 +4166,7 @@ bool OllyLang::DoSHL(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 << dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -4181,7 +4184,7 @@ bool OllyLang::DoSHR(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 >> dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -4240,7 +4243,7 @@ bool OllyLang::DoSUB(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 - dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
@@ -4419,10 +4422,10 @@ bool OllyLang::DoXCHG(string args)
 
 	if (GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2)) {
 		args = ops[0] + ", " + ultoa(dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		DoMOV(args);
 		args = ops[1] + ", " + ultoa(dw1, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		DoMOV(args);
 		return true;
 	}
@@ -4443,7 +4446,7 @@ bool OllyLang::DoXOR(string args)
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		args = ops[0] + ", " + ultoa(dw1 ^ dw2, buffer, 16);
-		nIgnoreNextValuesHist=1;
+		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;

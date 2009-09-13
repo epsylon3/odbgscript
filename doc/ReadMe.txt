@@ -60,12 +60,15 @@ Get Trace Addr
 1.69 (SVN)
 + Added system to free memory blocks allocated directly after Ollydbg processed asm command(s)
 + LOADLIB now returns address of loaded library (delayed result)
+* Fixed display of \t in commented lines
+* Fixed bug in HANDLE command
+* Variable history hiding enhancement for subcommands
 
 1.68 (13 Sep 2009)
 + LOADLIB command to load a library in debugged program
 + PUSHA/POPA commands to Save/Restore Registers
 + Added an automatic memory block cleaning system, which cleans memory allocated by some script commands (ASM, LOADLIB)
-* Fixed ASMTXT with 00 opcode
+* Fixed ASMTXT with \0 in hex opcode
 * Fixed "INC a" when "a" is a variable and a has value 9
 
 1.67 (6 Feb 2009)
