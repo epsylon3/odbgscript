@@ -1142,7 +1142,7 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				else
 					ops[i]=vResult.str;
 
-				if (!sub_operand) 
+				if (!sub_operand && var_logging) 
 					setProgLineValue(script_pos+1,ops[i]);
 				goto operation_ok;
 

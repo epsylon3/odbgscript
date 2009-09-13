@@ -1844,12 +1844,13 @@ bool OllyLang::DoFREE(string args)
 		hMem = (void*)addr;
 		//To Refresh Memory Window
 		require_ollyloop=1;
-		if (size==0)
+		if (size==0) {
 			if (DelProcessMemoryBloc(addr)) {
 				unregMemBlock(hMem);
 				Listmemory();
 				return true;
 			}
+		}
 		else {
 			
 			HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
@@ -2539,7 +2540,7 @@ bool OllyLang::DoGPI(string args)
 	return false;
 }
 
-//in dev... i try to find API parameters number and types
+//in dev... i try to find API parameters count and types
 bool OllyLang::DoGPP(string args)
 {
 	if (!DoGPA(args))
@@ -2566,7 +2567,7 @@ bool OllyLang::DoGPP(string args)
 		if (ref->addr == addr)
 			continue; 
 
-			//Disasm origin to get comments
+		//Disasm origin to get comments
 		BYTE buffer[MAXCMDSIZE];
 		size=Readmemory(buffer, ref->addr, MAXCMDSIZE, MM_SILENT);					
 		if (size>0) {
@@ -4509,7 +4510,7 @@ bool OllyLang::DoWRTA(string args)
 
     path = path.substr(0, path.rfind('\\') + 1);
 
-	string filename,data;
+	string filename,data,sSep;
 
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetANYOpValue(ops[1], data))
@@ -4521,8 +4522,10 @@ bool OllyLang::DoWRTA(string args)
 		
 		HANDLE hFile;
 		ulong dwAccBytes=0;
+
+		GetSTROpValue(ops[2], sSep);		
 		
-		data=ops[2]+data;	
+		data=sSep+data;	
 
 		hFile = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if(hFile != INVALID_HANDLE_VALUE) 
