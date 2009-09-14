@@ -41,7 +41,7 @@ v1.54
 ODbgScript has a new site and SVN system : http://odbgscript.sf.net
 
 v1.0
-OllyScript becomes ODbgScript with the new GUI Window
+OllyScript becomes ODbgScript with the new GUI Windows
 
 v0.9
 OllyScript has now been downloaded more then 10000 times! That means more then 2Gb of raw
@@ -57,12 +57,15 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.69 (SVN)
+1.69 (14 Sep 2009)
 + Added system to free memory blocks allocated directly after Ollydbg processed asm command(s)
 + LOADLIB now returns address of loaded library (delayed result)
++ new OLLY command to get Ollydbg variables (PID, HWND only for the moment)
 * Fixed display of \t in commented lines
 * Fixed bug in HANDLE command
-* Variable history hiding enhancement for subcommands
+* Fixed bug in FREE command (1.68)
+* Variable history hiding enhancement for subcommands and String constants
+* WRTA Separator fixed
 
 1.68 (13 Sep 2009)
 + LOADLIB command to load a library in debugged program
@@ -1219,6 +1222,19 @@ Assembly Operation "neg eax"
 NOT op
 ------
 Assembly Operation "not eax"
+
+OLLY info
+--------------
+Gets information about ollydbg
+"info" can be :
+	- PID retrieve the Ollydbg Process ID
+	- HWND retrieve the main Ollydbg HWND
+
+Example:
+	OLLY PID
+	mov pid, $RESULT
+	OLLY HWND
+	mov hwnd, $RESULT
 
 OR dest, src
 ------------

@@ -3494,6 +3494,38 @@ bool OllyLang::DoMSGYN(string args)
 	return false;
 }
 
+bool OllyLang::DoOLLY(string args)
+{
+    string ops[1], param;
+	ulong value;
+
+	if(!CreateOp(args, ops, 1))
+		return false;
+
+	if ( GetSTROpValue("\""+ops[0]+"\"", param) )
+	{
+
+		transform(param.begin(), param.end(), param.begin(), toupper);
+
+		if (param == "PID")
+		{
+			value = GetCurrentProcessId();
+			variables["$RESULT"] = value; 
+			return true;
+		}
+		else if (param == "HWND")
+		{
+			value = (ulong) hwndOllyDbg();
+			variables["$RESULT"] = value;
+			return true;
+		}
+		
+
+	}
+	return false;
+}
+
+
 bool OllyLang::DoOR(string args)
 {
 	string ops[2];

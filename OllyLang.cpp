@@ -156,6 +156,7 @@ OllyLang::OllyLang()
     commands["neg"] = &OllyLang::DoNEG;
 	commands["not"] = &OllyLang::DoNOT;
 	commands["or"] = &OllyLang::DoOR;
+	commands["olly"] = &OllyLang::DoOLLY;
 	commands["opcode"] = &OllyLang::DoOPCODE;
 	commands["opendump"] = &OllyLang::DoOPENDUMP;
 	commands["opentrace"] = &OllyLang::DoOPENTRACE;

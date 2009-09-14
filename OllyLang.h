@@ -279,6 +279,7 @@ private:
 	bool DoMUL(string args);
 	bool DoNEG(string args);
 	bool DoNOT(string args);
+	bool DoOLLY(string args);
 	bool DoOR(string args);
 	bool DoOPCODE(string args);
 	bool DoOPENDUMP(string args);
