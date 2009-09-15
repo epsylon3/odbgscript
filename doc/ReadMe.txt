@@ -63,7 +63,7 @@ Get Trace Addr
 + POPA protection to restore only in the thread used by PUSHA
 + Added DebugScript Export for ScriptEditor interaction
 * GMA now uses the 8 first chars of specified module name
-* Enhanced Memory block cleaning when multiple blocks were allocated in one command
+* Enhanced Memory block cleaning when multiple blocks were allocated in one command (loadlib)
 * LOADLIB now refresh modules list and memory
 
 1.69 (14 Sep 2009)

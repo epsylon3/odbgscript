@@ -2973,14 +2973,14 @@ bool OllyLang::DoLOADLIB(string args)
 	block.listmemory = true;
 	block.autoclean = true;
 
-	nIgnoreNextValuesHist++;
+	//nIgnoreNextValuesHist++;
 	if (DoPUSH(bfdlladdr)) {
 
 		char bffnloadlib[10]={0};
 		sprintf(bffnloadlib,"%09X",fnload);
 		string libPtrToLoad = bffnloadlib;
 
-		nIgnoreNextValuesHist++;
+		//nIgnoreNextValuesHist++;
 		ExecuteASM("call "+libPtrToLoad);	
 
 		variables["$RESULT"] = 0;
