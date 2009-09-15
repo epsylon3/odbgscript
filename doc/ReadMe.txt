@@ -58,8 +58,12 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.70 (SVN)
-+ Added DebugScript Export for ScriptEditor interaction
 + MRU has now 9 entries
++ Added Flags Save/Restore to PUSHA/POPA
++ POPA protection to restore only in the thread used by PUSHA
++ Added DebugScript Export for ScriptEditor interaction
+* GMA now uses the 8 first chars of specified module name
+* Enhanced Memory block cleaning when multiple blocks were allocated in one command
 
 1.69 (14 Sep 2009)
 + Added system to free memory blocks allocated directly after Ollydbg processed asm command(s)
@@ -439,7 +443,7 @@ Try it on mspaint.exe
 The scripting language of OllyScript is an assembly-like language.
 
 In the document below, src and dest can be (unless stated otherwise):
- - Constant in the form of a hex number withot prefixes and suffixes (i.e. 00FF, not 0x00FF or 00FFh)
+ - Constant in the form of a hex number without prefixes and suffixes, with leading 0 (i.e. 00FF, not 0x00FF or 00FFh)
    For decimal values, use the point (i.e. 100. 128.)
  - Variable previously declared by VAR, or are declared with MOV
  - A 32-bit register (one of EAX, EBX, ECX, EDX, ESI, EDI, EBP, ESP, EIP).
@@ -996,7 +1000,7 @@ Example:
 	go 401005
 
 GOPI addr, index, info
---------------
+----------------------
 Gets information about operands of asm command
 
 "index" is between 1 and 3
@@ -1042,11 +1046,11 @@ Get Relative Offset
 When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
 
 HANDLE x, y, class
----------------------
+------------------
 Returns the handle of child window of specified class at point x,y (remember: in hex values).
 
 HISTORY (0,1)
---------------
+-------------
 Enables or Disables Value history in Script Progress Window, could optimize loops
 Example:
 	history 0 //disable
@@ -1059,7 +1063,7 @@ Example:
 	inc v
 
 ITOA n [, base=16.]
------------------
+-------------------
 Converts an integer to string
 Returns the string in the reserved $RESULT variable
 Example:
@@ -1228,7 +1232,7 @@ NOT op
 Assembly Operation "not eax"
 
 OLLY info
---------------
+---------
 Gets information about ollydbg
 "info" can be :
 	- PID retrieve the Ollydbg Process ID
@@ -1369,7 +1373,7 @@ Example:
 	run
 
 SCMP dest, src [,size]
--------------
+----------------------
 Compares strings dest to src. Works like it's ASM counterpart.
 Example: 
 	cmp x, "KERNEL32.DLL"
@@ -1377,7 +1381,7 @@ Example:
 	je Label
 
 SCMPI dest, src [,size]
--------------
+-----------------------
 Compares strings dest to src (case insentitive). Works like it's ASM counterpart.
 Example: 
 	cmp sVar, "KERNEL32.DLL"
@@ -1445,7 +1449,7 @@ Example:
 	ti
 
 TICK [var [,reftime]]
--------------------
+---------------------
 Set variable with script execution time (microsec)
 if reftime parameter is set, set $RESULT with time since reftime.
 if no parameter is set, function set $RESULT with execution time in text, in "<ssss mmm> ms" format
@@ -1560,6 +1564,8 @@ if(hMod) // Check that the other plugin is present and loaded
 		pFunc("myscript.txt"); // Execute exported function
 }
 
+DebugScript dll entry is also available.
+
 You can also execute script commands via OllyDBG ODBG_plugincmd() 
 and in Conditional Log Breakpoints.
 
@@ -1588,7 +1594,7 @@ with improvement ideas etc.
 R@dier for the great dumping engine.
 
 shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong,
-hnedka for ideas and bug report on the new ODbgScript
+SunBeam, LCF AT, hnedka for ideas and bug report on the new ODbgScript
 
 And of course Olly for this great debugger!
 

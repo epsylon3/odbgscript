@@ -2069,6 +2069,9 @@ bool OllyLang::DoGMA(string args)
 
 	if(GetSTROpValue(ops[0], str)) {
 
+		if (str.length() > 8)
+			str = str.substr(0,8);
+
 		Listmemory();
 
 		int t=Plugingetvalue(VAL_MEMORY);
@@ -2441,7 +2444,7 @@ bool OllyLang::DoGPA(string args)
 				
 				}
 
-				
+				regBlockToFree((void*)pmem,0x1000,true);
 				//VirtualFreeEx(hDebugee, pmem, 0x1000, MEM_DECOMMIT);
 
 			}

@@ -754,26 +754,34 @@ bool OllyLang::ProcessAddonAction()
 
 	t_thread* thr = Findthread(Getcputhreadid());	 
 
+	t_dbgmemblock todo={0};
+
  	t_dbgmemblock * block;
-	for (int b=0; b<tMemBlocks.size(); b++) {
+	for (int b=tMemBlocks.size()-1; b>=0; b--) {
 		block = &tMemBlocks[b];
 		if (block->free_at_eip = thr->reg.ip) {
 			HANDLE hDbgPrc = (HANDLE)Plugingetvalue(VAL_HPROCESS);
 			VirtualFreeEx(hDbgPrc, block->hmem, block->size, MEM_DECOMMIT);
-			tMemBlocks.erase(block);
+			
+			DbgMsgHex((ulong)block->hmem,"VirtualFreeEx");
 
 			if (block->result_register) {
 				variables["$RESULT"] = thr->reg.r[block->reg_to_return];
-				setProgLineResult(block->script_pos+1,variables["$RESULT"]);
+				setProgLineResult(block->script_pos+1,variables["$RESULT"].dw);
 			}
 
-			if (block->listmemory) Listmemory();
-			if (block->restore_registers) RestoreRegisters(true);
+			if (block->listmemory) todo.listmemory=true;
+			if (block->restore_registers) todo.restore_registers=true;
+
+			tMemBlocks.erase(block);
 
 			require_addonaction=0;
-			return true;
+			//return true;
 		}
 	}
+
+	if (todo.listmemory) Listmemory();	
+	if (todo.restore_registers) RestoreRegisters(true);
 	
 	return true;
 }
@@ -2214,8 +2222,8 @@ bool OllyLang::ExecuteASM(string command)
 	DbgMsgHex(pmemexec);
 
 	// Free memory block after next ollyloop
-	t_dbgmemblock block;
-	block.hmem = hDebugee;
+	t_dbgmemblock block={0};
+	block.hmem = (void *) pmemexec;
 	block.size = 0x1000;
 	block.script_pos = script_pos;
 	block.free_at_eip = eip;
@@ -2258,6 +2266,8 @@ void OllyLang::regBlockToFree(void * hMem, ulong size, bool autoclean)
 	block.size = size;	
 	block.autoclean = autoclean; 
 	block.script_pos = script_pos;
+	block.restore_registers = 0;
+	block.listmemory = 0;
 
 	tMemBlocks.push_back(block);
 }
@@ -2313,8 +2323,11 @@ bool OllyLang::SaveRegisters(bool stackToo)
 		reg_backup.ebp = pt->reg.r[REG_EBP];
 	}
 
+	reg_backup.dwFlags = pt->reg.flags;
+
 	reg_backup.eip = pt->reg.ip;
 
+	reg_backup.threadid = pt->reg.threadid;
 	reg_backup.loaded = script_pos;
 
 	return true;
@@ -2327,6 +2340,9 @@ bool OllyLang::RestoreRegisters(bool stackToo)
 
 	t_thread* pt = Findthread(Getcputhreadid());			
 
+	if (pt->reg.threadid != reg_backup.threadid)
+		return false;
+
 	pt->reg.r[REG_EAX] = reg_backup.eax;
 	pt->reg.r[REG_EBX] = reg_backup.ebx;
 	pt->reg.r[REG_ECX] = reg_backup.ecx;
@@ -2337,7 +2353,9 @@ bool OllyLang::RestoreRegisters(bool stackToo)
 	if (stackToo) {
 		pt->reg.r[REG_ESP] = reg_backup.esp;
 		pt->reg.r[REG_EBP] = reg_backup.ebp;
-	}
+	}	
+
+	pt->reg.flags = reg_backup.dwFlags;
 
 	pt->reg.modified = 1;
 	pt->regvalid = 1;

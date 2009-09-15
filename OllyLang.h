@@ -372,6 +372,7 @@ private:
 	struct t_reg_backup
 	{
 		int loaded;
+		DWORD threadid;
 
 		DWORD eax;
 		DWORD ebx;
@@ -383,7 +384,10 @@ private:
 		DWORD esp;
 		DWORD ebp;
 
+		DWORD dwFlags;
+
 		DWORD eip;
+
 	} reg_backup;
 	
 	bool SaveRegisters(bool stackToo);
