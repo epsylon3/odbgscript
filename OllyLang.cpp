@@ -780,7 +780,7 @@ bool OllyLang::ProcessAddonAction()
 		}
 	}
 
-	if (todo.listmemory) Listmemory();	
+	if (todo.listmemory) DoREFRESH(""); //Listmemory();	
 	if (todo.restore_registers) RestoreRegisters(true);
 	
 	return true;

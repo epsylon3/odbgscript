@@ -64,6 +64,7 @@ Get Trace Addr
 + Added DebugScript Export for ScriptEditor interaction
 * GMA now uses the 8 first chars of specified module name
 * Enhanced Memory block cleaning when multiple blocks were allocated in one command
+* LOADLIB now refresh modules list and memory
 
 1.69 (14 Sep 2009)
 + Added system to free memory blocks allocated directly after Ollydbg processed asm command(s)
