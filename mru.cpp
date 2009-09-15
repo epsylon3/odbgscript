@@ -10,7 +10,7 @@ void mruAddFile(char* szFilePath) {
 
 	HINSTANCE h=hinstModule();
 
-	for(n=1; n<=5; n++) { 
+	for(n=1; n<=9; n++) { 
 		key[3]=n + 0x30; //ASCII n
 		ZeroMemory(&buf, sizeof(buf));
 		Pluginreadstringfromini(h,key,buf,0);
@@ -24,7 +24,7 @@ void mruAddFile(char* szFilePath) {
 			return;
 		}
 	}
-	for(n=4; n>0; n--) {
+	for(n=9; n>0; n--) {
 		//Add File then Move others
 		key[3]=n+0x30;
 		ZeroMemory(&buf, sizeof(buf));
@@ -106,7 +106,7 @@ int mruGetCurrentMenu(char* buf) {
 	
 	strcpy(key,"NRU ");
 
- 	for(int n=1; n<=5; n++) {
+ 	for(int n=1; n<=9; n++) {
 		key[3]=n+0x30; //ASCII n
 
 		ZeroMemory(&buf2, sizeof(buf2));
@@ -152,7 +152,7 @@ int mruGetCurrentMenu(HMENU mmru,int cmdIndex) {
 	
 	strcpy(key,"NRU ");
 
- 	for(int n=1; n<=5; n++) {
+ 	for(int n=1; n<=9; n++) {
 		key[3]=n+0x30; //ASCII n
 
 		ZeroMemory(&buf2, sizeof(buf2));

@@ -57,6 +57,10 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.70 (SVN)
++ Added DebugScript Export for ScriptEditor interaction
++ MRU has now 9 entries
+
 1.69 (14 Sep 2009)
 + Added system to free memory blocks allocated directly after Ollydbg processed asm command(s)
 + LOADLIB now returns address of loaded library (delayed result)
