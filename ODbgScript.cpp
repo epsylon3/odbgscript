@@ -300,6 +300,19 @@ extc int _export cdecl ExecuteScript(const char* const filename)
 	return 0;
 }
 
+extc void _export cdecl DebugScript(const char* const filename)
+{
+	if (filename!="")
+	{
+		ollylang->LoadScript((LPSTR)filename);
+		ollylang->Pause();
+		script_state = ollylang->script_state;
+		initProgTable();
+		SetForegroundWindow(ollylang->wndProg.hw);
+		SetFocus(ollylang->wndProg.hw);     
+	}
+}
+
 // Receives commands from main menu.
 extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item) 
 {

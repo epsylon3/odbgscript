@@ -3,8 +3,8 @@
 using namespace std;
 
 #define VERSIONHI      1               // High plugin version
-#define VERSIONLO      69              // Low plugin version
-#define VERSIONST      3               // plugin state (0hacked, 1svn 2beta 3official release)
+#define VERSIONLO      70              // Low plugin version
+#define VERSIONST      1               // plugin state (0hacked, 1svn 2beta 3official release)
 
 ///long
 static char		wndprogclass[32];	   // Name of progress window class
@@ -19,8 +19,9 @@ static void*	pmemforexec;
 
 #define STRING_READSIZE 256
 
-#include "mru.h"
+extc void _export cdecl DebugScript(const char* const filename);
 
+#include "mru.h"
 //For unique vars btw processes
 //#pragma data_seg( ".GLOBALS" )
 //#pragma data_seg()
