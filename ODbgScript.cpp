@@ -219,21 +219,7 @@ extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_
 			InvalidateProgWindow();
 		}
 	}
-	// Step script
-//	if(script_state == SS_RUNNING || script_state == SS_LOADED)
-//	{
-//		try
-//		{
-//			Broadcast(WM_USER_CHALL, 0, 0);
-//			ollylang->Step(0);
-//			script_state = ollylang->script_state;
-//		}
-//		catch( ... )
-//		{
-//			delete ollylang;
-//			MessageBox(hwmain, "An error occured in the plugin!\nPlease contact SHaG.", "OllyScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
-//		}
-//	}
+
 	return 0;
 }
 
@@ -407,7 +393,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
 		MessageBox(hwmain,s,"ODbgScript",MB_OK|MB_ICONINFORMATION);
 		break;
-	case 21: // MRU List
+/*	case 21: // MRU List
 	case 22:
 	case 23:
 	case 24:
@@ -438,7 +424,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 
 			break;
 		}
-	case 30:
+*/	case 30:
 		{
 			initProgTable();
 			break;

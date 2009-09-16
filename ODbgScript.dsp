@@ -298,7 +298,7 @@ SOURCE=.\copydbg.bat
 # End Source File
 # Begin Source File
 
-SOURCE=.\doc\Plugins.hlp
+SOURCE=.\doc\Plugins.chm
 # End Source File
 # Begin Source File
 

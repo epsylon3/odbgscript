@@ -57,11 +57,12 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.70 (SVN)
+1.70 (15 Sep 2009)
 + MRU has now 9 entries
 + Added Flags Save/Restore to PUSHA/POPA
 + POPA protection to restore only in the thread used by PUSHA
 + Added DebugScript Export for ScriptEditor interaction
+* Fixed Edit Script Line
 * GMA now uses the 8 first chars of specified module name
 * Enhanced Memory block cleaning when multiple blocks were allocated in one command (loadlib)
 * LOADLIB now refresh modules list and memory

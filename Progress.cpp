@@ -109,7 +109,7 @@ t_wndprog_data *ppl;
 			if (mLabels!=NULL) DestroyMenu(mLabels);
 			if (mVars!=NULL) DestroyMenu(mVars);
 			
-			if (i>10 && i<=15 || i>20 && i<=25) 
+			if (i>10 && i<=29) 
 			{
 
 				char key[5]="NRU ";
@@ -615,13 +615,20 @@ void FocusProgWindow(void)
 
 bool editProgLine(t_wndprog_data *ppl) 
 {
-	string s;
-	s=ollylang->script[ppl->line-1];
+	string s=ollylang->script[ppl->line-1];
+	char buffer[PROG_CMD_LEN]={0};
 
-	if (Gettext("Edit script line...",(char*)s.c_str(),0,0,FIXEDFONT)) {
+	strcpy(buffer,(char*)s.c_str());
+
+	if (Gettext("Edit script line...",buffer,0,0,FIXEDFONT)) {
+
 		strcpy(ppl->command," ");
-		strncat(ppl->command,(char*) s.c_str(),PROG_CMD_LEN-2);
-		
+		strncat(ppl->command,buffer,PROG_CMD_LEN-2);
+		s.assign(buffer);
+
+		ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
+		ollylang->script.insert(ollylang->script.begin()+ppl->line-1,s);
+
 		s=trim(s);
 		if (s.find(";")==0) {
 			ppl->type = PROG_TYPE_COMMENT;
