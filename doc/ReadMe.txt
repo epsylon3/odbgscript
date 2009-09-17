@@ -58,7 +58,7 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.71 (SVN)
-* LM error handling if file not found
+* LM error handling if file not found, and write only real size if size > 0
 
 1.70 (15 Sep 2009)
 + MRU has now 9 entries
@@ -1151,7 +1151,7 @@ LM addr, size, filename
 load Dm file to mem
 LM is the opposite of the DM command
 Example:
-	lm 0x401000, 0x100, "test.bin"
+	lm 401000, 100, "test.bin"
 
 LOADLIB dllname
 ---------------

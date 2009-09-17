@@ -2879,14 +2879,19 @@ bool OllyLang::DoLM(string args)
 		if(fin.fail()) {
 	        variables["$RESULT"] = 0;
             errorstr = "Couldn't open file!";
+			fin.close();
             return false;
 		}
 
         char buf[4096];
-		while (!fin.eof())
+		int gotten;
+		while (!fin.eof() && (sum<size || size==0) )
         {
-			fin.read(buf, sizeof buf);			
-			int gotten=fin.gcount();
+			if (size==0) 
+				fin.read(buf, sizeof buf);			
+			else
+				fin.read(buf, min(size-sum, sizeof buf));
+			gotten=fin.gcount();
 			sum += Writememory(buf, addr+sum, gotten, MM_RESILENT);
         }
         fin.close();
