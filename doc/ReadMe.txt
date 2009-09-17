@@ -57,10 +57,11 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.71 (SVN)
+1.71 (17 Sep 2009)
 + Added REF second parameter to search in the whole module or module's code
 * LM error handling if file not found, and write only given size (if size parameter > 0)
 * Fixed WRTA default separator (set to "\r\n")
+* like the 1.68 "INC a" bug, secured more functions using MOV internally
 
 1.70 (15 Sep 2009)
 + MRU has now 9 entries

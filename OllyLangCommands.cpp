@@ -119,7 +119,7 @@ bool OllyLang::DoAND(string args)
 	if (GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 & dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 & dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -940,7 +940,7 @@ bool OllyLang::DoDIV(string args)
 			errorstr = "Division by 0";
 			return false;
 		}
-		args = ops[0] + ", " + ultoa(dw1 / dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 / dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -3550,7 +3550,7 @@ bool OllyLang::DoOR(string args)
 	ulong dw1, dw2;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 | dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 | dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -3567,7 +3567,7 @@ bool OllyLang::DoMUL(string args)
 	ulong dw1, dw2;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 * dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 * dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4085,7 +4085,7 @@ bool OllyLang::DoROL(string args)
 			pop ecx
 			pop eax
 		}
-		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4116,7 +4116,7 @@ bool OllyLang::DoROR(string args)
 			pop ecx
 			pop eax
 		}
-		args = ops[0] + ", " + ultoa(dw1, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4237,7 +4237,7 @@ bool OllyLang::DoSHL(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 << dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 << dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4255,7 +4255,7 @@ bool OllyLang::DoSHR(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 >> dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 >> dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4314,7 +4314,7 @@ bool OllyLang::DoSUB(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 - dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 - dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4493,10 +4493,10 @@ bool OllyLang::DoXCHG(string args)
 	ulong dw1, dw2;
 
 	if (GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2)) {
-		args = ops[0] + ", " + ultoa(dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		DoMOV(args);
-		args = ops[1] + ", " + ultoa(dw1, buffer, 16);
+		args = ops[1] + ", 0" + ultoa(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		DoMOV(args);
 		return true;
@@ -4517,7 +4517,7 @@ bool OllyLang::DoXOR(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", " + ultoa(dw1 ^ dw2, buffer, 16);
+		args = ops[0] + ", 0" + ultoa(dw1 ^ dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4541,7 +4541,7 @@ bool OllyLang::DoWRT(string args)
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetANYOpValue(ops[1], data))
 	{
-        if (filename.find(":\\") != string::npos)
+        if ((filename.find(":\\") != string::npos) || (filename.find("\\\\") != string::npos)) //hard disk or network
 		  path = filename;
 		else
 		  path += filename;
@@ -4586,7 +4586,7 @@ bool OllyLang::DoWRTA(string args)
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetANYOpValue(ops[1], data))
 	{
-        if (filename.find(":\\") != string::npos)
+        if ((filename.find(":\\") != string::npos) || (filename.find("\\\\") != string::npos))
 		  path = filename;
 		else
 		  path += filename;
@@ -4594,8 +4594,9 @@ bool OllyLang::DoWRTA(string args)
 		HANDLE hFile;
 		ulong dwAccBytes=0;
 
-		GetSTROpValue(ops[2], sSep);		
-		
+		if (!GetSTROpValue(ops[2],sSep))
+			return false;	
+
 		data=sSep+data;	
 
 		hFile = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
