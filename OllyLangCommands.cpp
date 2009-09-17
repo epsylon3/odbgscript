@@ -3849,7 +3849,6 @@ bool OllyLang::DoREF(string args)
 	string str;
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
 	{
-		transform(str.begin(), str.end(), str.begin(), toupper);
 		variables["$RESULT"] = 0;
 		variables["$RESULT_1"] = 0; //command bytes
 		variables["$RESULT_2"] = 0;
@@ -3868,13 +3867,10 @@ bool OllyLang::DoREF(string args)
 			if (size==0)
 				return true;
 
-			// Get process handle and save eip
-			HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
-			t_thread* thr = Findthread(Getcputhreadid());
-			ulong eip = thr->reg.ip;
+			transform(str.begin(), str.end(), str.begin(), toupper);
 
 			//Search for references
-			if(str == "MEMORY") // Compatibility (before v1.70) Search in the memory bloc
+			if(str == "MEMORY") // Compatibility (before v1.71) Search in the memory bloc
 			{
 				t_memory* mem = Findmemory(addr);
 
@@ -4575,7 +4571,7 @@ bool OllyLang::DoWRTA(string args)
 	string ops[3];
 
 	if(!CreateOperands(args, ops, 3)) {
-		ops[2]="\n";
+		ops[2]="\"\r\n\"";
 		if(!CreateOperands(args, ops, 2))
 			return false;
 	}

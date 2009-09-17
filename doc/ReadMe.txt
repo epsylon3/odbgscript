@@ -60,6 +60,7 @@ Get Trace Addr
 1.71 (SVN)
 + Added REF second parameter to search in the whole module or module's code
 * LM error handling if file not found, and write only given size (if size parameter > 0)
+* Fixed WRTA default separator (set to "\r\n")
 
 1.70 (15 Sep 2009)
 + MRU has now 9 entries
@@ -1525,12 +1526,11 @@ Example:
 
 WRTA file, data [, separator]
 -----------------------------
-Append to file, default separator is "\n"
+Append to file, default separator is "\r\n"
 Example: 
-	wrta sFile, "hello world"
+	wrt sFile, "hello world"
 	wrta sFile, ABCD, ""
 	wrta sFile, "Windows CR, "\r\n"
-
 
 3.2 Labels
 ----------
