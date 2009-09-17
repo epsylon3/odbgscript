@@ -58,7 +58,8 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.71 (SVN)
-* LM error handling if file not found, and write only real size if size > 0
++ Added REF second parameter to search in the whole module or module's code
+* LM error handling if file not found, and write only given size (if size parameter > 0)
 
 1.70 (15 Sep 2009)
 + MRU has now 9 entries
@@ -1148,9 +1149,12 @@ Example:
 
 LM addr, size, filename
 -----------------------
-load Dm file to mem
+Load dump file into memory
 LM is the opposite of the DM command
 Example:
+	;whole file
+	lm 401000, 0, "test.bin"
+	;first 0x100 bytes
 	lm 401000, 100, "test.bin"
 
 LOADLIB dllname
@@ -1309,16 +1313,18 @@ READSTR str, len
 -------
 Copy len chars of str into $RESULT
 
-REF addr
---------
+REF addr, [LOCATION]
+--------------------
 REF addr works as "Find references to .. Selected command" and "Find references", Ctrl R, in OllyDbg.
+Search LOCATION could be the MEMORY bloc (default), CODE of module, or whole MODULE
 $RESULT variable is set to the first reference addr 
 $RESULT_1 to the opcode (text asm command) 
 $RESULT_2 to the comment (like reference window). 
 Repeat "REF addr" until $RESULT=0 to get next refs
+REF value counter is reset when addr changes
 Example:
 	continue:
-		REF eip
+		REF eip,CODE
 		log $RESULT
 		log $RESULT_1
 		log $RESULT_2

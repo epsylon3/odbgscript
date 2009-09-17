@@ -3837,14 +3837,19 @@ bool OllyLang::DoREADSTR(string args)
 
 bool OllyLang::DoREF(string args)
 {
-	string ops[1];
-	if(!CreateOperands(args, ops, 1))
+	string ops[2];
+	if (!CreateOperands(args, ops, 2)){
+		ops[1]="MEMORY"; 
+		if(!CreateOperands(args, ops, 1))
 		return false;
+	}
 
 	char title[256]="Reference to Command - ODbgScript REF";	
 	ulong addr,size;
-	if(GetDWOpValue(ops[0], addr))
+	string str;
+	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
 	{
+		transform(str.begin(), str.end(), str.begin(), toupper);
 		variables["$RESULT"] = 0;
 		variables["$RESULT_1"] = 0; //command bytes
 		variables["$RESULT_2"] = 0;
@@ -3869,12 +3874,36 @@ bool OllyLang::DoREF(string args)
 			ulong eip = thr->reg.ip;
 
 			//Search for references
-			t_memory* mem = Findmemory(addr);
+			if(str == "MEMORY") // Compatibility (before v1.70) Search in the memory bloc
+			{
+				t_memory* mem = Findmemory(addr);
 
-			if (Findreferences(mem->base,mem->size,addr,addr+size,addr,16,title) > 0)
-				adrREF=addr;
+				if (Findreferences(mem->base,mem->size,addr,addr+size,addr,16,title) > 0)
+					adrREF=addr;
+				else
+					return true;
+			}
+			else if(str == "CODE") // Search in the code part of module
+			{
+				t_module* mod = Findmodule(addr);
+
+				if (Findreferences(mod->codebase,mod->codesize,addr,addr+size,addr,16,title) > 0)
+					adrREF=addr;
+				else
+					return true;
+			}
+			else if(str == "MODULE") // Search in the whole module
+			{
+				t_module* mod = Findmodule(addr);
+
+				if (Findreferences(mod->base,mod->size,addr,addr+size,addr,16,title) > 0)
+					adrREF=addr;
+				else
+					return true;
+			}
 			else
-				return true;
+				return false;
+
 		}
 		t_table* tref=(t_table*) Plugingetvalue(VAL_REFERENCES);
 		
