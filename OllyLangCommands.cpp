@@ -2875,7 +2875,13 @@ bool OllyLang::DoLM(string args)
 			path += filename;
 
 		std::ifstream fin(path.c_str(),ios::in | ios::binary);
-    
+
+		if(fin.fail()) {
+	        variables["$RESULT"] = 0;
+            errorstr = "Couldn't open file!";
+            return false;
+		}
+
         char buf[4096];
 		while (!fin.eof())
         {
@@ -2891,7 +2897,7 @@ bool OllyLang::DoLM(string args)
         }
         else
         {
-            errorstr = "Couldn't create file!";
+            errorstr = "Couldn't load file!";
             return false;
         }
     }

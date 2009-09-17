@@ -57,6 +57,9 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.71 (SVN)
+* LM error handling if file not found
+
 1.70 (15 Sep 2009)
 + MRU has now 9 entries
 + Added Flags Save/Restore to PUSHA/POPA
