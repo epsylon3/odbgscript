@@ -57,6 +57,9 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.72 (SVN)
++ Added "REF 0" support to force REF reset
+
 1.71 (17 Sep 2009)
 + Added REF second parameter to search in the whole module or module's code
 * LM error handling if file not found, and write only given size (if size parameter > 0)
@@ -1323,8 +1326,9 @@ $RESULT variable is set to the first reference addr
 $RESULT_1 to the opcode (text asm command) 
 $RESULT_2 to the comment (like reference window). 
 Repeat "REF addr" until $RESULT=0 to get next refs
-REF value counter is reset when addr changes
+REF value counter is reset when addr changes or forced with addr = 0
 Example:
+	REF 0 // RESET REF
 	continue:
 		REF eip,CODE
 		log $RESULT

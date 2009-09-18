@@ -3856,7 +3856,13 @@ bool OllyLang::DoREF(string args)
 		if (adrREF!=addr) 
 		{
 			curREF=-1;
-			
+
+			//Reset REF
+			if (addr == 0) {
+				adrREF=0;
+				return true;
+			}
+
 			//Info to get destination address
 			BYTE buffer[MAXCMDSIZE];
 //			size=Readmemory(buffer, addr, MAXCMDSIZE, MM_SILENT);
