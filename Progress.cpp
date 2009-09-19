@@ -144,6 +144,7 @@ t_wndprog_data *ppl;
 			} 
 			else if (i>=0x100 && i<0x200) 
 			{
+				//Selectandscroll(&ollylang->wndProg,i-0xFE,2);
 				Selectandscroll(&ollylang->wndProg,i-0xFE,2);
 				InvalidateRect(hw, NULL, FALSE);
 				return 1;
@@ -630,18 +631,56 @@ bool editProgLine(t_wndprog_data *ppl)
 		ollylang->script.insert(ollylang->script.begin()+ppl->line-1,s);
 
 		s=trim(s);
-		if (s.find(";")==0) {
-			ppl->type = PROG_TYPE_COMMENT;
-		}
-		else 
-		{
-			ppl->type = PROG_TYPE_COMMAND;
-		}
+		ppl->type = analyseProgLineType(s,ppl->line);
 
 		InvalidateProgWindow();
 		return true;
 	}
 	return false;
+}
+
+int analyseProgLineType(string &scriptline, int linenumber) 
+{
+
+	bool bComment=false;
+	int p, result;
+
+	string cleanline=scriptline;
+	p=scriptline.find("//");
+	if (p > 0) {
+		if (scriptline.find("\"")!=string::npos) {
+
+			if (p > scriptline.rfind("\"") || p < scriptline.find("\""))
+				scriptline.erase(p,scriptline.length()-p);
+
+		} else
+			scriptline.erase(p,scriptline.length()-p);
+	}
+	if (trim(scriptline) == "") {
+		scriptline = cleanline;
+		bComment = true;
+	}
+
+	if (scriptline.find(";")==0) {
+		bComment = true;		
+	}
+
+	if (bComment) {
+		result = PROG_TYPE_COMMENT;
+	}
+	else {
+		if (scriptline.length() > 0) {
+			if(scriptline.at(scriptline.length() - 1) == ':') {
+				ollylang->labels.insert(pair<string, int>(scriptline.substr(0, scriptline.length() - 1), linenumber));
+				result = PROG_TYPE_LABEL;
+			}
+		}
+		if (result != PROG_TYPE_LABEL) {
+			result = PROG_TYPE_COMMAND;
+		}
+	}
+
+	return result;
 }
 
 int addProgLine(int line, string & command, int type) 

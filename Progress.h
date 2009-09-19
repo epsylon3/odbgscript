@@ -55,3 +55,4 @@ void clearProgLines();
 void resetProgLines();
 
 bool editProgLine(t_wndprog_data *ppl) ;
+int  analyseProgLineType(string &scriptline, int linenumber);

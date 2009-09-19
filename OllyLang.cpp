@@ -257,7 +257,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 {
 	vector<string>::iterator iter = toInsert.begin();
 
-	string scriptline;
+	string scriptline, cleanline;
 	int inc_pos = -1, linesAdded = 0;
 	int p;
 	bool comment_todisplay, in_asm=false, in_comment=false;
@@ -270,14 +270,24 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 		if(scriptline == "/*")
 		{
 			in_comment = true;
-			iter++;
-			continue;
+			comment_todisplay=1;
+			//iter++;
+			//continue;
 		}
 		else if(scriptline == "*/")
 		{
 			in_comment = false;
-			iter++;
-			continue;
+			comment_todisplay=1;
+			//iter++;
+			//continue;
+		}
+		else if (scriptline.find("/*")==0 && scriptline.find("*/")==string::npos) {
+			in_comment = true;
+			comment_todisplay=1;
+		}
+		else if (scriptline.find("*/")==(scriptline.length()-2) ) {
+			in_comment = false;
+			comment_todisplay=1;
 		}
 		else if (scriptline.find("/*")!=string::npos && scriptline.find("*/")==string::npos) 
 		{
@@ -299,6 +309,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 		// Check for comments at the end of rows and erase those
 		else if(!in_comment && scriptline.find("//")!=string::npos) 
 		{
+			cleanline=scriptline;
 			p=scriptline.find("//");
 			if (scriptline.find("\"")!=string::npos) {
 
@@ -307,6 +318,11 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 
 			} else
 				scriptline.erase(p,scriptline.length()-p);
+
+			if (trim(scriptline) == "") {
+				scriptline = cleanline;
+				comment_todisplay=1;
+			}
 		}
 		else if(!in_comment && scriptline.find(";")!=string::npos) 
 		{
@@ -329,15 +345,17 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 		}
 		else if(in_comment) //Comment Block, ignored
 		{
-			iter++;
-			continue;
+			comment_todisplay=1;
+//			iter++;
+//			continue;
 		} 
 		// ASM Blocks
 
 		scriptline = trim(scriptline);
 		if (scriptline=="") {
-			iter++;
-			continue;
+			comment_todisplay=1;
+//			iter++;
+//			continue;
 		}
 
 		string lcline = scriptline;
@@ -366,7 +384,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			}
 		}
 		// Logging
-		else if((inc_pos = lcline.find("#log")) > -1)
+		else if((inc_pos = lcline.find("#log")) > -1 && !in_comment)
 		{
 			enable_logging = true;
 		}
@@ -376,18 +394,18 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			linesAdded++;
 			posInScript++;
 
-			if(in_asm && lcline == "ende") {
+			if(in_asm && lcline == "ende" && !in_comment) {
 				in_asm = false;
 			}
 
 			addProgLine(posInScript,scriptline,comment_todisplay*PROG_TYPE_COMMENT + in_asm*PROG_TYPE_ASM);
 
-			if(lcline == "exec") {
+			if(lcline == "exec"  && !in_comment) {
 				in_asm = true;
 			}
 
 		}
-
+	
 		iter++;
 	}
 	return linesAdded;
@@ -1210,12 +1228,14 @@ bool OllyLang::ParseLabels()
 	while(iter != script.end())
 	{
 		s = *iter;
-		if(s.at(s.length() - 1) == ':') {
-			labels.insert(pair<string, int>(s.substr(0, s.length() - 1), loc));
+		if(s.length() > 0) {
+			if(s.at(s.length() - 1) == ':') {
+				labels.insert(pair<string, int>(s.substr(0, s.length() - 1), loc));
 
-			ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,loc+1);
-			ppl->type = PROG_TYPE_LABEL;
+				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,loc+1);
+				ppl->type = PROG_TYPE_LABEL;
 
+			}
 		}
 		iter++;
 		loc++;

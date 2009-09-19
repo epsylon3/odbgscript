@@ -58,6 +58,7 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.72 (SVN)
++ Enhanced Script Window (Empty lines and all comments are now displayed, except comments in command lines)
 + Added "REF 0" support to force REF reset
 
 1.71 (17 Sep 2009)
