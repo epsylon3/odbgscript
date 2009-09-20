@@ -2103,6 +2103,7 @@ bool OllyLang::DoGMA(string args)
 	return true;
 
 }
+
 bool OllyLang::DoGMEMI(string args)
 {
 	string ops[2];
@@ -2141,6 +2142,94 @@ bool OllyLang::DoGMEMI(string args)
 		else
 		{			
 			//DoGMI(Int2Str(mem->base)+" ops[1]);
+			variables["$RESULT"] = 0;
+			errorstr = "Second operand bad";
+			return false;
+		}
+	}
+
+	errorstr = "Bad operand";
+	return false;
+}
+
+bool OllyLang::DoNAMES(string args)
+{
+	string ops[1];
+	ulong addr;
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	if(GetDWOpValue(ops[0], addr)) {
+		t_module* mod = Findmodule(addr);
+		Setdisasm(mod->codebase,1,0);
+		Sendshortcut(PM_DISASM, 0, WM_KEYDOWN, 1, 0, 'N');  //"Ctrl + N"
+		require_ollyloop = 1;
+		return true;
+	}
+
+	return false;
+}
+
+bool OllyLang::DoGMEXP(string args)
+{
+	string ops[3];
+
+	if(!CreateOperands(args, ops, 3)) {
+		ops[2]="0";
+		if(!CreateOperands(args, ops, 2))
+			return false;
+	}
+
+	ulong i, num, addr, count=0;
+	string str;
+
+	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) && GetDWOpValue(ops[2], num) )
+	{
+		transform(str.begin(), str.end(), str.begin(), toupper);
+		
+		char buffer[TEXTLEN]={0};
+
+		t_module * mod = Findmodule(addr);
+		if (!mod) {
+			variables["$RESULT"] = 0;
+			return true;
+		}
+
+		t_export exp={0};
+
+		for(i = 0; i < mod->codesize ; i++) {
+			if (Findname(mod->codebase + i, NM_EXPORT, buffer))
+			{
+				count++;
+				exp.addr=mod->codebase + i;
+				strcpy(exp.label,buffer);
+				if (count==num && num>0) break;			
+			}
+		}
+
+		if (num > count) //no more
+		{
+			variables["$RESULT"] = 0;
+			return true;
+		}
+
+		if(str == "COUNT")
+		{
+			variables["$RESULT"] = count;
+			return true;
+		}
+		else if(str == "ADDRESS")
+		{
+			variables["$RESULT"] = exp.addr;
+			return true;
+		}
+		else if(str == "LABEL")
+		{
+			variables["$RESULT"] = exp.label;
+			return true;
+		}
+		else
+		{
 			variables["$RESULT"] = 0;
 			errorstr = "Second operand bad";
 			return false;

@@ -37,6 +37,13 @@ typedef struct t_dbgmemblock {
 
 } t_dbgmemblock; 
 
+typedef struct t_export {
+
+	ulong addr;
+	char  label[TEXTLEN];
+
+} t_export;
+
 class OllyLang
 {
 public:
@@ -243,6 +250,7 @@ private:
 	bool DoGCMT(string args);
 	bool DoGMA(string args);
 	bool DoGMEMI(string args);
+	bool DoGMEXP(string args);
 	bool DoGMI(string args);
 	bool DoGN(string args);
 	bool DoGO(string args);
@@ -277,6 +285,7 @@ private:
 	bool DoMSG(string args);
 	bool DoMSGYN(string args);
 	bool DoMUL(string args);
+	bool DoNAMES(string args);
 	bool DoNEG(string args);
 	bool DoNOT(string args);
 	bool DoOLLY(string args);

@@ -59,6 +59,8 @@ Get Trace Addr
 ---------------
 1.72 (SVN)
 + Enhanced Script Window (Empty lines and all comments are now displayed, except comments in command lines)
++ Added GMEXP to list module exports (usefull to set breakpoints on all exports)
++ Added NAMES to open Names Window
 + Added "REF 0" support to force REF reset
 
 1.71 (17 Sep 2009)
@@ -495,13 +497,13 @@ Example
 
 #INC file
 ---------
-Includes a script file in another script file
+Include a script file in another script file
 Example:
 	#inc "anotherscript.txt"
 	
 #LOG
 ----
-Enables logging of executed commands.
+Enable logging of executed commands.
 The commands will appear in OllyDbg log window, and will be prefixed with -->
 Example:
 	#log
@@ -517,7 +519,7 @@ Example:
 
 AI
 --
-Executes "Animate into" in OllyDbg
+Execute "Animate into" in OllyDbg
 Example:
 	ai
 
@@ -550,7 +552,7 @@ Example:
 
 ASK question
 ------------
-Displays an input box with the specified question and lets user enter a response.
+Display an input box with the specified question and lets user enter a response.
 Sets the reserved $RESULT variable (0 if cancel button was pressed).
 You have also the length in $RESULT_1 (divised by 2 for hex entries)
 Example:
@@ -575,7 +577,7 @@ Example:
 
 ATOI str [, base=16.]
 -----------------
-Converts a string to integer
+Convert a string to integer
 Returns the integer in the reserved $RESULT variable
 Example:
 	atoi "F"
@@ -592,7 +594,7 @@ Example:
 
 BD [addr]
 ---------
-Disables breakpoint at addr.
+Disable breakpoint at addr.
 Without parameter, the command disables all loaded breakpoints 
 Example:
 	bp 401000
@@ -958,7 +960,7 @@ Example:
 
 GCI addr, info
 --------------
-Gets information about asm command
+Get information about asm command
 "info" can be :
 	- COMMAND for asm command string (like OPCODE)
 	- DESTINATION for Destination of jump/call/return
@@ -970,23 +972,39 @@ Example:
 
 GCMT addr
 ---------
-Gets the comment, automatic comment or analyse's comment at specified code address
+Get the comment, automatic comment or analyse's comment at specified code address
 
 GMA name, info
 --------------
-Calls GMI, but parameter is short name of the module
+Call GMI, but parameter is short name of the module
+Example:
+	GMA "KERNEL32", MODULEBASE
 
 GMEMI addr, info
 ----------------
-Gets information about a memory block to which the specified address belongs.
+Get information about a memory block to which the specified address belongs.
 "info" can be MEMORYBASE, MEMORYSIZE or MEMORYOWNER (if you want other info in the future versions plz tell me).
 Sets the reserved $RESULT variable (0 if data not found).
 Example:
 	GMEMI addr, MEMORYBASE // After this $RESULT is the address to the memory base of the memory block to which addr belongs
 
+GMEXP moduleaddr, info, [num]
+-----------------------------
+Get Export Address and Names in a module
+info can be ADDRESS, LABEL, COUNT
+Example:
+	gma "KERNEL32", MODULEBASE
+	mov addr, $RESULT
+	GMEXP addr, COUNT
+	log $RESULT
+	GMEXP addr, LABEL, 1
+	log $RESULT
+	GMEXP addr, ADDRESS, 1
+	log $RESULT
+
 GMI addr, info
 --------------
-Gets information about a module to which the specified address belongs.
+Get information about a module to which the specified address belongs.
 "info" can be :
 MODULEBASE, MODULESIZE, CODEBASE, CODESIZE, MEMBASE, MEMSIZE, 
 ENTRY, NSECT, DATABASE, RELOCTABLE, RELOCSIZE
@@ -999,21 +1017,21 @@ Example:
 
 GN addr
 -------
-Gets the symbolic name of specified address (ex the API it poits to)
-Sets the reserved $RESULT variable to the name. If that name is an API
+Get the symbolic name of specified address (ex the API it points to)
+Set the reserved $RESULT variable to the name. If that name is an API
 $RESULT_1 is set to the library (ex kernel32) and $RESULT_2 to the name of the API (ex ExitProcess).
 Example:
 	gn 401000
 	
 GO addr
 -------
-Executes to specified address (like G in SoftIce)
+Execute to specified address (like G in SoftIce)
 Example:
 	go 401005
 
 GOPI addr, index, info
 ----------------------
-Gets information about operands of asm command
+Get information about operands of asm command
 
 "index" is between 1 and 3
 
@@ -1029,7 +1047,7 @@ Example:
 
 GPA proc, lib, [0,1]
 --------------------
-Gets the address of the specified procedure in the specified library.
+Get the address of the specified procedure in the specified library.
 When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
 Useful for setting breakpoints on APIs.
 Set third param to 1 if you want to keep library in memory
@@ -1038,7 +1056,7 @@ Example:
 
 GPI key
 -------
-Gets process information, one of :
+Get process information, one of :
 HPROCESS,PROCESSID,HMAINTHREAD,MAINTHREADID,MAINBASE,PROCESSNAME,EXEFILENAME,CURRENTDIR,SYSTEMDIR
 
 GREF [line]
@@ -1063,7 +1081,7 @@ Returns the handle of child window of specified class at point x,y (remember: in
 
 HISTORY (0,1)
 -------------
-Enables or Disables Value history in Script Progress Window, could optimize loops
+Enable or Disable Value history in Script Progress Window, could optimize loops
 Example:
 	history 0 //disable
 	history 1 //enable
@@ -1076,7 +1094,7 @@ Example:
 
 ITOA n [, base=16.]
 -------------------
-Converts an integer to string
+Convert an integer to string
 Returns the string in the reserved $RESULT variable
 Example:
 	itoa F
@@ -1126,7 +1144,7 @@ Example:
 
 KEY vkcode [, shift [, ctrl]]
 --------------------------
-Emulates global keyboard shortcut.
+Emulate global keyboard shortcut.
 Example:
 	key 20
 	key 20, 1 //Shift+space
@@ -1134,7 +1152,7 @@ Example:
 
 LBL addr, text
 --------------
-Inserts a label at the specified address
+Insert a label at the specified address
 Example:
 	lbl eip, "NiceJump"
 
@@ -1175,7 +1193,7 @@ Example:
   
 LOG src [,prefix]
 -----------------
-Logs src to OllyDbg log window.
+Log src to OllyDbg log window.
 If src is a constant string the string is logged as it is.
 If src is a variable or register its logged with its name.
 You can replace default prefix with the optional second parameter.
@@ -1238,6 +1256,11 @@ Sets op1 with op1*op2
 Example:
 	mul op1, 10
 
+NAMES addr
+----------
+Open names Window for module (Like Ctrl + N)
+addr is the module address
+
 NEG op
 ------
 Assembly Operation "neg eax"
@@ -1248,7 +1271,7 @@ Assembly Operation "not eax"
 
 OLLY info
 ---------
-Gets information about ollydbg
+Get information about ollydbg
 "info" can be :
 	- PID retrieve the Ollydbg Process ID
 	- HWND retrieve the main Ollydbg HWND
@@ -1269,7 +1292,7 @@ Example:
 
 OPCODE addr
 -----------
-OPCODE sets the $RESULT variable to the opcode bytes, $RESULT_1 variable to mnemonic opcode (i.e. "MOV ECX,EAX") 
+OPCODE set the $RESULT variable to the opcode bytes, $RESULT_1 variable to mnemonic opcode (i.e. "MOV ECX,EAX") 
 and $RESULT_2 to the length of the opcode. 
 If an invalid opcode appears, $RESULT_2 should be 0. 
 addr is increased by the length of the opcode (disassemble command). 

@@ -114,6 +114,7 @@ OllyLang::OllyLang()
 	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
 	commands["gmemi"] = &OllyLang::DoGMEMI;
+	commands["gmexp"] = &OllyLang::DoGMEXP;	
 	commands["gma"] = &OllyLang::DoGMA;
 	commands["gmi"] = &OllyLang::DoGMI;
 	commands["gn"] = &OllyLang::DoGN;
@@ -153,6 +154,7 @@ OllyLang::OllyLang()
 	commands["msg"] = &OllyLang::DoMSG;
 	commands["msgyn"] = &OllyLang::DoMSGYN;
 	commands["mul"] = &OllyLang::DoMUL;
+	commands["names"] = &OllyLang::DoNAMES;	
     commands["neg"] = &OllyLang::DoNEG;
 	commands["not"] = &OllyLang::DoNOT;
 	commands["or"] = &OllyLang::DoOR;

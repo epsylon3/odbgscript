@@ -805,3 +805,12 @@ BOOL str_filename_from_handle2 (HANDLE h_file, string &target_filename)
       }
 }
 */
+
+HWND GetODBGWindow(string &title, string &classname) {
+
+	HWND main, hwnd=0;
+	main = (HWND) Plugingetvalue(VAL_HWCLIENT);
+	hwnd = FindWindowEx(main,NULL,classname.c_str(),title.c_str());
+
+	return hwnd;
+}

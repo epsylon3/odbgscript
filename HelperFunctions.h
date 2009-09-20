@@ -46,6 +46,8 @@ void resizeSTR(string &str, DWORD size);
 string StrLastError(void);
 LARGE_INTEGER MyGetTickCount(ULONGLONG oldValue, bool bUseTickCount=0);
 
+HWND GetODBGWindow(string &title, string &classname);
+
 //PSAPI.DLL (to get Module name from Handle)
 typedef DWORD (WINAPI *lpfGetMappedFileName) (HANDLE, LPVOID, LPTSTR, DWORD);
 BOOL get_filename_from_handle (HANDLE h_file, char *target_filename);

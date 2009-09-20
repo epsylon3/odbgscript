@@ -109,7 +109,7 @@ t_wndprog_data *ppl;
 			if (mLabels!=NULL) DestroyMenu(mLabels);
 			if (mVars!=NULL) DestroyMenu(mVars);
 			
-			if (i>10 && i<=29) 
+			if (i>10 && i<=29 && i!=20) 
 			{
 
 				char key[5]="NRU ";
@@ -144,8 +144,7 @@ t_wndprog_data *ppl;
 			} 
 			else if (i>=0x100 && i<0x200) 
 			{
-				//Selectandscroll(&ollylang->wndProg,i-0xFE,2);
-				Selectandscroll(&ollylang->wndProg,i-0xFE,2);
+				Selectandscroll(&ollylang->wndProg,i-0xFF,2);
 				InvalidateRect(hw, NULL, FALSE);
 				return 1;
 			} 
