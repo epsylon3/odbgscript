@@ -2182,12 +2182,11 @@ bool OllyLang::DoGMEXP(string args)
 
 	ulong i, num, addr, count=0;
 	string str;
+	bool cache=false, cached=false;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) && GetDWOpValue(ops[2], num) )
 	{
 		transform(str.begin(), str.end(), str.begin(), toupper);
-		
-		char buffer[TEXTLEN]={0};
 
 		t_module * mod = Findmodule(addr);
 		if (!mod) {
@@ -2197,13 +2196,28 @@ bool OllyLang::DoGMEXP(string args)
 
 		t_export exp={0};
 
+		if (str == "COUNT") {
+			cache = true;
+			tExportsCache.clear();
+			exportsCacheAddr = addr;
+		} else {
+			if (exportsCacheAddr == addr && num < tExportsCache.size()) {
+				exp = tExportsCache[num];
+				count = tExportsCache.size();
+				cached = true;
+			}
+		}
+
+		if (!cached)
 		for(i = 0; i < mod->codesize ; i++) {
-			if (Findname(mod->codebase + i, NM_EXPORT, buffer))
+			if (Findname(mod->codebase + i, NM_EXPORT, exp.label))
 			{
 				count++;
 				exp.addr=mod->codebase + i;
-				strcpy(exp.label,buffer);
-				if (count==num && num>0) break;			
+				if (count==num && !cache) break;
+				if (cache) {
+					tExportsCache.push_back(exp);
+				}
 			}
 		}
 
@@ -3060,33 +3074,28 @@ bool OllyLang::DoLOADLIB(string args)
 	
 	Writememory((void*)str.c_str(), (ulong) hMem, str.length(), MM_DELANAL|MM_SILENT);
 
-	//t_thread* pt = Findthread(Getcputhreadid());
-
-	t_dbgmemblock block={0};
-	block.hmem = hMem;
-	block.size = 0x1000;
-	block.script_pos = script_pos;
-	block.free_at_eip = reg_backup.eip;
-	block.result_register = true;
-	block.reg_to_return = REG_EAX;
-	block.restore_registers = true;
-	block.listmemory = true;
-	block.autoclean = true;
-
-	//nIgnoreNextValuesHist++;
 	if (DoPUSH(bfdlladdr)) {
 
 		char bffnloadlib[10]={0};
 		sprintf(bffnloadlib,"%09X",fnload);
 		string libPtrToLoad = bffnloadlib;
 
-		//nIgnoreNextValuesHist++;
 		ExecuteASM("call "+libPtrToLoad);	
 
 		variables["$RESULT"] = 0;
 
 		// result returned after process
 		// variables["$RESULT"] = pt->reg.r[REG_EAX];
+		t_dbgmemblock block={0};
+		block.hmem = hMem;
+		block.size = 0x1000;
+		block.script_pos = script_pos;
+		block.free_at_eip = reg_backup.eip;
+		block.result_register = true;
+		block.reg_to_return = REG_EAX;
+		block.restore_registers = true;
+		block.listmemory = true;
+		block.autoclean = true;
 
 		// Free memory block after next ollyloop
 		regBlockToFree(block);

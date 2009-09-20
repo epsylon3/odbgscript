@@ -236,6 +236,7 @@ OllyLang::~OllyLang()
 	clearProgLines();
 	clearLogLines();
 	Reset();
+
 }
 
 vector<string> OllyLang::GetScriptFromFile(LPSTR file)
@@ -578,6 +579,10 @@ bool OllyLang::Reset()
 	require_ollyloop = 0;
 	require_addonaction = 0;
 	nIgnoreNextValuesHist = 0;
+
+	tExportsCache.clear();
+	exportsCacheAddr = 0;
+
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;
@@ -783,7 +788,7 @@ bool OllyLang::ProcessAddonAction()
 			HANDLE hDbgPrc = (HANDLE)Plugingetvalue(VAL_HPROCESS);
 			VirtualFreeEx(hDbgPrc, block->hmem, block->size, MEM_DECOMMIT);
 			
-			DbgMsgHex((ulong)block->hmem,"VirtualFreeEx");
+			//DbgMsgHex((ulong)block->hmem,"VirtualFreeEx");
 
 			if (block->result_register) {
 				variables["$RESULT"] = thr->reg.r[block->reg_to_return];
@@ -2241,7 +2246,7 @@ bool OllyLang::ExecuteASM(string command)
 	thr->regvalid = 1;
 	Broadcast(WM_USER_CHREG, 0, 0);
 	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
-	DbgMsgHex(pmemexec);
+	//DbgMsgHex(pmemexec);
 
 	// Free memory block after next ollyloop
 	t_dbgmemblock block={0};

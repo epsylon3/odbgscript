@@ -57,10 +57,10 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.72 (SVN)
+1.72 (20 Sep 2009)
 + Enhanced Script Window (Empty lines and all comments are now displayed, except comments in command lines)
 + Added GMEXP to list module exports (usefull to set breakpoints on all exports)
-+ Added NAMES to open Names Window
++ Added NAMES to open Names Window in a module
 + Added "REF 0" support to force REF reset
 
 1.71 (17 Sep 2009)

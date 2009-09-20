@@ -402,4 +402,7 @@ private:
 	bool SaveRegisters(bool stackToo);
 	bool RestoreRegisters(bool stackToo);
 
+	//cache for GMEXP
+	vector<t_export> tExportsCache;
+	ulong exportsCacheAddr;
 };
