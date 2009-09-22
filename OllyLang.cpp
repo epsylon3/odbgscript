@@ -95,7 +95,7 @@ OllyLang::OllyLang()
 	commands["endsearch"] = &OllyLang::DoENDSEARCH;
 	commands["erun"] = &OllyLang::DoERUN;
 	commands["esti"] = &OllyLang::DoESTI;
-	 commands["esto"] = &OllyLang::DoERUN;
+	commands["estep"] = &OllyLang::DoESTEP;
 	commands["eob"] = &OllyLang::DoEOB;
 	commands["eoe"] = &OllyLang::DoEOE;
 	commands["eval"] = &OllyLang::DoEVAL;
@@ -114,9 +114,10 @@ OllyLang::OllyLang()
 	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
 	commands["gmemi"] = &OllyLang::DoGMEMI;
-	commands["gmexp"] = &OllyLang::DoGMEXP;	
+	commands["gmexp"] = &OllyLang::DoGMEXP;
 	commands["gma"] = &OllyLang::DoGMA;
 	commands["gmi"] = &OllyLang::DoGMI;
+	commands["gmimp"] = &OllyLang::DoGMIMP;
 	commands["gn"] = &OllyLang::DoGN;
 	commands["go"] = &OllyLang::DoGO;
 	commands["gopi"] = &OllyLang::DoGOPI;	
@@ -185,6 +186,7 @@ OllyLang::OllyLang()
     commands["setoption"] = &OllyLang::DoSETOPTION;
 	commands["shl"] = &OllyLang::DoSHL;
 	commands["shr"] = &OllyLang::DoSHR;
+	 commands["step"] = &OllyLang::DoSTO;
 	commands["sti"] = &OllyLang::DoSTI;
 	commands["sto"] = &OllyLang::DoSTO;
 	commands["str"] = &OllyLang::DoSTR;
@@ -582,6 +584,8 @@ bool OllyLang::Reset()
 
 	tExportsCache.clear();
 	exportsCacheAddr = 0;
+	tImportsCache.clear();
+	importsCacheAddr = 0;
 
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);

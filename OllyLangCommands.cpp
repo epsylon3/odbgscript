@@ -1097,6 +1097,13 @@ bool OllyLang::DoESTI(string args)
 	return true;
 }
 
+bool OllyLang::DoESTEP(string args)
+{
+	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F8); 
+	require_ollyloop = 1;
+	return true;
+}
+
 bool OllyLang::DoEOB(string args)
 {
 	string ops[1];
@@ -2374,6 +2381,111 @@ bool OllyLang::DoGMI(string args)
 			return false;
 		}
 	}
+	errorstr = "Bad operand";
+	return false;
+}
+
+bool OllyLang::DoGMIMP(string args)
+{
+	string ops[3];
+
+	if(!CreateOperands(args, ops, 3)) {
+		ops[2]="0";
+		if(!CreateOperands(args, ops, 2))
+			return false;
+	}
+
+	ulong i, num, addr, count=0;
+	string str;
+	bool cache=false, cached=false;
+
+	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) && GetDWOpValue(ops[2], num) )
+	{
+		transform(str.begin(), str.end(), str.begin(), toupper);
+
+		t_module * mod = Findmodule(addr);
+		if (!mod) {
+			variables["$RESULT"] = 0;
+			return true;
+		}
+
+		t_export exp={0};
+
+		if (str == "COUNT") {
+			cache = true;
+			tImportsCache.clear();
+			importsCacheAddr = addr;
+		} else {
+			if (importsCacheAddr == addr && num < tImportsCache.size()) {
+				exp = tImportsCache[num];
+				count = tImportsCache.size();
+				cached = true;
+			}
+		}
+
+		if (!cached)
+		for(i = 0; i < mod->codesize ; i++) {
+			if (Findname(mod->codebase + i, NM_IMPORT, exp.label))
+			{
+				count++;
+				exp.addr=mod->codebase + i;
+				if (count==num && !cache) break;
+				if (cache) {
+					tImportsCache.push_back(exp);
+				}
+			}
+		}
+
+		if (num > count) //no more
+		{
+			variables["$RESULT"] = 0;
+			return true;
+		}
+
+		if(str == "COUNT")
+		{
+			variables["$RESULT"] = count;
+			return true;
+		}
+		else if(str == "ADDRESS")
+		{
+			variables["$RESULT"] = exp.addr;
+			return true;
+		}
+		else if(str == "LABEL")
+		{
+			variables["$RESULT"] = exp.label;
+			return true;
+		}
+		else if(str == "NAME")
+		{
+			string s = exp.label;
+			if (s.find(".") != string::npos) {
+				variables["$RESULT"] = s.substr(s.find(".")+1);
+			}
+			else 
+				variables["$RESULT"] = exp.label;
+
+			return true;
+		}
+		else if(str == "MODULE")
+		{
+			string s = exp.label;
+			if (s.find(".") != string::npos) {
+				variables["$RESULT"] = s.substr(0,s.find("."));
+			}
+			else 
+				variables["$RESULT"] = "";
+			return true;
+		}
+		else
+		{
+			variables["$RESULT"] = 0;
+			errorstr = "Second operand bad";
+			return false;
+		}
+	}
+
 	errorstr = "Bad operand";
 	return false;
 }

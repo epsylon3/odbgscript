@@ -57,6 +57,12 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.73 (22 Sep 2009)
++ Added ESTEP to Step Over ignoring exceptions (Shift F8)
++ Added STEP to Step Over (same a STO)
++ Added GMIMP command like GMEXP to get imports in a module
+! Removed old command ESTO (use ERUN) to force old script updates
+
 1.72 (20 Sep 2009)
 + Enhanced Script Window (Empty lines and all comments are now displayed, except comments in command lines)
 + Added GMEXP to list module exports (usefull to set breakpoints on all exports)
@@ -794,20 +800,21 @@ Example:
 ERUN
 ----
 Executes SHIFT-F9 in OllyDbg. Run with Ignore Exceptions
+Note: Was ESTO before, but command is now removed to force script updates
 Example:
 	erun
 
-ESTI
+ESTEP
 ----
-Executes SHIFT-F7 in OllyDbg.
-Example:
-	esti
-
-ESTO
-----
-Executes SHIFT-F9 in OllyDbg. (OLD COMMAND, COULD BE REMOVED, USE ERUN)
+Executes SHIFT-F8 in OllyDbg. Step Over ignoring Exceptions.
 Example:
 	esto
+
+ESTI
+----
+Executes SHIFT-F7 in OllyDbg. Step Into ignoring Exceptions.
+Example:
+	esti
 
 EVAL
 ----
@@ -1014,6 +1021,23 @@ and strings NAME, PATH, VERSION
 Sets the reserved $RESULT variable (0 if data not found).
 Example:
 	GMI eip, CODEBASE // After this $RESULT is the address to the codebase of the module to which eip belongs
+
+GMIMP moduleaddr, info, [num]
+-----------------------------
+Get Import address and names in a module
+info can be ADDRESS, LABEL, MODULE, NAME, COUNT
+if LABEL results string like "KERNEL32.CopyFileEx"
+MODULE results "KERNEL32"
+NAME results "CopyFileEx"
+Example:
+	gma "USER32", MODULEBASE
+	mov addr, $RESULT
+	GMIMP addr, COUNT
+	log $RESULT
+	GMIMP addr, LABEL, 1
+	log $RESULT
+	GMIMP addr, ADDRESS, 1
+	log $RESULT
 
 GN addr
 -------
@@ -1447,6 +1471,12 @@ Shifts dest to the right src times and stores the result in dest.
 Example:
 	mov x, 00001000
 	shr x, 8 // x is now 00000010
+
+STEP
+---
+Execute F8 in OllyDbg. Same as STO
+Example:
+	sto
 
 STI
 ---

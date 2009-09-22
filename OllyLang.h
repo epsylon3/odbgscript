@@ -233,6 +233,7 @@ private:
 	bool DoEOB(string args);
 	bool DoEOE(string args);
 	bool DoERUN(string args);
+	bool DoESTEP(string args);
 	bool DoESTI(string args);
 	bool DoEVAL(string args);
 	bool DoEXEC(string args);
@@ -252,6 +253,7 @@ private:
 	bool DoGMEMI(string args);
 	bool DoGMEXP(string args);
 	bool DoGMI(string args);
+	bool DoGMIMP(string args);
 	bool DoGN(string args);
 	bool DoGO(string args);
 	bool DoGOPI(string args);
@@ -276,7 +278,7 @@ private:
 	bool DoLC(string args);	
 	bool DoLCLR(string args);
 	bool DoLEN(string args);	
-	bool DoLOADLIB(string args); bool _DoLOADLIB(void);
+	bool DoLOADLIB(string args);
 	bool DoLOG(string args);
 	bool DoLOGBUF(string args);
     bool DoLM(string args);
@@ -405,4 +407,9 @@ private:
 	//cache for GMEXP
 	vector<t_export> tExportsCache;
 	ulong exportsCacheAddr;
+
+	//cache for GMIMP
+	vector<t_export> tImportsCache;
+	ulong importsCacheAddr;
+	
 };
