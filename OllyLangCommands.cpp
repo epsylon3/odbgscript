@@ -2066,6 +2066,27 @@ bool OllyLang::DoGCMT(string args)
 	return false;
 }
 
+bool OllyLang::DoGFO(string args)
+{
+	string comment;
+	ulong addr;
+
+	if(GetDWOpValue(args, addr))
+	{
+		if(addr != 0)
+		{
+			t_module* mod = (t_module*) Findmodule(addr);
+			if (mod!=NULL) {
+				variables["$RESULT"] = Findfileoffset(mod, addr);
+			} else {
+				variables["$RESULT"] = 0;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 
 bool OllyLang::DoGMA(string args)
 {
@@ -2086,18 +2107,18 @@ bool OllyLang::DoGMA(string args)
 			return false;
 
 		t_table* ttab=(t_table*) t;
-		t_memory* tmem;
-		t_module* tmod;
+		t_memory* mem;
+		t_module* mod;
 		string sMod;
 
 		for (int n=0;n<ttab->data.n;n++) {
 	
-			tmem = (t_memory*) Getsortedbyselection(&ttab->data,n);
-			tmod = (t_module*) Findmodule(tmem->base);
-			if (tmod!=NULL) {
-				sMod.assign(tmod->name,SHORTLEN);
+			mem = (t_memory*) Getsortedbyselection(&ttab->data,n);
+			mod = (t_module*) Findmodule(mem->base);
+			if (mod!=NULL) {
+				sMod.assign(mod->name,SHORTLEN);
 				if (stricmp(sMod.c_str(),str.c_str())==0) {
-					Int2Hex(tmem->base, str);
+					Int2Hex(mem->base, str);
 					nIgnoreNextValuesHist++;
 					return DoGMI(str+","+ops[1]);		
 				}

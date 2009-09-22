@@ -57,9 +57,12 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.74
++ Added GFO to get file offset of disasm address.
+
 1.73 (22 Sep 2009)
 + Added ESTEP to Step Over ignoring exceptions (Shift F8)
-+ Added STEP to Step Over (same a STO)
++ Added STEP to Step Over (same as STO)
 + Added GMIMP command like GMEXP to get imports in a module
 ! Removed old command ESTO (use ERUN) to force old script updates
 
@@ -711,7 +714,7 @@ Converts string/dword variable to a Buffer
 Example: 
 	mov s, "123"
 	buf s
-	log s // output "#313233#
+	log s // output #313233#
 
 CMP dest, src [,size]
 ---------------------
@@ -830,6 +833,7 @@ EXEC/ENDE
 ---------
 Executes instructions between EXEC and ENDE in the context of the target process.
 Values in curly braces {} are replaced by their values.
+PUSHA / POPA commands could be usefull when you use this.
 Examples:
 	// This does some movs
 	mov x, "eax"
@@ -986,6 +990,10 @@ GMA name, info
 Call GMI, but parameter is short name of the module
 Example:
 	GMA "KERNEL32", MODULEBASE
+
+GFO addr
+--------
+Get File Offset of address
 
 GMEMI addr, info
 ----------------

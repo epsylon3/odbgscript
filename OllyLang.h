@@ -249,6 +249,7 @@ private:
 	bool DoGBPR(string args);
 	bool DoGCI(string args);
 	bool DoGCMT(string args);
+	bool DoGFO(string args);
 	bool DoGMA(string args);
 	bool DoGMEMI(string args);
 	bool DoGMEXP(string args);

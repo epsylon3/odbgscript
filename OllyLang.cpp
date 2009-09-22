@@ -95,6 +95,7 @@ OllyLang::OllyLang()
 	commands["endsearch"] = &OllyLang::DoENDSEARCH;
 	commands["erun"] = &OllyLang::DoERUN;
 	commands["esti"] = &OllyLang::DoESTI;
+	 commands["esto"] = &OllyLang::DoERUN;
 	commands["estep"] = &OllyLang::DoESTEP;
 	commands["eob"] = &OllyLang::DoEOB;
 	commands["eoe"] = &OllyLang::DoEOE;
@@ -113,6 +114,7 @@ OllyLang::OllyLang()
 	commands["gbpr"] = &OllyLang::DoGBPR;
 	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
+	commands["gfo"] = &OllyLang::DoGFO;
 	commands["gmemi"] = &OllyLang::DoGMEMI;
 	commands["gmexp"] = &OllyLang::DoGMEXP;
 	commands["gma"] = &OllyLang::DoGMA;
