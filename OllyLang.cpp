@@ -1243,11 +1243,12 @@ bool OllyLang::ParseLabels()
 		s = *iter;
 		if(s.length() > 0) {
 			if(s.at(s.length() - 1) == ':') {
-				labels.insert(pair<string, int>(s.substr(0, s.length() - 1), loc));
 
 				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,loc+1);
-				ppl->type = PROG_TYPE_LABEL;
-
+				if (ppl->type != PROG_TYPE_COMMENT) {
+					ppl->type = PROG_TYPE_LABEL;
+					labels.insert(pair<string, int>(s.substr(0, s.length() - 1), loc));
+				}
 			}
 		}
 		iter++;

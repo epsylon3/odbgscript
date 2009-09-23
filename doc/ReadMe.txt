@@ -59,6 +59,9 @@ Get Trace Addr
 ---------------
 1.74
 + Added GFO to get file offset of disasm address.
+* Labels commented ignored
+* Script Window : result/eip columns display cleanup with commented lines
+! Restored ESTO for compatibility but use ERUN only
 
 1.73 (22 Sep 2009)
 + Added ESTEP to Step Over ignoring exceptions (Shift F8)
@@ -791,6 +794,7 @@ Example:
 EOB label
 ---------
 Transfer execution to some label on next breakpoint.
+(see BPGOTO command to assign a label to a breakpoint)
 Example:
 	eob SOME_LABEL
 
@@ -803,12 +807,12 @@ Example:
 ERUN
 ----
 Executes SHIFT-F9 in OllyDbg. Run with Ignore Exceptions
-Note: Was ESTO before, but command is now removed to force script updates
+Note: Was ESTO before, but the command is depreciated
 Example:
 	erun
 
 ESTEP
-----
+-----
 Executes SHIFT-F8 in OllyDbg. Step Over ignoring Exceptions.
 Example:
 	esto
@@ -1481,7 +1485,7 @@ Example:
 	shr x, 8 // x is now 00000010
 
 STEP
----
+----
 Execute F8 in OllyDbg. Same as STO
 Example:
 	sto
@@ -1494,7 +1498,7 @@ Example:
 
 STO
 ---
-Execute F8 in OllyDbg. STep Over.
+Execute F8 in OllyDbg. STep Over. Same as STEP
 Example:
 	sto
 

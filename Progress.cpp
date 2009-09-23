@@ -386,10 +386,20 @@ int wndprog_sort_function(const t_sortheader *p1,const t_sortheader *p2,const in
 int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int column) 
 {
 
-	unsigned int ret;
+	unsigned int ret=0;
 	t_wndprog_data *pline = (t_wndprog_data *)ph;
 	t_wndprog_data *plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line-1);
 	t_wndprog_data *plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line+1);
+
+	if (plineBf!=NULL)
+	while (plineBf->type == PROG_TYPE_COMMENT && plineBf->line > 1) {
+		plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineBf->line-1);
+	}
+
+	if (plineAf!=NULL)
+	while (plineAf->type == PROG_TYPE_COMMENT && plineAf->line < ollylang->script.size()) {
+		plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineAf->line+1);
+	}
 
 	t_dump *cpuasm;
 	int p;
@@ -523,6 +533,18 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				}
 				ret = sprintf(s, "%s", pline->result);
 			}
+			else if (plineBf)
+			{
+				if (plineBf->result == NULL) 
+				{
+					//Same result as previous line
+					*select=DRAW_MASK;
+					*s=' ';	s[1]=D_GRAYPATH;
+					ret=2;
+					memset(mask,DRAW_GRAPH,ret);
+					break;
+				}			
+			}
 		break;
 		case 3:
 			if (pline->type & PROG_TYPE_LABEL) 
@@ -564,6 +586,27 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					*select=DRAW_MASK;
 					memset(mask,DRAW_HILITE,ret);				
 				}
+			} 
+			else if (plineBf)
+			{
+				if (pline->eip != 0) 
+				{
+					//Same result as previous line
+					if (plineAf)
+						if (plineAf->eip != pline->eip) goto draw_normal_eip;
+					
+					*select=DRAW_MASK;
+					*s=' ';
+					if (cpuasm->sel0 == pline->eip) 
+						s[1]=D_PATH;
+					else 
+						s[1]=D_GRAYPATH;
+				
+					ret=2;
+					memset(mask,DRAW_GRAPH,ret);
+					break;
+				}
+				ret = 0;			
 			}
 		break;
 		case 4:
