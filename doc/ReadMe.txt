@@ -57,7 +57,7 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.74
+1.74 (23 Sep 2009)
 + Added GFO to get file offset of disasm address.
 * Labels commented ignored
 * Script Window : result/eip columns display cleanup with commented lines
