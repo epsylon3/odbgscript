@@ -386,25 +386,24 @@ int wndprog_sort_function(const t_sortheader *p1,const t_sortheader *p2,const in
 int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int column) 
 {
 
-	unsigned int ret=0;
-	t_wndprog_data *pline = (t_wndprog_data *)ph;
-	t_wndprog_data *plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line-1);
-	t_wndprog_data *plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line+1);
+	unsigned int ret;
+	t_wndprog_data * pline = (t_wndprog_data *)ph;
+	t_wndprog_data * plineBf;
+	t_dump * cpuasm;
+	
+	if (column == 2 || column == 3) {
+		plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line-1);
+		if (plineBf != NULL)
+			while (plineBf->type == PROG_TYPE_COMMENT && plineBf->line > 1)
+				plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineBf->line-1);
 
-	if (plineBf!=NULL)
-	while (plineBf->type == PROG_TYPE_COMMENT && plineBf->line > 1) {
-		plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineBf->line-1);
+		//t_wndprog_data *plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line+1);
+		//if (plineAf != NULL)
+		//	while (plineAf->type == PROG_TYPE_COMMENT && plineAf->line < ollylang->script.size())
+		//		plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineAf->line+1);
 	}
 
-	if (plineAf!=NULL)
-	while (plineAf->type == PROG_TYPE_COMMENT && plineAf->line < ollylang->script.size()) {
-		plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineAf->line+1);
-	}
-
-	t_dump *cpuasm;
 	int p;
-
-	cpuasm = (t_dump*) Plugingetvalue(VAL_CPUDASM);
 
     ret = sprintf(s,"");
 
@@ -440,7 +439,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
 			}
-		break;
+			break;
 		case 1:
 			if (pline->type & PROG_TYPE_COMMENT) //comment
 			{
@@ -504,7 +503,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*mask=DRAW_GRAPH;
 
 			} 
-		break;
+			break;
 		case 2:
 			if (pline->type & PROG_TYPE_LABEL) 
 			{
@@ -533,9 +532,9 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				}
 				ret = sprintf(s, "%s", pline->result);
 			}
-			else if (plineBf)
+			else if ((plineBf != NULL) && pline->type == PROG_TYPE_COMMENT)
 			{
-				if (plineBf->result == NULL) 
+				if (*plineBf->result != NULL) 
 				{
 					//Same result as previous line
 					*select=DRAW_MASK;
@@ -545,7 +544,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					break;
 				}			
 			}
-		break;
+			break;
 		case 3:
 			if (pline->type & PROG_TYPE_LABEL) 
 			{
@@ -554,15 +553,17 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);				
 			}
-			else if (pline->eip>0) 
+			else if (pline->eip != 0) 
 			{
+				cpuasm = (t_dump*) Plugingetvalue(VAL_CPUDASM);
+
 				if (plineBf) 
 				{
 					if (plineBf->eip == pline->eip) 
 					{
 						
-						if (plineAf)
-							if (plineAf->eip != pline->eip) goto draw_normal_eip;
+						//if (plineAf)
+						//	if (plineAf->eip != pline->eip) goto draw_normal_eip;
 						
 						*select=DRAW_MASK;
 						*s=' ';
@@ -570,14 +571,13 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 							s[1]=D_PATH;
 						else 
 							s[1]=D_GRAYPATH;
-					
 						ret=2;
 						memset(mask,DRAW_GRAPH,ret);
 						break;
 					}
 				}
 
-				draw_normal_eip:
+				//draw_normal_eip:
 				ret = sprintf(s, "%08X", pline->eip);
 				
 				if (cpuasm->sel0 == pline->eip) 
@@ -586,29 +586,25 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					*select=DRAW_MASK;
 					memset(mask,DRAW_HILITE,ret);				
 				}
-			} 
-			else if (plineBf)
+			}
+			else if ((plineBf != NULL) && pline->type == PROG_TYPE_COMMENT)
 			{
-				if (pline->eip != 0) 
+				if (plineBf->eip != 0) 
 				{
 					//Same result as previous line
-					if (plineAf)
-						if (plineAf->eip != pline->eip) goto draw_normal_eip;
-					
 					*select=DRAW_MASK;
 					*s=' ';
-					if (cpuasm->sel0 == pline->eip) 
+					cpuasm = (t_dump*) Plugingetvalue(VAL_CPUDASM);
+					if (cpuasm->sel0 == plineBf->eip) 
 						s[1]=D_PATH;
 					else 
 						s[1]=D_GRAYPATH;
-				
 					ret=2;
 					memset(mask,DRAW_GRAPH,ret);
 					break;
-				}
-				ret = 0;			
-			}
-		break;
+				}			
+			}		
+			break;
 		case 4:
 			if (pline->type & PROG_TYPE_LABEL)
 			{   
