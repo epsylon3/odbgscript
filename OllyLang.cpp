@@ -1258,6 +1258,33 @@ bool OllyLang::ParseLabels()
 	return false;
 }
 
+int OllyLang::SearchText(string text)
+{
+	vector<string>::iterator iter;
+	iter = script.begin();
+	string s;
+	int loc = 0;
+
+	int (*pf)(int) = tolower; 
+	transform(text.begin(), text.end(), text.begin(), pf);
+
+
+	while(iter != script.end())
+	{
+		s = *iter;
+		transform(s.begin(), s.end(), s.begin(), pf);
+		if(s.length() > 0) {
+			if(s.find(text) != string::npos) {
+				return loc;
+			}
+		}
+		iter++;
+		loc++;
+	}
+
+	return -1;
+}
+
 bool OllyLang::AddBPJump(int bpaddr,int labelpos)
 {
 	map<int,int>::iterator iter;

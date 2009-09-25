@@ -57,6 +57,11 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.75 (SVN)
++ Added Ctrl+F to search in script
++ Added Ctrl+G to goto script line
+* Fixed Scroll to Label when script has more than 256 lines
+
 1.74 (23 Sep 2009)
 + Added GFO to get file offset of disasm address.
 * Labels commented ignored

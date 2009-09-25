@@ -1,5 +1,6 @@
 LRESULT CALLBACK wndprog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp) {
 int i,m,shiftkey,controlkey;
+ulong u;
 HMENU menu,mLoad,mCmd,mRun,mLabels=NULL,mVars=NULL;
 t_wndprog_data *ppl;
 
@@ -142,7 +143,7 @@ t_wndprog_data *ppl;
 					InvalidateRect(hw, NULL, FALSE);
 				return 1;
 			} 
-			else if (i>=0x100 && i<0x200) 
+			else if (i>=0x100 && i<0x1000) 
 			{
 				Selectandscroll(&ollylang->wndProg,i-0xFF,2);
 				InvalidateRect(hw, NULL, FALSE);
@@ -310,6 +311,30 @@ t_wndprog_data *ppl;
 				ollylang->Pause();
 				return 1;
 			} 
+			else if (wp=='F' && controlkey) //Search
+			{				
+				char buffer[TEXTLEN]={0};
+				i = Gettext("Search in script...",buffer,0,0,FIXEDFONT);
+				if (i != -1) {
+					string s; s.assign(buffer);
+					m = ollylang->SearchText(s);
+					if (m >= 0) {
+						Selectandscroll(&ollylang->wndProg,m+1,1);
+						InvalidateRect(hw, NULL, FALSE);
+					}
+				}
+				return 1;
+			}
+			else if (wp=='G' && controlkey) //Goto Line
+			{
+				u = 0;
+				Getline("Goto line...",&u);
+				if (u != 0) {
+					Selectandscroll(&ollylang->wndProg,u,1);
+					InvalidateRect(hw, NULL, FALSE);
+				}
+				return 1;
+			}
 			Tablefunction(&ollylang->wndProg,hw,msg,wp,lp);
 			break;
         case WM_USER_CHALL:

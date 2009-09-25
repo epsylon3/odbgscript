@@ -97,6 +97,8 @@ public:
 	
 	bool jumpToLine(int number);
 
+	int SearchText(string text);
+
 	// "Events"
 	bool OnBreakpoint(int reason, int details);
 	bool OnException(DWORD ExceptionCode);
