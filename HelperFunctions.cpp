@@ -23,6 +23,21 @@ HINSTANCE hinstModule() {
 	return hinst;
 }
 
+DWORD getPluginDirectory(string &directory) {
+	DWORD result;
+	HINSTANCE hinst = hinstModule();
+	char * p;
+	char buffer[TEXTLEN]={0};
+	result = GetModuleFileName(hinst,buffer,TEXTLEN);
+	p = strrchr(buffer,'\\');
+	if (p) {
+		*p = '\0';
+		directory.assign(buffer);
+		return 1;
+	} else
+		return 0;
+}
+
 void MsgBox(string sMsg, string sTitle)
 {
 	MessageBox(hwndOllyDbg(),sMsg.c_str(),sTitle.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);

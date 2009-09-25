@@ -3310,8 +3310,12 @@ bool OllyLang::DoLOG(string args)
 				}
 
 				buffer[TEXTLEN-1]=0;
-				Infoline(buffer);
-				Addtolist(0, 1, buffer);
+				str.assign(buffer);
+				//Infoline and Addtolist need parameters if %s %d... is present in string
+				if (str.find("%") == string::npos) {
+					Infoline(buffer);
+					Addtolist(0, 1, buffer);
+				}
 				add2log(buffer);
 				return true;
 			}
@@ -3374,8 +3378,11 @@ bool OllyLang::DoLOG(string args)
 					}
 				}
 				buffer[TEXTLEN-1]=0;
-				Addtolist(0, 1, buffer);
 				str.assign(buffer);
+				//Infoline and Addtolist need parameters if %s %d... is present in string
+				if (str.find("%") == string::npos) {
+					Addtolist(0, 1, buffer);
+				}
 				add2log(str);
 				return true;
 			}

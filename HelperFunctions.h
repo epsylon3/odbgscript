@@ -35,6 +35,7 @@ bool ESPRun(void);
 HWND hwndOllyDbg();
 HINSTANCE hinstModule();
 HWND FindHandle(DWORD dwThreadId, string wdwClass, long x, long y);
+DWORD getPluginDirectory(string &directory);
 
 // PE Dumper
 bool SaveDump(string fileName, DWORD ep);

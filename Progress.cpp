@@ -56,6 +56,9 @@ t_wndprog_data *ppl;
 			AppendMenu(mLoad,MF_SEPARATOR,0,"-");
 			mruGetCurrentMenu(mLoad,10);
 
+			AppendMenu(menu,MF_SEPARATOR,0,"-");
+			AppendMenu(menu,MF_STRING, 1,"&Help");
+
 			//mCmd=CreatePopupMenu();
 			//AppendMenu(mCmd,MF_SEPARATOR,0,"-");
 			//mruCmdMenu(mCmd,50);
@@ -153,6 +156,14 @@ t_wndprog_data *ppl;
 
 			switch (i) 
 			{ 
+				case 1: 
+				{
+					string directory, helpfile;
+					getPluginDirectory(directory);
+					helpfile = directory + "\\ODbgScript.txt";			
+					ShellExecute(hwndOllyDbg(),"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
+				}
+				break;
 				case 20: // Open Run
 					ODBG_Pluginaction(PM_MAIN,0,NULL);
 					return 1;

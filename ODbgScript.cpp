@@ -164,8 +164,8 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 		}
 		catch( ... )
 		{
-			delete ollylang;
 			MessageBox(hwndOllyDbg(), "An error occured in the plugin!\nPlease contact Epsylon3.", "ODbgScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+			delete ollylang;
 		}
 
 	}
@@ -245,6 +245,8 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
 		"|"
 */		"30 Script &Window..."
 		",31 &Log Window..."
+		"|"
+		"20 &Help"
 		"|"
 		"10 &About"
 //		",11 TEST"
@@ -392,6 +394,14 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 				  "Compiled %s %s",
 			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
 		MessageBox(hwmain,s,"ODbgScript",MB_OK|MB_ICONINFORMATION);
+		break;
+	case 20: 
+		{
+			string directory, helpfile;
+			getPluginDirectory(directory);
+			helpfile = directory + "\\ODbgScript.txt";			
+			ShellExecute(hwndOllyDbg(),"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
+		}
 		break;
 /*	case 21: // MRU List
 	case 22:

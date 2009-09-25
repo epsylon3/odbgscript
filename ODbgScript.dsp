@@ -298,11 +298,11 @@ SOURCE=.\copydbg.bat
 # End Source File
 # Begin Source File
 
-SOURCE=.\doc\Plugins.chm
+SOURCE=.\doc\ODbgScript.txt
 # End Source File
 # Begin Source File
 
-SOURCE=.\doc\ReadMe.txt
+SOURCE=.\doc\Plugins.chm
 # End Source File
 # Begin Source File
 
