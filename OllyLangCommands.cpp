@@ -3375,7 +3375,8 @@ bool OllyLang::DoLOG(string args)
 				}
 				buffer[TEXTLEN-1]=0;
 				Addtolist(0, 1, buffer);
-				add2log(buffer);
+				str.assign(buffer);
+				add2log(str);
 				return true;
 			}
 		}

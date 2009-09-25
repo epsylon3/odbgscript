@@ -61,6 +61,7 @@ Get Trace Addr
 + Added Ctrl+F to search in script
 + Added Ctrl+G to goto script line
 * Fixed Scroll to Label when script has more than 256 lines
+* Logging multiline strings supported
 
 1.74 (23 Sep 2009)
 + Added GFO to get file offset of disasm address.

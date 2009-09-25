@@ -189,7 +189,19 @@ int add2log(char* message) {
 
 int add2log(string & message) {
 
-	return add2log((char*)message.c_str());
+	string s;
+	vector<string> v;
+	int i;
+
+	if (split(v, message, '\n'))
+	{
+		for (i=0;i<v.size();i++) {
+			add2log((char*)v[i].c_str());
+		}
+		return 1;
+	} 
+	else
+		return add2log((char*)message.c_str());
 
 }
 
