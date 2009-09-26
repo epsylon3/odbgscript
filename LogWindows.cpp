@@ -37,8 +37,8 @@ int i,shiftkey,controlkey;
 
 			pll=(t_logwnd_data *)Getsortedbyselection(&(ollylang->wndLog.data),ollylang->wndLog.data.selected);
 			if (menu!=NULL && pll!=NULL) {
-				AppendMenu(menu,MF_DEFAULT, 10,"Clear");
-//				AppendMenu(menu,MF_STRING, 32,"Toggle Script BP\tF2");
+				AppendMenu(menu,MF_STRING, 10,"Cl&ear window");
+				AppendMenu(menu,MF_STRING, 20,"&Find\tCtrl+F");
 			};
 
 			// Even when menu is NULL, call to Tablefunction is still meaningful.
@@ -50,6 +50,22 @@ int i,shiftkey,controlkey;
 					clearLogLines();
 					InvalidateRect(hw, NULL, FALSE);
 					return 1;
+				case 20: //Search
+				{
+					char buffer[TEXTLEN]={0};
+					Findname(1,NM_SOURCE,buffer);
+					i = Gettext("Search in log...",buffer,0,NM_SOURCE,FIXEDFONT);
+					if (i != -1) {
+						string s; s.assign(buffer);
+						Insertname(1,NM_SOURCE,buffer);
+						i = SearchInLog(s,ollylang->wndLog.data.selected+1);
+						if (i >= 0) {
+							Selectandscroll(&ollylang->wndLog,i,1);
+							InvalidateRect(hw, NULL, FALSE);
+						}
+					}
+					return 1;
+				}
 				default:;
 			}
 			return 0;
@@ -72,9 +88,24 @@ int i,shiftkey,controlkey;
 					if (pll->line) Setcpu(0,pll->line,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					InvalidateRect(hw, NULL, FALSE);
 				}
+				return 1;
 			} 
-//			else if (wp==VK_F2) { // && shiftkey==0 && controlkey==0) {
-
+			else if (wp=='F' && controlkey) //Search
+			{				
+				char buffer[TEXTLEN]={0};
+				Findname(1,NM_SOURCE,buffer);
+				i = Gettext("Search in log...",buffer,0,NM_SOURCE,FIXEDFONT);
+				if (i != -1) {
+					string s; s.assign(buffer);
+					Insertname(1,NM_SOURCE,buffer);
+					i = SearchInLog(s,ollylang->wndLog.data.selected+1);
+					if (i >= 0) {
+						Selectandscroll(&ollylang->wndLog,i,1);
+						InvalidateRect(hw, NULL, FALSE);
+					}
+				}
+				return 1;
+			}
 			Tablefunction(&ollylang->wndLog,hw,msg,wp,lp);
 			break;
         case WM_USER_CHALL:
@@ -207,4 +238,40 @@ int add2log(string & message) {
 
 int add2logMasked(char* message,char* mask) {
 return 1;
+}
+
+int SearchInLog(string text, ulong fromPos)
+{
+	vector<t_wndlog_data>::iterator iter;
+	string s;
+	int loc = 0;
+	bool oneTime = true;
+
+	int (*pf)(int) = tolower; 
+	transform(text.begin(), text.end(), text.begin(), pf);
+
+	SearchFromLogStart:
+	iter = ollylang->tLogLines.begin();
+
+	while(iter != ollylang->tLogLines.end())
+	{
+		if (loc >= fromPos) {
+			s.assign(iter->message);
+			transform(s.begin(), s.end(), s.begin(), pf);
+			if(s.length() > 0) {
+				if(s.find(text) != string::npos) {
+					return loc;
+				}
+			}
+		}
+		iter++;
+		loc++;
+	}
+	if (fromPos > 0 && oneTime) {
+		fromPos = 0; loc = 0;
+		oneTime = false;
+		goto SearchFromLogStart;
+	}
+
+	return -1;
 }

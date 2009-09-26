@@ -4201,11 +4201,12 @@ bool OllyLang::DoREFRESH(string args)
 	} else {
 		//was hidden, hide it after
 		Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'E');
+		tt = (t_table*)Plugingetvalue(VAL_MODULES);
 		if (tt->hw!=0)
-			CloseWindow(tt->hw);
+			DestroyWindow(tt->hw);
 	}
 
-	//Refresh DISAM
+	//Refresh DISASM
 	Redrawdisassembler();
 
 	require_ollyloop=1;

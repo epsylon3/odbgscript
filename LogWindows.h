@@ -25,3 +25,4 @@ int add2logMasked(char* message,char* mask);
 
 void clearLogLines();
 
+int SearchInLog(string text,ulong fromPos);

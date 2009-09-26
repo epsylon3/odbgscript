@@ -97,7 +97,7 @@ public:
 	
 	bool jumpToLine(int number);
 
-	int SearchText(string text);
+	int SearchInScript(string text, ulong fromPos);
 
 	// "Events"
 	bool OnBreakpoint(int reason, int details);

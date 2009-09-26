@@ -57,6 +57,11 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.76 (SVN)
+* REFRESH and LOADLIB commands keep "Executable modules" window hidden
++ Added Ctrl+F to search in "Script Log" window
++ Search input box remembers last search, and search after current position
+
 1.75 (25 Sep 2009)
 * Sources are removed from package, only available via SVN
 + Added Link to Documentation (Help)

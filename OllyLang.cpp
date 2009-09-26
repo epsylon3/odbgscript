@@ -1258,28 +1258,37 @@ bool OllyLang::ParseLabels()
 	return false;
 }
 
-int OllyLang::SearchText(string text)
+int OllyLang::SearchInScript(string text, ulong fromPos)
 {
 	vector<string>::iterator iter;
-	iter = script.begin();
 	string s;
 	int loc = 0;
+	bool oneTime = true;
 
 	int (*pf)(int) = tolower; 
 	transform(text.begin(), text.end(), text.begin(), pf);
 
+	SearchFromStart:
+	iter = script.begin();
 
 	while(iter != script.end())
 	{
-		s = *iter;
-		transform(s.begin(), s.end(), s.begin(), pf);
-		if(s.length() > 0) {
-			if(s.find(text) != string::npos) {
-				return loc;
+		if (loc >= fromPos) {
+			s = *iter;
+			transform(s.begin(), s.end(), s.begin(), pf);
+			if(s.length() > 0) {
+				if(s.find(text) != string::npos) {
+					return loc;
+				}
 			}
 		}
 		iter++;
 		loc++;
+	}
+	if (fromPos > 0 && oneTime) {
+		fromPos = 0; loc = 0;
+		oneTime = false;
+		goto SearchFromStart;
 	}
 
 	return -1;

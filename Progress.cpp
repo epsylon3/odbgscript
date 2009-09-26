@@ -325,10 +325,12 @@ t_wndprog_data *ppl;
 			else if (wp=='F' && controlkey) //Search
 			{				
 				char buffer[TEXTLEN]={0};
-				i = Gettext("Search in script...",buffer,0,0,FIXEDFONT);
+				Findname(1,NM_SOURCE,buffer);
+				i = Gettext("Search in script...",buffer,0,NM_SOURCE,FIXEDFONT);
 				if (i != -1) {
+					Insertname(1,NM_SOURCE,buffer);
 					string s; s.assign(buffer);
-					m = ollylang->SearchText(s);
+					m = ollylang->SearchInScript(s,ollylang->wndProg.data.selected);
 					if (m >= 0) {
 						Selectandscroll(&ollylang->wndProg,m+1,1);
 						InvalidateRect(hw, NULL, FALSE);
