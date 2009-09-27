@@ -3958,33 +3958,20 @@ bool OllyLang::DoPAUSE(string args)
 
 bool OllyLang::DoPOP(string args)
 {
-	string ops[1],args1;
+	string ops[1];
 
 	nIgnoreNextValuesHist++;
 	var_logging=false;
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	ulong dw,dw1;
-	if(GetDWOpValue(ops[0], dw1))
-	{
-		args = ops[0] + ", [esp]";
-		nIgnoreNextValuesHist+=2;
-		DoMOV(args);
+	args = ops[0] + ", [esp], 4";
+	nIgnoreNextValuesHist+=2;
+	DoMOV(args);
 
-		args1 = "esp, esp+4";
-		nIgnoreNextValuesHist+=1;
-		DoMOV(args1);
-
-		t_thread* pt = Findthread(Getcputhreadid());	
-     	dw1 = (pt->reg.r[4] -4);
-
-		Readmemory(&dw, dw1, 4, MM_DELANAL|MM_SILENT);
-
-		return true;
-	}
-
-	return false;
+	args = "esp, esp+4";
+	nIgnoreNextValuesHist+=1;
+	return DoMOV(args);
 }
 
 bool OllyLang::DoPOPA(string args)

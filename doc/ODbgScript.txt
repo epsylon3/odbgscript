@@ -58,6 +58,7 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.76 (SVN)
+* POP command on undeclared variable is now possible (will create it)
 * REFRESH and LOADLIB commands keep "Executable modules" window hidden
 + Added Ctrl+F to search in "Script Log" window
 + Search input box remembers last search, and search after current position
