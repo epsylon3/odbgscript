@@ -647,7 +647,8 @@ bool OllyLang::DoBPWM(string args)
 	return false;
 }
 
-//Breakpoint on DLL Call
+//Breakpoint on DLL Calls in current module
+//ex: BPX "GetModuleHandleA"
 bool OllyLang::DoBPX(string args)
 {
 
@@ -656,6 +657,8 @@ bool OllyLang::DoBPX(string args)
 	int bpnmb=0;
 	ulong del=0;
 	string callname;
+	string module;
+	bool closeWindow=false;
  
 	if(CreateOp(args, ops, 2))
 	{
@@ -671,16 +674,28 @@ bool OllyLang::DoBPX(string args)
 		t_table *reftable;
 		t_ref *pref;
   
-		char findname[256]={0};
-		char name[256]={0};
-		strcpy(name,callname.c_str());
+		char findname[TEXTLEN]={0};
+		
+		variables["$RESULT"]=0;
 
-		if(strlen(name)==0) 
+		if(callname.length()==0) 
 		{
 			errorstr="Function name missed";
 			return false;
 		}
-		  
+		
+		if (callname.find(".") != string::npos)
+		{
+			module = callname.substr(0, callname.find("."));
+			callname = callname.substr(callname.find(".")+1);
+		}
+
+		reftable=(t_table *)Plugingetvalue(VAL_REFERENCES);
+
+		//Hide window after if was closed
+		if(reftable->hw == 0)
+			closeWindow = true;
+
 		Findalldllcalls((t_dump *)Plugingetvalue(VAL_CPUDASM),0,"Intermodular calls");
 		reftable=(t_table *)Plugingetvalue(VAL_REFERENCES);
 
@@ -690,7 +705,7 @@ bool OllyLang::DoBPX(string args)
 			return false;
 		}
 
-		 if(reftable->data.itemsize<sizeof(t_ref))
+		if(reftable->data.itemsize<sizeof(t_ref))
 		{
 			errorstr="Old version of OllyDbg";
 			return false;
@@ -706,7 +721,7 @@ bool OllyLang::DoBPX(string args)
 				continue;
 			}
    
-			if(stricmp(name,findname)!=0) 
+			if(stricmp(callname.c_str(),findname)!=0) 
 			{      // Different function
 				continue;
 			} 
@@ -726,6 +741,10 @@ bool OllyLang::DoBPX(string args)
 			}
 		}
         variables["$RESULT"]=bpnmb;
+
+		if (closeWindow && reftable->hw != 0) 
+			DestroyWindow(reftable->hw);
+
         Broadcast(WM_USER_CHALL,0,0);
         return true;
 	}
@@ -3926,7 +3945,10 @@ bool OllyLang::DoOPENDUMP(string args)
 	if (size==0) size=mem->size;
 	
 	HWND wndDump = Createdumpwindow(NULL,base,size,addr,0x01081,NULL);
-	
+
+//dont work: need to ask Olleh to have a function 
+//	t_dump * dump = (t_dump *) &wndDump;
+
 	if (wndDump!=NULL)
 		return true;
 

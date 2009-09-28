@@ -58,9 +58,11 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.76 (SVN)
-* POP command on undeclared variable is now possible (will create it)
+* Restored the Run Script menu in CPU Window
+* Some work on BPX, to close opened reference window (intermodular calls)
+* POP command on undeclared variable is now possible (will declare it)
 * REFRESH and LOADLIB commands keep "Executable modules" window hidden
-+ Added Ctrl+F to search in "Script Log" window
++ Added Ctrl+F to search in "Script Log" window, and menu item
 + Search input box remembers last search, and search after current position
 
 1.75 (25 Sep 2009)
@@ -724,7 +726,10 @@ Example:
 
 BPX callname
 ------------
-Set breakpoint on dll call
+Set breakpoint on every api calls found in current module.
+Then you can clear these breakpoints with BPD
+Example:
+	bpx "GetModuleHandleA"
 
 BUF var
 -------
@@ -1691,7 +1696,7 @@ with improvement ideas etc.
 R@dier for the great dumping engine.
 
 shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong,
-SunBeam, LCF AT, hnedka for ideas and bug report on the new ODbgScript
+SunBeam, LCF AT, Fungus, hnedka for ideas and bug report on the new ODbgScript
 
 And of course Olly for this great debugger!
 

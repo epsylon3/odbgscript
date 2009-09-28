@@ -386,8 +386,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 	case 10:
 		sprintf(s,"ODbgScript plugin v%i.%i.%i\n"
 			      "by Epsylon3@gmail.com\n\n"
-				  "From OllyScript 0.92 written by SHaG\n"
-				  "and some enhancements from hnhuqiong\n\n"
+				  "From OllyScript written by SHaG\n"
 				  "PE dumper by R@dier\n"
 				  "Byte replacement algo by Hex\n\n"
 				  "http://odbgscript.sf.net/ \n\n"
@@ -403,14 +402,18 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 			ShellExecute(hwndOllyDbg(),"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
 		}
 		break;
-/*	case 21: // MRU List
+	case 21: // MRU List in CPU Window
 	case 22:
 	case 23:
 	case 24:
 	case 25:
+	case 26:
+	case 27:
+	case 28:
+	case 29:
 		{
 			action-=20; 
-			char key[5]="MRU ";
+			char key[5]="NRU ";
 			key[3]=action+0x30;
 						
 			ZeroMemory(&buff, sizeof(buff));
@@ -434,7 +437,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 
 			break;
 		}
-*/	case 30:
+	case 30:
 		{
 			initProgTable();
 			break;
