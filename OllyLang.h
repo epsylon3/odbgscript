@@ -130,6 +130,9 @@ public:
 	bool require_ollyloop;
 	bool require_addonaction;
 
+	//hwnd to t_dump (OPENDUMP/BACKUP)
+	map<HWND, t_dump*> dumpWindows;
+
 private:
 	
 	typedef bool (OllyLang::*PFCOMMAND)(string);
@@ -199,6 +202,7 @@ private:
 	bool DoASM(string args);
 	bool DoASMTXT(string args);
 	bool DoATOI(string args);
+	bool DoBACKUP(string args);
 	bool DoBC(string args);
 	bool DoBCA(string args);
 	bool DoBD(string args);
@@ -414,5 +418,5 @@ private:
 	//cache for GMIMP
 	vector<t_export> tImportsCache;
 	ulong importsCacheAddr;
-	
+		
 };

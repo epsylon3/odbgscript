@@ -57,13 +57,15 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.76 (SVN)
+1.76 (28 Sep 2009)
++ Added BACKUP command to create a capture of memory
++ Added Ctrl+F to search in "Script Log" window, and menu item
++ Search input box remembers last search, and search after current position
++ OPENDUMP returns descriptor as $RESULT for later use (backups)
 * Restored the Run Script menu in CPU Window
 * Some work on BPX, to close opened reference window (intermodular calls)
 * POP command on undeclared variable is now possible (will declare it)
 * REFRESH and LOADLIB commands keep "Executable modules" window hidden
-+ Added Ctrl+F to search in "Script Log" window, and menu item
-+ Search input box remembers last search, and search after current position
 
 1.75 (25 Sep 2009)
 * Sources are removed from package, only available via SVN
@@ -611,6 +613,17 @@ Returns the integer in the reserved $RESULT variable
 Example:
 	atoi "F"
 	atoi "10", 10.
+
+BACKUP addr [,base,size]
+------------------------
+Like OPENDUMP, create a Dump Window with data at address.
+But this dump window keep a backup of data, which can be used to view changes
+$RESULT is the HWND of window, for future use
+Note: If you are looking to save data in a file, see the DM function (Dump Memory)
+Example:
+	BACKUP esp
+	STO
+	STO
 
 BC [addr]
 ---------
@@ -1359,6 +1372,7 @@ Example:
 OPENDUMP addr [,base,size]
 --------------------------
 Create a new Dump Window with data at address.
+$RESULT is the HWND of the new window, for future use (backup purpose)
 
 OPENTRACE
 ---------

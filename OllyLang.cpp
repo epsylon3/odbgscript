@@ -62,6 +62,7 @@ OllyLang::OllyLang()
 	commands["asm"] = &OllyLang::DoASM;	
     commands["asmtxt"] = &OllyLang::DoASMTXT;	
 	commands["atoi"] = &OllyLang::DoATOI;
+	commands["backup"] = &OllyLang::DoBACKUP;
 	commands["bc"] = &OllyLang::DoBC;
 	commands["bd"] = &OllyLang::DoBD;
 	commands["beginsearch"] = &OllyLang::DoBEGINSEARCH;
@@ -588,6 +589,8 @@ bool OllyLang::Reset()
 	exportsCacheAddr = 0;
 	tImportsCache.clear();
 	importsCacheAddr = 0;
+
+	dumpWindows.clear();
 
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);

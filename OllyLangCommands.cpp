@@ -285,6 +285,23 @@ bool OllyLang::DoATOI(string args)
 	return false;
 }
 
+bool OllyLang::DoBACKUP(string args)
+{
+	if (DoOPENDUMP(args)) {
+
+		HWND wnd = (HWND) variables["$RESULT"].dw;
+		t_dump * dump = dumpWindows[wnd];
+
+		if (dump) {
+			Dumpbackup(dump, BKUP_CREATE);
+			//Dumpbackup(dump, BKUP_VIEWCOPY);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool OllyLang::DoBC(string args)
 {
 	if (args=="")
@@ -3936,6 +3953,8 @@ bool OllyLang::DoOPENDUMP(string args)
 	if(!GetDWOpValue(ops[2], size))
 		return false;
 
+	variables["$RESULT"] = 0;
+
 	if (addr==0)
 		return true; //do nothing
 
@@ -3949,8 +3968,13 @@ bool OllyLang::DoOPENDUMP(string args)
 //dont work: need to ask Olleh to have a function 
 //	t_dump * dump = (t_dump *) &wndDump;
 
-	if (wndDump!=NULL)
-		return true;
+	//So i created a special key message to grab it
+	if (wndDump!=NULL) {
+		ulong res = SendMessage(wndDump,WM_KEYDOWN,VK_F5,0);
+		//can now grab (t_dump *) dumpWindows[wndDump];
+		variables["$RESULT"] = (ulong) wndDump;		
+	}
+	return true;
 
 	return false;
 }

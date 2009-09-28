@@ -307,11 +307,19 @@ extc void _export cdecl DebugScript(const char* const filename)
 	}
 }
 
-// Receives commands from main menu.
+// Receives commands from windows menus.
 extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item) 
 {
-  if (origin != PM_MAIN && origin != PM_DISASM)
-    return;
+
+  switch (origin)
+  {
+	case PM_MAIN:
+	case PM_DISASM:
+		break;
+	default:
+		//Other windows ignored
+		return;
+  }
 
   char s[256];
   HINSTANCE hinst  = hinstModule();
@@ -537,6 +545,18 @@ PM_CPUDUMP	(t_dump *)	CPU Dump
 PM_CPUSTACK	(t_dump *)	CPU Stack
 PM_CPUREGS	(t_reg *)	CPU Registers
 */
+	case PM_DUMP:
+	{
+		if (key==VK_F5) {
+			//Used to retrieve t_dump after OPENDUMP
+			t_dump * pd;
+			pd=(t_dump *)item;
+			if (pd && pd->table.hw != 0) {
+				ollylang->dumpWindows[pd->table.hw] = pd;
+			}
+			return 1;
+		}
+	}
 	default:
 			//if (key==VK_F8 && shift==0 && ctrl==0) {
 #ifdef _DEBUG
