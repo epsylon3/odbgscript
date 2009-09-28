@@ -48,6 +48,7 @@ string StrLastError(void);
 LARGE_INTEGER MyGetTickCount(ULONGLONG oldValue, bool bUseTickCount=0);
 
 HWND GetODBGWindow(string &title, string &classname);
+HWND GetODBGWindow(char * title, char * classname);
 
 //PSAPI.DLL (to get Module name from Handle)
 typedef DWORD (WINAPI *lpfGetMappedFileName) (HANDLE, LPVOID, LPTSTR, DWORD);

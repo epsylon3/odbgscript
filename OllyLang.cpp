@@ -81,6 +81,7 @@ OllyLang::OllyLang()
 	commands["bpx"] = &OllyLang::DoBPX;
 	commands["buf"] = &OllyLang::DoBUF;
 	commands["call"] = &OllyLang::DoCALL;
+	commands["close"] = &OllyLang::DoCLOSE;
 	commands["cmp"] = &OllyLang::DoCMP;
 	commands["cmt"] = &OllyLang::DoCMT;
 	commands["cob"] = &OllyLang::DoCOB;

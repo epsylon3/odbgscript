@@ -223,6 +223,7 @@ private:
 	bool DoBPX(string args);
 	bool DoBUF(string args);
 	bool DoCALL(string args);
+	bool DoCLOSE(string args);
 	bool DoCMP(string args);
 	bool DoCMT(string args);
 	bool DoCOB(string args);

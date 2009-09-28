@@ -810,6 +810,145 @@ bool OllyLang::DoCALL(string args)
 	return false;
 }
 
+bool OllyLang::DoCLOSE(string args)
+{
+
+	string ops[1];
+
+	if(!CreateOperands(args, ops, 1))
+		return false;
+
+	HWND hwnd = 0;
+	string str;
+	bool bOk = false;
+
+	t_table * tbl = NULL;
+	t_dump * dmp = NULL;
+
+	if( GetSTROpValue("\""+ops[0]+"\"", str) )
+	{
+		transform(str.begin(), str.end(), str.begin(), toupper);
+		
+		if(str == "SCRIPT")
+		{ 			
+			hwnd = wndProg.hw;
+			bOk = true;
+		}
+		else if(str == "SCRIPTLOG")
+		{ 
+			hwnd = wndLog.hw;
+			bOk = true;
+		}
+		else if(str == "MODULES")
+		{ 
+			tbl = (t_table *) Plugingetvalue(VAL_MODULES);
+			hwnd = tbl->hw;
+		}
+		else if(str == "MEMORY")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_MEMORY);
+			hwnd = tbl->hw;
+		}
+		else if(str == "THREADS")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_THREADS);
+			hwnd = tbl->hw;
+		}
+		else if(str == "BREAKPOINTS")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_BREAKPOINTS);
+			hwnd = tbl->hw;
+		}
+		else if(str == "REFERENCES")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_REFERENCES);
+			hwnd = tbl->hw;
+		}
+		else if(str == "SOURCELIST")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_SOURCELIST);
+			hwnd = tbl->hw;
+		}
+		else if(str == "WATCHES")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_WATCHES);
+			hwnd = tbl->hw;
+		}
+		else if(str == "PATCHES")
+		{
+			tbl = (t_table *) Plugingetvalue(VAL_PATCHES);
+			hwnd = tbl->hw;
+		}
+		else if(str == "CPU")
+		{
+			dmp = (t_dump *) Plugingetvalue(VAL_CPUDASM);
+			hwnd = dmp->table.hw;
+			if (hwnd != 0) hwnd = GetParent(hwnd);
+		}
+		else if(str == "RUNTRACE")
+		{						
+			hwnd = GetODBGWindow(NULL,"ARTRACE");
+			bOk = true;
+		}
+		else if(str == "WINDOWS")
+		{
+			hwnd = GetODBGWindow(NULL,"AWINDOWS");
+			bOk = true;
+		}
+		else if(str == "CALLSTACK")
+		{
+			hwnd = GetODBGWindow(NULL,"ACALLSTK");
+			bOk = true;
+		}
+		else if(str == "LOG")
+		{
+			hwnd = GetODBGWindow(NULL,"ALIST");
+			bOk = true;
+		}
+		else if(str == "TEXT")
+		{
+			hwnd = GetODBGWindow(NULL,"ASHOWTEXT");
+			bOk = true;
+		}
+		else if(str == "FILE")
+		{
+			hwnd = GetODBGWindow(NULL,"ADUMPFILE");
+			bOk = true;
+		}
+		else if(str == "HANDLES")
+		{
+			hwnd = GetODBGWindow(NULL,"AHANDLES");
+			bOk = true;
+		}
+		else if(str == "SEH")
+		{
+			hwnd = GetODBGWindow(NULL,"ASEH");
+			bOk = true;
+		}
+		else if(str == "SOURCE")
+		{
+			hwnd = GetODBGWindow(NULL,"ASOURCE");
+			bOk = true;
+		}
+
+		if (hwnd != 0) {
+			DestroyWindow(hwnd);
+		}
+		if (tbl || dmp || hwnd || bOk)
+			return true;
+	} 
+
+	if(hwnd==0 && GetDWOpValue(ops[0], (ulong &) hwnd) ) {
+		if (hwnd != 0) {
+			DestroyWindow(hwnd);
+			return true;
+		}
+	}
+
+	errorstr = "Bad operand";
+	return false;
+}
+
 bool OllyLang::DoCMP(string args)
 {
 	string ops[3];

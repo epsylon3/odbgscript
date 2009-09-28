@@ -829,3 +829,12 @@ HWND GetODBGWindow(string &title, string &classname) {
 
 	return hwnd;
 }
+
+HWND GetODBGWindow(char * title, char * classname) {
+
+	HWND main, hwnd=0;
+	main = (HWND) Plugingetvalue(VAL_HWCLIENT);
+	hwnd = FindWindowEx(main,NULL,classname,title);
+
+	return hwnd;
+}

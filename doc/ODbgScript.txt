@@ -57,6 +57,9 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.77 (SVN)
++ Added CLOSE command to close windows
+
 1.76 (28 Sep 2009)
 + Added BACKUP command to create a capture of memory
 + Added Ctrl+F to search in "Script Log" window, and menu item
@@ -752,6 +755,15 @@ Example:
 	buf s
 	log s // output #313233#
 
+CLOSE window
+------------
+Close an Ollydbg MDI window
+window parameter can be a constant or a HWND (like $RESULT of OPENDUMP/BACKUP).
+ SCRIPT, SCRIPTLOG, LOG, CPU
+ MODULES, MEMORY, THREADS, BREAKPOINTS
+ REFERENCES, SOURCELIST, WATCHES
+ WINDOWS, PATCHES, RUNTRACE, CALLSTACK
+ TEXT, FILE, HANDLES, SEH, SOURCE
 CMP dest, src [,size]
 ---------------------
 Compares dest to src. Works like it's ASM counterpart.
