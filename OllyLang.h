@@ -257,6 +257,7 @@ private:
 	bool DoGCI(string args);
 	bool DoGCMT(string args);
 	bool DoGFO(string args);
+	bool DoGLBL(string args);
 	bool DoGMA(string args);
 	bool DoGMEMI(string args);
 	bool DoGMEXP(string args);
@@ -270,6 +271,8 @@ private:
 	bool DoGPI(string args);
 	bool DoGREF(string args);
 	bool DoGRO(string args);
+	bool DoGSL(string args);
+	bool DoGSTR(string args);
 	bool DoHANDLE(string args);
 	bool DoHISTORY(string args);
 	bool DoINC(string args);
@@ -309,6 +312,7 @@ private:
 	bool DoPREOP(string args);
 	bool DoPUSH(string args);
 	bool DoPUSHA(string args);
+	bool DoRBP(string args);
 	bool DoREADSTR(string args);
 	bool DoREFRESH(string args);
 	bool DoREPL(string args);
@@ -321,6 +325,7 @@ private:
 	bool DoRTR(string args);
 	bool DoRTU(string args);
 	bool DoRUN(string args);
+	bool DoSBP(string args);
 	bool DoSCMP(string args);
 	bool DoSCMPI(string args);
 	bool DoSETOPTION(string args);
@@ -386,6 +391,15 @@ private:
 	bool  DelProcessMemoryBloc(DWORD address);
 
 	bool ExecuteASM(string command);
+
+	// Save / Restore Breakpoints
+	t_hardbpoint hwbp_t[4];
+	t_sorted sortedsoftbp_t;
+	t_bpoint* softbp_t;
+
+	bool is_bp_saved;
+	bool AllocSwbpMem(uint tmpSizet);
+	void FreeBpMem();
 
 	// Save / Restore Registers
 	struct t_reg_backup

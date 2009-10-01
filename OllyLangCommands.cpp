@@ -2262,6 +2262,34 @@ bool OllyLang::DoGFO(string args)
 	return false;
 }
 
+// Get Label
+// returns label from address
+// glbl 
+bool OllyLang::DoGLBL ( string args )
+{
+	string comment;
+	ulong addr, type;
+	char buffer[TEXTLEN]={0};
+
+	if ( !GetDWOpValue ( args, addr ) )
+		return false;
+	{
+		if ( addr != 0 )
+		{
+			variables["$RESULT_1"] = 0;
+
+			if ( Findlabel ( addr, buffer ) != NM_LABEL )
+				variables["$RESULT"] = 0;
+
+			comment = buffer;
+			if ( comment == "" )
+				variables["$RESULT"] = 0;
+
+			variables["$RESULT"] = comment;
+		}
+	}
+	return true;
+}
 
 bool OllyLang::DoGMA(string args)
 {
@@ -3064,6 +3092,133 @@ bool OllyLang::DoGRO(string args)
 		return true;
 	}
 
+	return false;
+}
+
+// Get Selection Limits
+// returns START/END address from currently selected line in CPUASM | DUMP | STACK window in $RESULT & $RESULT_1
+// arg can be either : DASM, DUMP, STACK or numeric in the same order 1, 2, 3
+// ex		:	gsl DUMP
+//          :   gsl 1 ; DASM
+bool OllyLang::DoGSL ( string args )
+{
+	string ops[1];
+	string str;
+	t_dump* td;
+	BYTE b;
+	
+	if ( !CreateOperands ( args, ops, 1 ) )
+		return false;
+	
+	if ( !GetSTROpValue ( "\"" + ops[0] + "\"", str ) )
+		if(!GetBYTEOpValue(ops[0], b))
+			return false;
+
+	if( str == "DASM" || b == 1)
+		td = ( t_dump* ) Plugingetvalue ( VAL_CPUDASM );
+	else if( str == "DUMP" || b == 2)
+		td = ( t_dump* ) Plugingetvalue( VAL_CPUDDUMP);
+	else if( str == "STACK" || b == 3)
+		td = ( t_dump* ) Plugingetvalue( VAL_CPUDSTACK);
+	else
+		return false;
+	
+	if ( td )
+	{
+		variables["$RESULT"] = (DWORD)td->sel0;
+		variables["$RESULT_1"] =  (DWORD)td->sel1;
+	}
+	else
+	{
+		variables["$RESULT"] = 0;
+		variables["$RESULT_1"] =  0;
+	}
+
+	return true;
+}
+
+// Get String
+// returns a null terminated string from addr, the string is at least arg1 charachters
+// gstr addr, [arg1]
+// returns in   :
+// - $RESULT    : the string
+// - $RESULT_1  : len of string
+//
+// ex       : gstr 401000     ; arg1 in this case is set to default (5 chars)
+//          : gstr 401000, 20 ; must be at least 20 chars
+bool OllyLang::DoGSTR ( string args )
+{
+	string comment;
+	char buf[MAX_PATH];
+	ulong addr, size, tmpSize;
+	char c;
+	bool bUseDef = false;
+	uint iDashNum;
+
+	string ops[2];
+
+
+	if ( !CreateOperands ( args, ops, 2 ) )
+	{
+		if ( !CreateOperands ( args, ops, 1 ) )
+			return false;
+		else
+			bUseDef = true;
+	}
+
+	if ( GetDWOpValue ( ops[0], addr ) )
+	{
+		if ( addr != 0 )
+		{
+			tmpSize = Readmemory ( buf, addr, MAX_PATH, MM_RESILENT );
+			if ( !tmpSize )
+			{
+				variables["$RESULT"] = 0;
+				variables["$RESULT_1"] =  0;
+				return true;
+			}
+
+			lstrcpy ( buffer, buf );
+			tmpSize = lstrlen ( buffer );
+
+			if ( ! bUseDef )
+				GetDWOpValue ( ops[1], size );
+			else
+				size = 5;
+
+			if ( tmpSize < size )
+			{
+				variables["$RESULT"] = 0;
+				variables["$RESULT_1"] =  0;
+				return true;
+			}
+
+			int i;
+			for ( iDashNum = 0, i = 0; i  < tmpSize; i++ )
+			{
+				c = buffer[i];
+				if ( isalnum ( c ) )
+					continue;
+				else
+				{
+					buffer[i] = '_';
+					iDashNum++;
+				}
+			}
+
+			if ( iDashNum >= tmpSize / 2 )
+			{
+				variables["$RESULT"] = 0;
+				variables["$RESULT_1"] =  0;
+				return true;
+			}
+
+			comment = buffer;
+			variables["$RESULT"] = comment;
+			variables["$RESULT_1"] = tmpSize;
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -4246,6 +4401,64 @@ bool OllyLang::DoREADSTR(string args)
     return false;
 }
 
+// Restore Break Points
+// restores all hardware and software breakpoints
+// (if arg1 == 'STRICT', all soft bp set by script will be deleted and only those have been set before it runs
+// will be restored
+// if no argument set, previous soft bp will be appended to those set by script)
+
+// rbp [arg1]
+// arg1 = may be STRICT or nothing
+
+// return in:
+// - $RESULT number of restored swbp
+// - $RESULT_1 number of restored hwbp
+
+// ex     : rbp
+//        : rbp STRICT
+bool OllyLang::DoRBP ( string args )
+{
+	t_table* bpt = 0;
+	t_bpoint* bpoint = 0;
+	uint n;
+	string ops[1];
+
+	CreateOperands ( args, ops, 1 );
+
+	if ( is_bp_saved )
+	{
+		bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
+		if ( bpt != NULL )
+		{
+			bpoint = ( t_bpoint * ) bpt->data.data;
+
+			if ( ops[0] == "STRICT" )
+			{
+				int dummy;
+				dummy = bpt->data.n;
+				for ( n = 0; n < dummy; n++ )
+				{
+					Deletebreakpoints ( bpoint->addr, ( bpoint->addr ) + 1, 1 );
+				}
+			}
+
+			for ( n=0; n < sortedsoftbp_t.n; n++ )
+				Setbreakpoint ( softbp_t[n].addr, ( softbp_t[n].type | TY_KEEPCODE ) ^ TY_KEEPCODE, 0 );
+
+			variables["$RESULT"] = ( DWORD ) n;
+
+			for ( n=0; n < 4; n++ )
+				Sethardwarebreakpoint ( hwbp_t[n].addr, hwbp_t[n].size, hwbp_t[n].type );
+
+			variables["$RESULT_1"] = ( DWORD ) n;
+
+			is_bp_saved = false;
+			Broadcast ( WM_USER_CHALL, 0, 0 );
+		}
+	}
+	return true;
+}
+
 bool OllyLang::DoREF(string args)
 {
 	string ops[2];
@@ -4560,6 +4773,72 @@ bool OllyLang::DoRUN(string args)
 {
 	Go(Getcputhreadid(), 0, STEP_RUN, 0, 1);
 	require_ollyloop = 1;
+	return true;
+}
+
+// Store Break Points
+// stores all hardware and software breakpoints
+
+// return in:
+// - $RESULT number of restored swbp
+// - $RESULT_1 number of restored hwbp
+
+// ex 	: sbp
+// 		: no argument
+bool OllyLang::DoSBP ( string args )
+{
+	uint n = 0, i;
+	bool success;
+	t_table *bpt;
+	t_bpoint *bpoint;
+
+	DumpVars();
+
+	if ( !is_bp_saved )
+	{
+		bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
+		if ( bpt != NULL )
+		{
+			bpoint = ( t_bpoint * ) ( bpt->data.data );
+			if ( bpoint != NULL )
+			{
+				n = bpt->data.n;
+
+				if ( n > 100 )
+				{
+					success = false;
+					FreeBpMem();
+					success = AllocSwbpMem ( n );
+				}
+
+				if ( n > 100 && !success )
+					errorstr = "Can't allocate enough memory to copy all breakpoints";
+				else
+				{
+					memcpy ( ( void* ) softbp_t, bpt->data.data, n*sizeof ( t_bpoint ) );
+					memcpy ( ( void* ) &sortedsoftbp_t, ( void* ) &bpt->data, sizeof ( t_sorted ) );
+					memcpy ( ( void* ) &hwbp_t, ( void* ) ( Plugingetvalue ( VAL_HINST ) +0xD8D70 ), 4 * sizeof ( t_hardbpoint ) );
+
+					is_bp_saved = true;
+
+					variables["$RESULT"] =  ( DWORD ) n;
+
+					n = i = 0;
+					while ( n < 4 )
+					{
+						if ( hwbp_t[n].addr )
+							i++;
+						n++;
+					}
+					variables["$RESULT_1"] =  ( DWORD ) i;
+					return true;
+				}
+			}
+		}
+	}
+	else
+		errorstr = "sbp command can be called only once a session";
+
 	return true;
 }
 

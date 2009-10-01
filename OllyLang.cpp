@@ -117,6 +117,7 @@ OllyLang::OllyLang()
 	commands["gci"] = &OllyLang::DoGCI;
 	commands["gcmt"] = &OllyLang::DoGCMT;
 	commands["gfo"] = &OllyLang::DoGFO;
+	commands["glbl"] = &OllyLang::DoGLBL;
 	commands["gmemi"] = &OllyLang::DoGMEMI;
 	commands["gmexp"] = &OllyLang::DoGMEXP;
 	commands["gma"] = &OllyLang::DoGMA;
@@ -130,6 +131,8 @@ OllyLang::OllyLang()
 	commands["gpp"] = &OllyLang::DoGPP;
 	commands["gro"] = &OllyLang::DoGRO;
 	commands["gref"] = &OllyLang::DoGREF;
+	commands["gsl"] = &OllyLang::DoGSL;
+	commands["gstr"] = &OllyLang::DoGSTR;
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["inc"] = &OllyLang::DoINC;
@@ -173,6 +176,7 @@ OllyLang::OllyLang()
 	commands["preop"] = &OllyLang::DoPREOP;
 	commands["push"] = &OllyLang::DoPUSH;
 	commands["pusha"] = &OllyLang::DoPUSHA;
+	commands["rbp"] = &OllyLang::DoRBP;
 	commands["readstr"] = &OllyLang::DoREADSTR;
 	commands["refresh"] = &OllyLang::DoREFRESH;
 	commands["ref"] = &OllyLang::DoREF;
@@ -185,6 +189,7 @@ OllyLang::OllyLang()
 	commands["rtr"] = &OllyLang::DoRTR;
 	commands["rtu"] = &OllyLang::DoRTU;
 	commands["run"] = &OllyLang::DoRUN;
+	commands["sbp"] = &OllyLang::DoSBP;
 	commands["scmp"] = &OllyLang::DoSCMP;
 	commands["scmpi"] = &OllyLang::DoSCMPI;
     commands["setoption"] = &OllyLang::DoSETOPTION;
@@ -230,6 +235,9 @@ OllyLang::OllyLang()
 
 	showVarHistory=true;
 	bUnicode=false;
+
+	is_bp_saved = false;
+	AllocSwbpMem(100);
 }
 
 OllyLang::~OllyLang()
@@ -237,6 +245,7 @@ OllyLang::~OllyLang()
 	if (search_buffer!=NULL)
 		DoENDSEARCH("");
 
+	FreeBpMem();
 	labels.clear();
 	script.clear();
 	clearProgLines();
@@ -2437,5 +2446,21 @@ bool OllyLang::RestoreRegisters(bool stackToo)
 
 	return true;
 }
+
+bool OllyLang::AllocSwbpMem(uint tmpSizet)
+{
+	softbp_t = (t_bpoint*)malloc(sizeof(t_bpoint*) * tmpSizet);
+	return true;
+}
+
+void OllyLang::FreeBpMem()
+{
+	if (softbp_t != NULL) {
+		free((void *) softbp_t);
+		softbp_t = NULL;
+	}
+	is_bp_saved = false;
+}
+
 
 #include "OllyLangCommands.cpp"

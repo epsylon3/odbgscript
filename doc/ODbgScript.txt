@@ -59,9 +59,12 @@ Get Trace Addr
 ---------------
 1.77 (SVN)
 + Added CLOSE command to close windows
++ Added SBP/RBP To save/restore breakpoints
++ Added GLBL/GSTR to get Label/String at some addr
++ Added GSL (Selection Limits) to get size of currently selected line in CPUASM | DUMP | STACK
 
 1.76 (28 Sep 2009)
-+ Added BACKUP command to create a capture of memory
++ Added BACKUP command to see changes in a memory area
 + Added Ctrl+F to search in "Script Log" window, and menu item
 + Search input box remembers last search, and search after current position
 + OPENDUMP returns descriptor as $RESULT for later use (backups)
@@ -764,6 +767,7 @@ window parameter can be a constant or a HWND (like $RESULT of OPENDUMP/BACKUP).
  REFERENCES, SOURCELIST, WATCHES
  WINDOWS, PATCHES, RUNTRACE, CALLSTACK
  TEXT, FILE, HANDLES, SEH, SOURCE
+
 CMP dest, src [,size]
 ---------------------
 Compares dest to src. Works like it's ASM counterpart.
@@ -1044,6 +1048,10 @@ GFO addr
 --------
 Get File Offset of address
 
+GLBL addr
+---------
+Get Label at address
+
 GMEMI addr, info
 ----------------
 Get information about a memory block to which the specified address belongs.
@@ -1155,6 +1163,25 @@ GRO addr
 --------
 Get Relative Offset
 When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
+
+GSL
+----
+Get Selection Limits
+returns START/END address from currently selected line in CPUASM | DUMP | STACK window in $RESULT & $RESULT_1
+arg can be either : DASM, DUMP, STACK or numeric in the same order 1, 2, 3
+Example:
+	gsl DUMP
+	gsl 1 ; DASM
+
+GSTR addr, [arg1]
+-----------------
+Get String returns a null terminated string from addr, the string is at least arg1 characters
+returns in
+- $RESULT    : the string
+- $RESULT_1  : len of string
+Example:
+	gstr 401000     ; arg1 in this case is set to default (5 chars)
+	gstr 401000, 20 ; must be at least 20 chars
 
 HANDLE x, y, class
 ------------------
@@ -1420,8 +1447,23 @@ PUSHA
 Save all register in plugin memory (to be restored by POPA)
 Stack is not used by this command
 
+RBP [arg1]
+----------
+Restore Break Points
+arg1 = may be STRICT or nothing
+Restores all hardware and software breakpoints
+if arg1 == 'STRICT', all soft bp set by script will be deleted and only those 
+have been set before it runs will be restored.
+If no argument set, previous soft bp will be appended to those set by script
+Return in:
+ - $RESULT number of restored swbp
+ - $RESULT_1 number of restored hwbp
+Example:
+	rbp
+	rbp STRICT
+
 READSTR str, len
--------
+----------------
 Copy len chars of str into $RESULT
 
 REF addr, [LOCATION]
@@ -1494,6 +1536,14 @@ RUN
 Executes F9 in OllyDbg, you can also use ERUN to ignore exceptions
 Example:
 	run
+
+SBP 
+---
+Store Break Points
+stores all hardware and software breakpoints, to be restored with RBP
+return in:
+ - $RESULT number of stored swbp
+ - $RESULT_1 number of stored hwbp
 
 SCMP dest, src [,size]
 ----------------------
