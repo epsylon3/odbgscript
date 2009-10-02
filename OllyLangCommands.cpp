@@ -3175,11 +3175,11 @@ bool OllyLang::DoGSTR(string args)
 		{
 			buffer[0] = '\0';
 			tmpSize = Decodeascii(addr, buf, MAX_PATH, DASC_ASCII);
-			if (tmpSize > 2) {
+			if (tmpSize > 2 && buf[0]=='"') {
 				tmpSize -= 2;
 				lstrcpyn(buffer, (char *)(buf+1), tmpSize+1);
 			}
-			else if (tmpSize <= 2) {
+			else {
 				return true;
 			}
 
@@ -3193,7 +3193,7 @@ bool OllyLang::DoGSTR(string args)
 			if (!bUseDef)
 				GetDWOpValue(ops[1], size);
 			else
-				size = 5;
+				size = 2;
 
 			if (tmpSize < size)
 				return true;
