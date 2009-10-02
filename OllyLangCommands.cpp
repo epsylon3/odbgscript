@@ -2271,18 +2271,18 @@ bool OllyLang::DoGLBL ( string args )
 	ulong addr, type;
 	char buffer[TEXTLEN]={0};
 
-	if ( !GetDWOpValue ( args, addr ) )
+	if (!GetDWOpValue(args, addr))
 		return false;
 	{
-		if ( addr != 0 )
-		{
-			variables["$RESULT_1"] = 0;
+		variables["$RESULT"] = 0;
 
-			if ( Findlabel ( addr, buffer ) != NM_LABEL )
+		if (addr != 0)
+		{
+			if (Findlabel ( addr, buffer ) != NM_LABEL)
 				variables["$RESULT"] = 0;
 
-			comment = buffer;
-			if ( comment == "" )
+			comment.assign(buffer);
+			if (comment == "")
 				variables["$RESULT"] = 0;
 
 			variables["$RESULT"] = comment;
@@ -3147,10 +3147,10 @@ bool OllyLang::DoGSL ( string args )
 //
 // ex       : gstr 401000     ; arg1 in this case is set to default (5 chars)
 //          : gstr 401000, 20 ; must be at least 20 chars
-bool OllyLang::DoGSTR ( string args )
+bool OllyLang::DoGSTR(string args)
 {
 	string comment;
-	char buf[MAX_PATH];
+	char buf[MAX_PATH]={0};
 	ulong addr, size, tmpSize;
 	char c;
 	bool bUseDef = false;
@@ -3159,46 +3159,50 @@ bool OllyLang::DoGSTR ( string args )
 	string ops[2];
 
 
-	if ( !CreateOperands ( args, ops, 2 ) )
+	if (!CreateOperands(args, ops, 2))
 	{
-		if ( !CreateOperands ( args, ops, 1 ) )
+		if (!CreateOperands(args, ops, 1))
 			return false;
 		else
 			bUseDef = true;
 	}
 
-	if ( GetDWOpValue ( ops[0], addr ) )
+	if (GetDWOpValue (ops[0], addr))
 	{
-		if ( addr != 0 )
+		variables["$RESULT"] = 0;
+		variables["$RESULT_1"] = 0;
+		if (addr != 0)
 		{
-			tmpSize = Readmemory ( buf, addr, MAX_PATH, MM_RESILENT );
-			if ( !tmpSize )
-			{
-				variables["$RESULT"] = 0;
-				variables["$RESULT_1"] =  0;
+			buffer[0] = '\0';
+			tmpSize = Decodeascii(addr, buf, MAX_PATH, DASC_ASCII);
+			if (tmpSize > 2) {
+				tmpSize -= 2;
+				lstrcpyn(buffer, (char *)(buf+1), tmpSize+1);
+			}
+			else if (tmpSize <= 2) {
 				return true;
 			}
 
-			lstrcpy ( buffer, buf );
-			tmpSize = lstrlen ( buffer );
+			//tmpSize = Readmemory(buf, addr, MAX_PATH, MM_RESILENT);
+			//if (!tmpSize)
+			//	return true;
 
-			if ( ! bUseDef )
-				GetDWOpValue ( ops[1], size );
+			//lstrcpy(buffer, buf);
+			tmpSize = lstrlen(buffer);
+
+			if (!bUseDef)
+				GetDWOpValue(ops[1], size);
 			else
 				size = 5;
 
-			if ( tmpSize < size )
-			{
-				variables["$RESULT"] = 0;
-				variables["$RESULT_1"] =  0;
+			if (tmpSize < size)
 				return true;
-			}
-
+/*
 			int i;
-			for ( iDashNum = 0, i = 0; i  < tmpSize; i++ )
+			for (iDashNum=0,i=0; i < tmpSize; i++)
 			{
 				c = buffer[i];
-				if ( isalnum ( c ) )
+				if (isalnum(c))
 					continue;
 				else
 				{
@@ -3207,18 +3211,14 @@ bool OllyLang::DoGSTR ( string args )
 				}
 			}
 
-			if ( iDashNum >= tmpSize / 2 )
-			{
-				variables["$RESULT"] = 0;
-				variables["$RESULT_1"] =  0;
+			if (iDashNum >= tmpSize / 2)
 				return true;
-			}
-
-			comment = buffer;
+*/
+			comment.assign(buffer);
 			variables["$RESULT"] = comment;
-			variables["$RESULT_1"] = tmpSize;
-			return true;
+			variables["$RESULT_1"] = tmpSize;			
 		}
+		return true;
 	}
 	return false;
 }
