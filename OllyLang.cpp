@@ -236,8 +236,8 @@ OllyLang::OllyLang()
 	showVarHistory=true;
 	bUnicode=false;
 
-	is_bp_saved = false;
-	AllocSwbpMem(100);
+	saved_bp = 0;
+	//AllocSwbpMem(100);
 }
 
 OllyLang::~OllyLang()
@@ -252,6 +252,44 @@ OllyLang::~OllyLang()
 	clearLogLines();
 	Reset();
 
+}
+
+bool OllyLang::Reset()
+{
+	freeMemBlocks();
+	variables.clear();
+	bpjumps.clear();
+	calls.clear();
+	char s[10] = {0};
+	sprintf(s,"%i.%i", VERSIONHI, VERSIONLO);
+	string str(s);
+	variables["$VERSION"] = str;
+	EOB_row = -1;
+	EOE_row = -1;
+	script_state = SS_LOADED;
+	enable_logging = false;
+	script_pos = GetFirstCodeLine();
+	pgr_scriptpos = script_pos+1; 
+	resetProgLines();
+	tickcount_startup=0;
+	tickcount=0;
+	tickcounthi=0;
+	break_memaddr=0;
+	break_reason=0;
+	require_ollyloop = 0;
+	require_addonaction = 0;
+	nIgnoreNextValuesHist = 0;
+
+	tExportsCache.clear();
+	exportsCacheAddr = 0;
+	tImportsCache.clear();
+	importsCacheAddr = 0;
+
+	dumpWindows.clear();
+
+	if (wndProg.hw!=NULL)
+		Selectandscroll(&wndProg,pgr_scriptpos,2);
+	return true;
 }
 
 vector<string> OllyLang::GetScriptFromFile(LPSTR file)
@@ -566,44 +604,6 @@ bool OllyLang::LoadScript(LPSTR file)
 bool OllyLang::Pause()
 {
 	script_state = SS_PAUSED;
-	return true;
-}
-
-bool OllyLang::Reset()
-{
-	freeMemBlocks();
-	variables.clear();
-	bpjumps.clear();
-	calls.clear();
-	char s[10] = {0};
-	sprintf(s,"%i.%i", VERSIONHI, VERSIONLO);
-	string str(s);
-	variables["$VERSION"] = str;
-	EOB_row = -1;
-	EOE_row = -1;
-	script_state = SS_LOADED;
-	enable_logging = false;
-	script_pos = GetFirstCodeLine();
-	pgr_scriptpos = script_pos+1; 
-	resetProgLines();
-	tickcount_startup=0;
-	tickcount=0;
-	tickcounthi=0;
-	break_memaddr=0;
-	break_reason=0;
-	require_ollyloop = 0;
-	require_addonaction = 0;
-	nIgnoreNextValuesHist = 0;
-
-	tExportsCache.clear();
-	exportsCacheAddr = 0;
-	tImportsCache.clear();
-	importsCacheAddr = 0;
-
-	dumpWindows.clear();
-
-	if (wndProg.hw!=NULL)
-		Selectandscroll(&wndProg,pgr_scriptpos,2);
 	return true;
 }
 
@@ -2448,8 +2448,19 @@ bool OllyLang::RestoreRegisters(bool stackToo)
 }
 
 bool OllyLang::AllocSwbpMem(uint tmpSizet)
-{
-	softbp_t = (t_bpoint*)malloc(sizeof(t_bpoint*) * tmpSizet);
+{	
+	try
+	{
+		if (saved_bp)
+			softbp_t = (t_bpoint*)realloc((void *)softbp_t, sizeof(t_bpoint*) * tmpSizet);
+		else
+			softbp_t = (t_bpoint*)malloc(sizeof(t_bpoint*) * tmpSizet);
+		saved_bp = tmpSizet;
+	}
+	catch( ... )
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -2459,7 +2470,7 @@ void OllyLang::FreeBpMem()
 		free((void *) softbp_t);
 		softbp_t = NULL;
 	}
-	is_bp_saved = false;
+	saved_bp = 0;
 }
 
 

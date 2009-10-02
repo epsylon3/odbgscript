@@ -397,7 +397,7 @@ private:
 	t_sorted sortedsoftbp_t;
 	t_bpoint* softbp_t;
 
-	bool is_bp_saved;
+	uint saved_bp;
 	bool AllocSwbpMem(uint tmpSizet);
 	void FreeBpMem();
 

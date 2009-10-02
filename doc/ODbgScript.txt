@@ -59,9 +59,9 @@ Get Trace Addr
 ---------------
 1.77 (SVN)
 + Added CLOSE command to close windows
-+ Added SBP/RBP To save/restore breakpoints
-+ Added GLBL/GSTR to get Label/String at some addr
-+ Added GSL (Selection Limits) to get size of currently selected line in CPUASM | DUMP | STACK
++ Added SBP/RBP To save/restore breakpoints (Zool@nder based)
++ Added GSL (Selection Limits) to get size of currently selected line(s) in CPUASM|CPUSTACK|CPUSTACK (Zool@nder based) 
++ Added GLBL/GSTR to get Label/String at some addr (Zool@nder) 
 
 1.76 (28 Sep 2009)
 + Added BACKUP command to see changes in a memory area
@@ -1164,14 +1164,13 @@ GRO addr
 Get Relative Offset
 When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
 
-GSL
-----
+GSL [where]
+-----------
 Get Selection Limits
-returns START/END address from currently selected line in CPUASM | DUMP | STACK window in $RESULT & $RESULT_1
-arg can be either : DASM, DUMP, STACK or numeric in the same order 1, 2, 3
+returns START/END addresses and SIZE from currently selected line(s) in CPUASM | CPUDUMP | CPUSTACK window in $RESULT, $RESULT_1 & $RESULT_2
+arg can be either : CPUDASM, CPUDUMP, CPUSTACK. Default is CPUDASM
 Example:
-	gsl DUMP
-	gsl 1 ; DASM
+	gsl CPUDUMP
 
 GSTR addr, [arg1]
 -----------------
@@ -1772,7 +1771,7 @@ with improvement ideas etc.
 R@dier for the great dumping engine.
 
 shERis, nick_name, MetaCore, XanSama, arnix, hila123, bukkake, Human, hnhuqiong,
-SunBeam, LCF AT, Fungus, hnedka for ideas and bug report on the new ODbgScript
+SunBeam, LCF AT, Fungus, hnedka, Zool@nder for ideas and bug report on the new ODbgScript
 
 And of course Olly for this great debugger!
 

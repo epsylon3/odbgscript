@@ -3097,41 +3097,42 @@ bool OllyLang::DoGRO(string args)
 
 // Get Selection Limits
 // returns START/END address from currently selected line in CPUASM | DUMP | STACK window in $RESULT & $RESULT_1
-// arg can be either : DASM, DUMP, STACK or numeric in the same order 1, 2, 3
-// ex		:	gsl DUMP
-//          :   gsl 1 ; DASM
+// arg can be either : CPUDASM, CPUDUMP, CPUSTACK 
+// ex		:	gsl CPUDUMP
 bool OllyLang::DoGSL ( string args )
 {
-	string ops[1];
 	string str;
 	t_dump* td;
-	BYTE b;
-	
-	if ( !CreateOperands ( args, ops, 1 ) )
-		return false;
-	
-	if ( !GetSTROpValue ( "\"" + ops[0] + "\"", str ) )
-		if(!GetBYTEOpValue(ops[0], b))
-			return false;
 
-	if( str == "DASM" || b == 1)
-		td = ( t_dump* ) Plugingetvalue ( VAL_CPUDASM );
-	else if( str == "DUMP" || b == 2)
-		td = ( t_dump* ) Plugingetvalue( VAL_CPUDDUMP);
-	else if( str == "STACK" || b == 3)
-		td = ( t_dump* ) Plugingetvalue( VAL_CPUDSTACK);
+	variables["$RESULT"] = 0;
+	variables["$RESULT_1"] = 0;
+	variables["$RESULT_2"] = 0;
+	
+	GetSTROpValue("\""+args+"\"", str);
+	if (str == "") str = "CPUDASM";
+
+	transform(str.begin(), str.end(), str.begin(), toupper);
+
+	if(str == "CPUDASM")
+		td = (t_dump*) Plugingetvalue (VAL_CPUDASM);
+	else if (str == "CPUDUMP")
+		td = (t_dump*) Plugingetvalue(VAL_CPUDDUMP);
+	else if (str == "CPUSTACK")
+		td = (t_dump*) Plugingetvalue(VAL_CPUDSTACK);
 	else
 		return false;
 	
-	if ( td )
+	if (td)
 	{
 		variables["$RESULT"] = (DWORD)td->sel0;
-		variables["$RESULT_1"] =  (DWORD)td->sel1;
+		variables["$RESULT_1"] =  (DWORD)td->sel1-1;
+		variables["$RESULT_2"] =  (DWORD)td->sel1-(DWORD)td->sel0;
 	}
 	else
 	{
 		variables["$RESULT"] = 0;
-		variables["$RESULT_1"] =  0;
+		variables["$RESULT_1"] = 0;
+		variables["$RESULT_2"] = 0;
 	}
 
 	return true;
@@ -4425,7 +4426,7 @@ bool OllyLang::DoRBP ( string args )
 
 	CreateOperands ( args, ops, 1 );
 
-	if ( is_bp_saved )
+	if ( saved_bp )
 	{
 		bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
 		if ( bpt != NULL )
@@ -4452,7 +4453,7 @@ bool OllyLang::DoRBP ( string args )
 
 			variables["$RESULT_1"] = ( DWORD ) n;
 
-			is_bp_saved = false;
+			//saved_bp = 0;
 			Broadcast ( WM_USER_CHALL, 0, 0 );
 		}
 	}
@@ -4792,10 +4793,13 @@ bool OllyLang::DoSBP ( string args )
 	t_table *bpt;
 	t_bpoint *bpoint;
 
-	DumpVars();
+	variables["$RESULT"] = 0;
+	variables["$RESULT_1"] = 0;
 
-	if ( !is_bp_saved )
-	{
+	//DumpVars();
+
+	//if ( !saved_bp )
+	//{
 		bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
 		if ( bpt != NULL )
 		{
@@ -4804,14 +4808,14 @@ bool OllyLang::DoSBP ( string args )
 			{
 				n = bpt->data.n;
 
-				if ( n > 100 )
+				if ( n > saved_bp )
 				{
-					success = false;
+					//success = false;
 					FreeBpMem();
 					success = AllocSwbpMem ( n );
 				}
 
-				if ( n > 100 && !success )
+				if ( n > saved_bp && !success )
 					errorstr = "Can't allocate enough memory to copy all breakpoints";
 				else
 				{
@@ -4819,7 +4823,7 @@ bool OllyLang::DoSBP ( string args )
 					memcpy ( ( void* ) &sortedsoftbp_t, ( void* ) &bpt->data, sizeof ( t_sorted ) );
 					memcpy ( ( void* ) &hwbp_t, ( void* ) ( Plugingetvalue ( VAL_HINST ) +0xD8D70 ), 4 * sizeof ( t_hardbpoint ) );
 
-					is_bp_saved = true;
+					saved_bp = n;
 
 					variables["$RESULT"] =  ( DWORD ) n;
 
@@ -4835,9 +4839,9 @@ bool OllyLang::DoSBP ( string args )
 				}
 			}
 		}
-	}
-	else
-		errorstr = "sbp command can be called only once a session";
+	//}
+	//else
+	//	errorstr = "sbp command can be called only once a session";
 
 	return true;
 }
