@@ -398,6 +398,7 @@ private:
 	t_bpoint* softbp_t;
 
 	uint saved_bp;
+	uint alloc_bp;
 	bool AllocSwbpMem(uint tmpSizet);
 	void FreeBpMem();
 

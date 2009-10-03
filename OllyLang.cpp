@@ -237,6 +237,8 @@ OllyLang::OllyLang()
 	bUnicode=false;
 
 	saved_bp = 0;
+	alloc_bp = 0;
+	softbp_t = NULL;
 	//AllocSwbpMem(100);
 }
 
@@ -2449,13 +2451,21 @@ bool OllyLang::RestoreRegisters(bool stackToo)
 
 bool OllyLang::AllocSwbpMem(uint tmpSizet)
 {	
+	if (tmpSizet==0) {
+		FreeBpMem();
+		return true;
+	}
+
+	if (softbp_t && alloc_bp==tmpSizet)
+		return true;
+
 	try
 	{
-		if (saved_bp)
+		if (softbp_t)
 			softbp_t = (t_bpoint*)realloc((void *)softbp_t, sizeof(t_bpoint*) * tmpSizet);
 		else
 			softbp_t = (t_bpoint*)malloc(sizeof(t_bpoint*) * tmpSizet);
-		saved_bp = tmpSizet;
+		alloc_bp = tmpSizet;
 	}
 	catch( ... )
 	{
@@ -2466,11 +2476,12 @@ bool OllyLang::AllocSwbpMem(uint tmpSizet)
 
 void OllyLang::FreeBpMem()
 {
-	if (softbp_t != NULL) {
+	if (softbp_t) {
 		free((void *) softbp_t);
 		softbp_t = NULL;
 	}
 	saved_bp = 0;
+	alloc_bp = 0;
 }
 
 

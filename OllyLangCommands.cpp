@@ -4796,52 +4796,44 @@ bool OllyLang::DoSBP ( string args )
 	variables["$RESULT"] = 0;
 	variables["$RESULT_1"] = 0;
 
-	//DumpVars();
-
-	//if ( !saved_bp )
-	//{
-		bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
-		if ( bpt != NULL )
+	bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
+	if ( bpt != NULL )
+	{
+		bpoint = ( t_bpoint * ) ( bpt->data.data );
+		if ( bpoint != NULL )
 		{
-			bpoint = ( t_bpoint * ) ( bpt->data.data );
-			if ( bpoint != NULL )
+			n = bpt->data.n;
+
+			if ( n > saved_bp )
 			{
-				n = bpt->data.n;
-
-				if ( n > saved_bp )
-				{
-					//success = false;
-					FreeBpMem();
-					success = AllocSwbpMem ( n );
-				}
-
-				if ( n > saved_bp && !success )
-					errorstr = "Can't allocate enough memory to copy all breakpoints";
-				else
-				{
-					memcpy ( ( void* ) softbp_t, bpt->data.data, n*sizeof ( t_bpoint ) );
-					memcpy ( ( void* ) &sortedsoftbp_t, ( void* ) &bpt->data, sizeof ( t_sorted ) );
-					memcpy ( ( void* ) &hwbp_t, ( void* ) ( Plugingetvalue ( VAL_HINST ) +0xD8D70 ), 4 * sizeof ( t_hardbpoint ) );
-
-					saved_bp = n;
-
-					variables["$RESULT"] =  ( DWORD ) n;
-
-					n = i = 0;
-					while ( n < 4 )
-					{
-						if ( hwbp_t[n].addr )
-							i++;
-						n++;
-					}
-					variables["$RESULT_1"] =  ( DWORD ) i;
-					return true;
-				}
+				//FreeBpMem();
+				success = AllocSwbpMem ( n );
 			}
+
+			if ( n > saved_bp && !success )
+				errorstr = "Can't allocate enough memory to copy all breakpoints";
+			else if (n > 0)
+			{
+				memcpy ( ( void* ) softbp_t, bpt->data.data, n*sizeof ( t_bpoint ) );
+				memcpy ( ( void* ) &sortedsoftbp_t, ( void* ) &bpt->data, sizeof ( t_sorted ) );
+				
+			} 
+
+			saved_bp = n;
+			variables["$RESULT"] =  ( DWORD ) n;
 		}
-	//}
-	//else
-	//	errorstr = "sbp command can be called only once a session";
+	}
+
+	memcpy ( ( void* ) &hwbp_t, ( void* ) ( Plugingetvalue ( VAL_HINST ) +0xD8D70 ), 4 * sizeof ( t_hardbpoint ) );
+
+	n = i = 0;
+	while ( n < 4 )
+	{
+		if ( hwbp_t[n].addr )
+			i++;
+		n++;
+	}
+	variables["$RESULT_1"] =  ( DWORD ) i;
 
 	return true;
 }
