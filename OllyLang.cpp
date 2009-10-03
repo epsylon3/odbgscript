@@ -239,7 +239,9 @@ OllyLang::OllyLang()
 	saved_bp = 0;
 	alloc_bp = 0;
 	softbp_t = NULL;
-	//AllocSwbpMem(100);
+
+	for (int n=0; n < 4; n++ ) hwbp_t[n].addr = 0;
+
 }
 
 OllyLang::~OllyLang()
@@ -2456,7 +2458,7 @@ bool OllyLang::AllocSwbpMem(uint tmpSizet)
 		return true;
 	}
 
-	if (softbp_t && alloc_bp==tmpSizet)
+	if (softbp_t && tmpSizet < alloc_bp)
 		return true;
 
 	try

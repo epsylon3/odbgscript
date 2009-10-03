@@ -4421,10 +4421,12 @@ bool OllyLang::DoRBP ( string args )
 {
 	t_table* bpt = 0;
 	t_bpoint* bpoint = 0;
-	uint n;
+	uint n,i=0;
 	string ops[1];
 
 	CreateOperands ( args, ops, 1 );
+	
+	variables["$RESULT"] = 0;
 
 	if ( saved_bp )
 	{
@@ -4446,17 +4448,22 @@ bool OllyLang::DoRBP ( string args )
 			for ( n=0; n < sortedsoftbp_t.n; n++ )
 				Setbreakpoint ( softbp_t[n].addr, ( softbp_t[n].type | TY_KEEPCODE ) ^ TY_KEEPCODE, 0 );
 
-			variables["$RESULT"] = ( DWORD ) n;
+			variables["$RESULT"] = ( DWORD ) sortedsoftbp_t.n;
 
-			for ( n=0; n < 4; n++ )
-				Sethardwarebreakpoint ( hwbp_t[n].addr, hwbp_t[n].size, hwbp_t[n].type );
-
-			variables["$RESULT_1"] = ( DWORD ) n;
-
-			//saved_bp = 0;
 			Broadcast ( WM_USER_CHALL, 0, 0 );
 		}
+
 	}
+
+	//Hardware Bps
+	for ( n=0; n < 4; n++ ) {
+		if (hwbp_t[n].addr) {
+			Sethardwarebreakpoint ( hwbp_t[n].addr, hwbp_t[n].size, hwbp_t[n].type );
+			i++;
+		}
+	}
+	variables["$RESULT_1"] = ( DWORD ) i;
+
 	return true;
 }
 
@@ -4804,14 +4811,16 @@ bool OllyLang::DoSBP ( string args )
 		{
 			n = bpt->data.n;
 
-			if ( n > saved_bp )
+			if ( n > alloc_bp )
 			{
 				//FreeBpMem();
 				success = AllocSwbpMem ( n );
 			}
 
-			if ( n > saved_bp && !success )
+			if ( n > alloc_bp && !success ) {
 				errorstr = "Can't allocate enough memory to copy all breakpoints";
+				return false;
+			}
 			else if (n > 0)
 			{
 				memcpy ( ( void* ) softbp_t, bpt->data.data, n*sizeof ( t_bpoint ) );
