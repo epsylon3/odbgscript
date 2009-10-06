@@ -294,7 +294,8 @@ extc int _export cdecl ExecuteScript(const char* const filename)
 	return 0;
 }
 
-extc void _export cdecl DebugScript(const char* const filename)
+// Asked by Ollysubscript
+extc HWND _export cdecl DebugScript(const char* const filename)
 {
 	if (filename!="")
 	{
@@ -305,6 +306,7 @@ extc void _export cdecl DebugScript(const char* const filename)
 		SetForegroundWindow(ollylang->wndProg.hw);
 		SetFocus(ollylang->wndProg.hw);     
 	}
+	return ollylang->wndProg.hw;
 }
 
 // Receives commands from windows menus.

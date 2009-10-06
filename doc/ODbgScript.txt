@@ -57,11 +57,11 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.77 (SVN)
+1.77 (06 Oct 2009)
 + Added CLOSE command to close windows
 + Added SBP/RBP To save/restore breakpoints (Zool@nder based)
-+ Added GSL (Selection Limits) to get size of currently selected line(s) in CPUASM|CPUSTACK|CPUSTACK (Zool@nder based) 
-+ Added GLBL/GSTR to get Label/String at some addr (Zool@nder) 
++ Added GSL (Selection Limits) to get addr/size of currently selected line(s) in CPUASM|CPUSTACK|CPUSTACK (Zool@nder based) 
++ Added GLBL/GSTR to get Label/String at some addr (Zool@nder based) 
 
 1.76 (28 Sep 2009)
 + Added BACKUP command to see changes in a memory area
@@ -1179,7 +1179,7 @@ returns in
 - $RESULT    : the string
 - $RESULT_1  : len of string
 Example:
-	gstr 401000     ; arg1 in this case is set to default (5 chars)
+	gstr 401000     ; arg1 in this case is set to default (2 chars)
 	gstr 401000, 20 ; must be at least 20 chars
 
 HANDLE x, y, class
