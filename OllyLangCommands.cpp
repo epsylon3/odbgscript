@@ -2303,6 +2303,10 @@ bool OllyLang::DoGMA(string args)
 		if (str.length() > 8)
 			str = str.substr(0,8);
 
+		//Module names : Spaces to underscores
+		while(str.find(" ")!=string::npos)
+			str.replace(str.find(" "),1,"_");
+
 		Listmemory();
 
 		int t=Plugingetvalue(VAL_MEMORY);

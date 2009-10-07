@@ -57,6 +57,9 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.78 (SVN)
+* GMA : Spaces to underscores in module names
+
 1.77 (06 Oct 2009)
 + Added CLOSE command to close windows
 + Added SBP/RBP To save/restore breakpoints (Zool@nder based)

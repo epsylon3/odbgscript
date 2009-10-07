@@ -294,7 +294,7 @@ extc int _export cdecl ExecuteScript(const char* const filename)
 	return 0;
 }
 
-// Asked by Ollysubscript
+// Needed by OllyscriptEditor
 extc HWND _export cdecl DebugScript(const char* const filename)
 {
 	if (filename!="")
