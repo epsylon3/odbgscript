@@ -58,7 +58,8 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.78 (SVN)
-* GMA : Spaces to underscores in module names
++ Added GSTRU to get Unicode String (wchar) at address, and returns unicode buffer, size and ascii
+* GMA : Spaces to underscores in module name
 
 1.77 (06 Oct 2009)
 + Added CLOSE command to close windows
@@ -1184,6 +1185,17 @@ returns in
 Example:
 	gstr 401000     ; arg1 in this case is set to default (2 chars)
 	gstr 401000, 20 ; must be at least 20 chars
+
+GSTRU addr, [arg1]
+------------------
+Get String returns a unicode string from addr, the string is at least arg1 characters
+returns in
+- $RESULT    : the string (ascii)
+- $RESULT_1  : len of string
+- $RESULT_2  : unicode string
+Example:
+	gstru 401000     ; arg1 in this case is set to default (2 chars)
+	gstru 401000, 20 ; must be at least 20 chars
 
 HANDLE x, y, class
 ------------------

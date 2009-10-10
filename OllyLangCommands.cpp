@@ -3153,8 +3153,8 @@ bool OllyLang::DoGSL ( string args )
 //          : gstr 401000, 20 ; must be at least 20 chars
 bool OllyLang::DoGSTR(string args)
 {
-	string comment;
-	char buf[MAX_PATH]={0};
+	string str;
+	char buf[TEXTLEN]={0};
 	ulong addr, size, tmpSize;
 	char c;
 	bool bUseDef = false;
@@ -3178,7 +3178,7 @@ bool OllyLang::DoGSTR(string args)
 		if (addr != 0)
 		{
 			buffer[0] = '\0';
-			tmpSize = Decodeascii(addr, buf, MAX_PATH, DASC_ASCII);
+			tmpSize = Decodeascii(addr, buf, TEXTLEN, DASC_ASCII);
 			if (tmpSize > 2 && buf[0]=='"') {
 				tmpSize -= 2;
 				lstrcpyn(buffer, (char *)(buf+1), tmpSize+1);
@@ -3187,7 +3187,7 @@ bool OllyLang::DoGSTR(string args)
 				return true;
 			}
 
-			//tmpSize = Readmemory(buf, addr, MAX_PATH, MM_RESILENT);
+			//tmpSize = Readmemory(buf, addr, TEXTLEN, MM_RESILENT);
 			//if (!tmpSize)
 			//	return true;
 
@@ -3218,9 +3218,96 @@ bool OllyLang::DoGSTR(string args)
 			if (iDashNum >= tmpSize / 2)
 				return true;
 */
-			comment.assign(buffer);
-			variables["$RESULT"] = comment;
+			str.assign(buffer);
+			variables["$RESULT"] = str;
 			variables["$RESULT_1"] = tmpSize;			
+		}
+		return true;
+	}
+	return false;
+}
+
+// Get String
+// returns a null terminated string from addr, the string is at least arg1 charachters
+// gstr addr, [arg1]
+// returns in   :
+// - $RESULT    : the string
+// - $RESULT_1  : len of string
+//
+// ex       : gstr 401000     ; arg1 in this case is set to default (5 chars)
+//          : gstr 401000, 20 ; must be at least 20 chars
+bool OllyLang::DoGSTRU(string args)
+{
+	string str,wstr;
+	char buf[TEXTLEN*2]={0};
+	ulong addr, size, tmpSize;
+	char c;
+	bool bUseDef = false;
+	uint iDashNum;
+
+	string ops[2];
+
+
+	if (!CreateOperands(args, ops, 2))
+	{
+		if (!CreateOperands(args, ops, 1))
+			return false;
+		else
+			bUseDef = true;
+	}
+
+	if (GetDWOpValue (ops[0], addr))
+	{
+		variables["$RESULT"] = 0;
+		variables["$RESULT_1"] = 0;
+		if (addr != 0)
+		{
+			buffer[0] = '\0';
+			tmpSize = Decodeunicode(addr, buf, TEXTLEN*2);
+			if (tmpSize > 2 && buf[0]=='"') {
+				tmpSize -= 2;
+				lstrcpyn(buffer, (char *)(buf+1), tmpSize+1);				
+			}
+			else {
+				return true;
+			}
+
+			str.assign(buffer);
+			tmpSize = str.length();//lstrlen(buffer);
+
+			if (tmpSize < Readmemory(buf, addr, TEXTLEN*2, MM_RESILENT)) {
+				wcsncpy((wchar_t *)buffer, (wchar_t *) buf, tmpSize);
+				wstr.assign(buffer,tmpSize*2);
+			}
+
+			if (!bUseDef)
+				GetDWOpValue(ops[1], size);
+			else
+				size = 2;
+
+			if (tmpSize < size)
+				return true;
+/*
+			int i;
+			for (iDashNum=0,i=0; i < tmpSize; i++)
+			{
+				c = buffer[i];
+				if (isalnum(c))
+					continue;
+				else
+				{
+					buffer[i] = '_';
+					iDashNum++;
+				}
+			}
+
+			if (iDashNum >= tmpSize / 2)
+				return true;
+*/
+			
+			variables["$RESULT"] = str;
+			variables["$RESULT_1"] = tmpSize;
+			variables["$RESULT_2"] = wstr;
 		}
 		return true;
 	}

@@ -273,6 +273,7 @@ private:
 	bool DoGRO(string args);
 	bool DoGSL(string args);
 	bool DoGSTR(string args);
+	bool DoGSTRU(string args);
 	bool DoHANDLE(string args);
 	bool DoHISTORY(string args);
 	bool DoINC(string args);

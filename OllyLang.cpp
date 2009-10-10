@@ -133,6 +133,7 @@ OllyLang::OllyLang()
 	commands["gref"] = &OllyLang::DoGREF;
 	commands["gsl"] = &OllyLang::DoGSL;
 	commands["gstr"] = &OllyLang::DoGSTR;
+	commands["gstru"] = &OllyLang::DoGSTRU;
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["inc"] = &OllyLang::DoINC;
