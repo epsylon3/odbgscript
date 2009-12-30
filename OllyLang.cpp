@@ -806,9 +806,11 @@ bool OllyLang::ProcessAddonAction()
 	t_dbgmemblock todo={0};
 
 	vector<t_dbgmemblock>::iterator block;
-
+	
 	block = tMemBlocks.end();
-	for (int b=tMemBlocks.size()-1; b>=0; b--) {
+
+	for (int b=tMemBlocks.size(); b>0; b--) {
+		
 		block--;
 		if (block->free_at_eip == thr->reg.ip) {
 			HANDLE hDbgPrc = (HANDLE)Plugingetvalue(VAL_HPROCESS);
@@ -829,6 +831,8 @@ bool OllyLang::ProcessAddonAction()
 			require_addonaction=0;
 			//return true;
 		}
+		if (block == tMemBlocks.begin())
+			break;
 	}
 
 	if (todo.listmemory) DoREFRESH(""); //Listmemory();	
