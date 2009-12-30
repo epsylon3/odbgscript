@@ -2368,10 +2368,10 @@ void OllyLang::regBlockToFree(void * hMem, ulong size, bool autoclean)
 
 bool OllyLang::unregMemBlock(void * hMem)
 {
-	t_dbgmemblock * block;
-	for (int b=0; b<tMemBlocks.size(); b++) {
-		block = &tMemBlocks[b];
-		if (block->hmem = hMem) {
+	vector<t_dbgmemblock>::iterator block = tMemBlocks.end();
+	for (int b=tMemBlocks.size(); b>0; b--) {
+		block--;		
+		if (block->hmem == hMem) {
 			tMemBlocks.erase(block);
 			return true;
 		}
@@ -2384,11 +2384,11 @@ bool OllyLang::freeMemBlocks()
 {
 	if (!tMemBlocks.empty()) {
 
-		t_dbgmemblock * block;	
 		HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
 
+		vector<t_dbgmemblock>::iterator block = tMemBlocks.end();
 		while (tMemBlocks.size() > 0) {
-			block = &tMemBlocks[tMemBlocks.size()-1];
+			block--;
 			if (block->autoclean)
 				VirtualFreeEx(hDbgPrc,block->hmem,block->size,MEM_DECOMMIT);
 			tMemBlocks.pop_back();
