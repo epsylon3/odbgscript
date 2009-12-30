@@ -3236,7 +3236,7 @@ bool OllyLang::DoGSTR(string args)
 //
 // ex       : gstr 401000     ; arg1 in this case is set to default (5 chars)
 //          : gstr 401000, 20 ; must be at least 20 chars
-bool OllyLang::DoGSTRU(string args)
+bool OllyLang::DoGSTRW(string args)
 {
 	string str,wstr;
 	char buf[TEXTLEN*2]={0};

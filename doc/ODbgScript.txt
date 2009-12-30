@@ -58,8 +58,9 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.78 (SVN)
-+ Added GSTRU to get Unicode String (wchar) at address, and returns unicode buffer, size and ascii
++ Added GSTRW to get Wide Char String (wchar) at address, and returns wchar buffer, size and ascii
 * GMA : Spaces to underscores in module name
+* Fixed a problem in automatic memory free routine
 
 1.77 (06 Oct 2009)
 + Added CLOSE command to close windows

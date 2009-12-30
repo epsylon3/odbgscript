@@ -133,7 +133,7 @@ OllyLang::OllyLang()
 	commands["gref"] = &OllyLang::DoGREF;
 	commands["gsl"] = &OllyLang::DoGSL;
 	commands["gstr"] = &OllyLang::DoGSTR;
-	commands["gstru"] = &OllyLang::DoGSTRU;
+	commands["gstrw"] = &OllyLang::DoGSTRW;
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["inc"] = &OllyLang::DoINC;
@@ -805,10 +805,12 @@ bool OllyLang::ProcessAddonAction()
 
 	t_dbgmemblock todo={0};
 
- 	t_dbgmemblock * block;
+	vector<t_dbgmemblock>::iterator block;
+
+	block = tMemBlocks.end();
 	for (int b=tMemBlocks.size()-1; b>=0; b--) {
-		block = &tMemBlocks[b];
-		if (block->free_at_eip = thr->reg.ip) {
+		block--;
+		if (block->free_at_eip == thr->reg.ip) {
 			HANDLE hDbgPrc = (HANDLE)Plugingetvalue(VAL_HPROCESS);
 			VirtualFreeEx(hDbgPrc, block->hmem, block->size, MEM_DECOMMIT);
 			
