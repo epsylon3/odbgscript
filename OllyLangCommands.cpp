@@ -1844,6 +1844,69 @@ bool OllyLang::DoFINDCMDS(string args)
 }
 */
 
+bool OllyLang::DoFINDMEM(string args)
+{
+
+	if (args=="")
+		return false;
+
+	string ops[2];
+
+	if (args.find(',') == -1)
+		args+=",0";
+
+	if(!CreateOperands(args, ops, 2))
+		return false;
+
+	t_table* tt;
+	tt=(t_table*) Plugingetvalue(VAL_MEMORY);
+	if (tt==NULL)
+		return false;
+
+	t_memory* tm;
+	char szBase[9];
+	ulong start=0; 
+	string sArgs;
+	bool bSkip;
+
+	if (!GetDWOpValue(ops[1], start))
+		return false;
+
+	for (int m=0; m < tt->data.n; m++) {
+		tm=(t_memory*) Getsortedbyselection(&tt->data, m);
+		if (tm==NULL) {
+			return false;
+		}
+
+		itoa(tm->base,szBase,16);
+
+		bSkip=false;
+
+		if (start > tm->base + tm->size)
+			bSkip=true;
+		else if (start >= tm->base) 
+			itoa(start,szBase,16);
+
+		if (!bSkip) {
+			sArgs="";
+			sArgs.append(szBase);
+			sArgs+=","+ops[0];
+			if (DoFIND(sArgs)) {
+				if (variables["$RESULT"].dw!=0 || variables["$RESULT"].str!="") {
+					var_logging=true;
+					return true;
+				}
+			}
+			//Display value in ollyscript wdw only once
+			var_logging=false;
+		}
+	}
+
+	var_logging=true;
+	variables["$RESULT"] = 0;
+	return true;
+}
+
 bool OllyLang::DoFINDOP(string args)
 {
 	string ops[3];
@@ -1946,68 +2009,48 @@ bool OllyLang::DoFINDOP(string args)
 	return true;
 }
 
-bool OllyLang::DoFINDMEM(string args)
+bool OllyLang::DoFINDOPREV(string args)
 {
-
-	if (args=="")
-		return false;
-
 	string ops[2];
-
-	if (args.find(',') == -1)
-		args+=",0";
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	t_table* tt;
-	tt=(t_table*) Plugingetvalue(VAL_MEMORY);
-	if (tt==NULL)
+	if(ops[1].length() % 2 != 0)
+	{
+		errorstr = "Hex string must have an even number of characters!";
 		return false;
-
-	t_memory* tm;
-	char szBase[9];
-	ulong start=0; 
-	string sArgs;
-	bool bSkip;
-
-	if (!GetDWOpValue(ops[1], start))
-		return false;
-
-	for (int m=0; m < tt->data.n; m++) {
-		tm=(t_memory*) Getsortedbyselection(&tt->data, m);
-		if (tm==NULL) {
-			return false;
-		}
-
-		itoa(tm->base,szBase,16);
-
-		bSkip=false;
-
-		if (start > tm->base + tm->size)
-			bSkip=true;
-		else if (start >= tm->base) 
-			itoa(start,szBase,16);
-
-		if (!bSkip) {
-			sArgs="";
-			sArgs.append(szBase);
-			sArgs+=","+ops[0];
-			if (DoFIND(sArgs)) {
-				if (variables["$RESULT"].dw!=0 || variables["$RESULT"].str!="") {
-					var_logging=true;
-					return true;
-				}
-			}
-			//Display value in ollyscript wdw only once
-			var_logging=false;
-		}
 	}
 
-	var_logging=true;
-	variables["$RESULT"] = 0;
+	DWORD addr, endaddr;
+	int result = -1;
+	int ok = 0;
+
+	if(GetDWOpValue(ops[0], addr) && UnquoteString(ops[1], '#', '#'))
+	{
+		t_memory* tmem = Findmemory(addr);
+		char cmd[MAXCMDSIZE] = {0};
+		do 
+		{
+			addr = Disassembleback(0, tmem->base, tmem->size, addr, 1, 0); 
+			endaddr = Disassembleback(0, tmem->base, tmem->size, addr, 1, 0); 
+			ok = Readcommand(addr, cmd);
+
+			if(addr == tmem->base + tmem->size)
+				ok = 0;
+
+			if(ok)
+				result = FindWithWildcards(cmd, ops[1].c_str(), endaddr - addr);
+		} while(result != 0 && ok != 0);
+	}
+	if(ok != 0)
+		variables["$RESULT"] = addr;
+	else
+		variables["$RESULT"] = 0;
 	return true;
+
 }
+
 
 bool OllyLang::DoFREE(string args)
 {
@@ -2021,6 +2064,7 @@ bool OllyLang::DoFREE(string args)
 
 	void * hMem;
 	ulong addr, size;
+
 	if(GetDWOpValue(ops[0], addr) && GetDWOpValue(ops[1], size))
 	{
 		hMem = (void*)addr;

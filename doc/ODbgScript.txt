@@ -59,6 +59,7 @@ Get Trace Addr
 ---------------
 1.78 (SVN)
 + Added GSTRW to get Wide Char String (wchar) at address, and returns wchar buffer, size and ascii
++ Added FINDOPREV (from ShaG 0.94 version)
 * GMA : Spaces to underscores in module name
 * Fixed a problem in automatic memory free routine
 

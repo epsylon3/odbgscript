@@ -249,6 +249,7 @@ private:
 	bool DoFINDCALLS(string args);
 	bool DoFINDCMD(string args);
 	bool DoFINDOP(string args);
+	bool DoFINDOPREV(string args);
 	bool DoFINDMEM(string args);
 	bool DoFREE(string args);
 	bool DoGAPI(string args);
