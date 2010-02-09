@@ -5,7 +5,7 @@ site : http://odbgscript.sf.net
 
 1. About OllyScript and ODbgScript
 2. Status
- 2.1 What's new ?
+ 2.1 What's new?
 3. Documentation
  3.1 Language
   3.1.1 Reserved variables
@@ -57,7 +57,7 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.78 (SVN)
+1.78 (08 Feb 2010)
 + Added GSTRW to get Wide Char String (wchar) at address, and returns wchar buffer, size and ascii
 + Added FINDOPREV (from ShaG 0.94 version)
 * GMA : Spaces to underscores in module name
@@ -102,7 +102,7 @@ Get Trace Addr
 
 1.72 (20 Sep 2009)
 + Enhanced Script Window (Empty lines and all comments are now displayed, except comments in command lines)
-+ Added GMEXP to list module exports (usefull to set breakpoints on all exports)
++ Added GMEXP to list module exports (useful to set breakpoints on all exports)
 + Added NAMES to open Names Window in a module
 + Added "REF 0" support to force REF reset
 
@@ -116,7 +116,7 @@ Get Trace Addr
 + MRU has now 9 entries
 + Added Flags Save/Restore to PUSHA/POPA
 + POPA protection to restore only in the thread used by PUSHA
-+ Added DebugScript Export for ScriptEditor interaction
++ Added DebugScript Export for Script Editor interaction
 * Fixed Edit Script Line
 * GMA now uses the 8 first chars of specified module name
 * Enhanced Memory block cleaning when multiple blocks were allocated in one command (loadlib)
@@ -145,7 +145,7 @@ Get Trace Addr
 * Set $RESULT to 0 on ASK dialog close
 
 1.66 (21 Dec 2008)
-+ GOPI (Get Operand Information) to get asm operand informations (TYPE, SIZE, ADDR, DATA, GOOD)
++ GOPI (Get Operand Information) to get asm operand information (TYPE, SIZE, ADDR, DATA, GOOD)
 * Fixed OPCODE, GCI, GAPI, REF commands, ReadMemory replaced by ReadCommand (bug on Vista ?)
 
 1.65 (SVN)
@@ -155,7 +155,7 @@ Get Trace Addr
 * Breakpoints saving enhanced, and saving/restore on restart.
 
 1.64 (30 May 2007)
-+! Added ability to call ODBGScript command(s) from OllyDbg Conditional Log Breakpoints
++! Added ability to call ODbgScript command(s) from OllyDbg Conditional Log Breakpoints
 +! Added CALL command to call Labels (use RET to return)
 + Added FINDCALLS command to find (and filter) intermodular calls.
 + Added GBPM command to get last memory breakpoint address, beta function affected on GBPR call
@@ -175,7 +175,7 @@ Get Trace Addr
 + Added UNICODE (0/1) command to set Unicode Mode (for future unicode support)
 * First TICK value fixed
 * ASM command was logged
-* Rewrote FINDCMD(S), now use Findallsequences ODBG API, can use R8, R16, R32 keywords
+* Rewrote FINDCMD(S), now use FindallSequences ODBG API, can use R8, R16, R32 keywords
 * RET Script is reset after "Script finished" message, no more modal.
 
 1.62 (26 May 2007)
@@ -225,7 +225,7 @@ x ALLOC, FREE can now refresh the memory window, was a problem with LIB, used ne
 + Added TAB key to Step in Script (S key could "assemble" if ASM window get focus)
 + Added PAUSE key (everywhere) to Pause Script on next command when Application is Running
 x BPHWS second parameter is now optional (default "x")
-* Comments // in /**/ bloc fixed
+* Comments // in /**/ block fixed
 * EXEC/END hex dword variables with letter as first char fixed
 * label script position fixed
 * negative values crash fixed
@@ -256,7 +256,7 @@ Note: GAPI function could be deleted, hnhu... has not finished the code
   no more modal and fixed the crash on close if box was not closed properly
 * Added fixes and news from 1.53 Chinese version
  
-  + pop,push,test,xchg commands.
+  + pop, push, test, xchg commands.
   + findcmds(Search for command sequence).
   + Added BPX and BPD functions
   + Added the OPENTRACE function (to open run trace)
@@ -270,10 +270,10 @@ Note: GAPI function could be deleted, hnhu... has not finished the code
 Other differences with Chinese Version :
 
 MRU "Bug" not modified 
-  I've made two MRU lists for a good reason, olly doesnt refresh Main Menu
+  I've made two MRU lists for a good reason, olly doesn't refresh Main Menu
 Inline operators are still working in this branch of OdbgScript
 Weird ESP Menu not added (i dont know what it is) 
-ADD doesnt supports dw+string itoa concatenation
+ADD doesn't supports dw+string itoa concatenation
 
 1.50.3 (8 May 2007)
 * 4-bytes alignment and speed optimization (thanks Human)
@@ -292,7 +292,7 @@ ADD doesnt supports dw+string itoa concatenation
   *ADD, SHL, SHR, SUB, XOR results to script window
 
 Notes : There are some differences between versions : 
-  WRTA doesnt add CR to lines (binary writing)
+  WRTA doesn't add CR to lines (binary writing)
 
 1.48 (27 May 2006)
 + Added ability to move script execution cursor, double click on a line.
@@ -366,7 +366,7 @@ Notes : There are some differences between versions :
 + Added Script Log Window
 # Fixed Manual Command when no debugged app or no script loaded.
 # Modified Load into Run in main and Disasm Menu
-# Added Version ressource, and cleaned source architecture
+# Added Version resource, and cleaned source architecture
 
 1.33 (06 Dec 2005) (Quick Fix version)
 # Some fixes
@@ -397,7 +397,7 @@ Notes : There are some differences between versions :
 + Added Result column
 + Value column keeps history of values
 + Enhanced Style of Script Window (current line, jumps, labels, same values)
-+ Added KEY to send custom key shorcut to ollydbg (global KEY_DOWN)
++ Added KEY to send custom key shortcut to ollydbg (global KEY_DOWN)
 + Added TC to close and delete runtrace
 # Fix MRU when a filename contains a comma or { }
 
@@ -424,13 +424,13 @@ Notes : There are some differences between versions :
 # PREOP now works in memory block, not only in code block
 
 1.26 (24 Nov 2005)
-+ Added Optionnal Start Address to "FINDMEM what [, StartAddr]" (to continue global search)
++ Added Optional Start Address to "FINDMEM what [, StartAddr]" (to continue global search)
 + Added PREOP command to get previous command address before specified address
 
 1.25 (22 Nov 2005)
 + Added FINDMEM to search into the whole memory
 + Added WRT (write a file) and WRTA (append) commands: WRT file, data
-+ Added GMEMI function (Memory Block Informations)
++ Added GMEMI function (Memory Block Information)
 # GPA now returns 0 and continue if the API is not found, $RESULT_2 set to Proc name if found.
 # fixed OllyDbg focus problem
 # fixed path of created files when full path given
@@ -449,12 +449,12 @@ Notes : There are some differences between versions :
 + lm, load Dump file to mem: lm, 0x401000, 0x100, "test.bin" (MetaCore)
 # fix the dm, lm, dmp, dpe 's default dump path to debugging app's path. (MetaCore)
 # fix dm, ...the open file parameter is incorrect, will add mess "0a 0d" at each lines tail. (MetaCore)
-# fix all dump related function's parameter check, so when the real mem is smaller then gived 
-  dump length, will not add mess data at the end, and the $result also catched the real dump size. (MetaCore)
+# fix all dump related function's parameter check, so when the real mem is smaller then given 
+  dump length, will not add mess data at the end, and the $result also catches the real dump size. (MetaCore)
 
 1.22 (11 Nov 2005)
-+ Added SCMP and SCMPI for string comparaison (SCMPI for case insensitive)
-# Restored CMP string comparaison to case sensitive
++ Added SCMP and SCMPI for string comparison (SCMPI for case insensitive)
+# Restored CMP string comparison to case sensitive
 
 1.21 (8 Nov 2005)
 + Remember Script Window Position & State
@@ -476,7 +476,7 @@ Notes : There are some differences between versions :
 0.92
 + New commands: ASK, BPL, BPLCND, COB, COE, EVAL, EXEC/ENDE, GN, TICND, TOCND
 + Execution of code in the target process context
-+ String concateration with ADD or EVAL
++ String concatenation with ADD or EVAL
 + Input box
 + Logging breakpoints
 + Removal of EOB and EOE
@@ -492,7 +492,7 @@ Notes : There are some differences between versions :
 3. Documentation
 ----------------
 Example script (sample.osc) is available with this release. 
-The script will break on LoadLibray call to debug a SHELL32.DLL function. 
+The script will break on LoadLibrary call to debug a SHELL32.DLL function. 
 Try it on mspaint.exe
 
 3.1 Language
@@ -503,16 +503,16 @@ In the document below, src and dest can be (unless stated otherwise):
  - Constant in the form of a hex number without prefixes and suffixes, with leading 0 (i.e. 00FF, not 0x00FF or 00FFh)
    For decimal values, use the point (i.e. 100. 128.)
  - Variable previously declared by VAR, or are declared with MOV
- - A 32-bit register (one of EAX, EBX, ECX, EDX, ESI, EDI, EBP, ESP, EIP).
+ - A 32-bit registers (one of EAX, EBX, ECX, EDX, ESI, EDI, EBP, ESP, EIP).
    A 16-bit register (one of AX, BX, CX, DX, SI, DI, BP, SP)
    A 8-bit register (one of AL, AH, ... DL, DH)
  - A memory reference in square brackets (i.e. [401000] points to the memory at address 401000, 
 	[ecx] points to the memory at address ecx).
  - A flag with an exclamation mark in front (one of !CF, !PF, !AF, !ZF, !SF, !DF, !OF)
- - Sometimes byte strings are required. those are scripted as #6A0000# (values between two #) and 
+ - Sometimes byte strings are required. Those are scripted as #6A0000# (values between two #) and 
 	must have an even number of characters.
-   Some byte strings can contain the wildcard '?', for exampla #6A??00# or #6?0000#
- - A combinaison of this values with operators :
+   Some byte strings can contain the wildcard '?', for example #6A??00# or #6?0000#
+ - A combination of these values with operators:
 
 You can use operators in your scripts, +-*/&|^>< for dword and + to concatenate strings.
  - Operators > and < are shr and shl (>> and << in C/C++)
@@ -581,7 +581,7 @@ Example:
 
 AND dest, src
 -------------
-ANDs src and dest and stores result in dest
+AND's src and dest and stores result in dest
 Example: 
 	and x, 0F
 	and eax, x
@@ -597,7 +597,7 @@ ASK question
 ------------
 Display an input box with the specified question and lets user enter a response.
 Sets the reserved $RESULT variable (0 if cancel button was pressed).
-You have also the length in $RESULT_1 (divised by 2 for hex entries)
+You have also the length in $RESULT_1 (divided by 2 for hex entries)
 Example:
 	ask "Enter new EIP"
 	cmp $RESULT, 0
@@ -629,7 +629,7 @@ Example:
 BACKUP addr [,base,size]
 ------------------------
 Like OPENDUMP, create a Dump Window with data at address.
-But this dump window keep a backup of data, which can be used to view changes
+But this dump window keeps a backup of data, which can be used to view changes
 $RESULT is the HWND of window, for future use
 Note: If you are looking to save data in a file, see the DM function (Dump Memory)
 Example:
@@ -654,8 +654,8 @@ Example:
 	bp 401000
 	BD 401000
 
-BEGINSEARCH [start]
--------------------
+BEGINSEARCH [start] {commands} ENDSEARCH
+----------------------------------------
 Create a Copy of Debugged App Memory, Find commands will use this data faster.
 You need to use ENDSEARCH before writing to memory and to free this memory copy.
 Optimization time is 20% for 5000 loops... but could maybe be optimized
@@ -674,8 +674,8 @@ Example:
 	endsearch
 	msg count
 
-BP addr
---------
+BP addr  (ubp)
+--------------
 Set unconditional breakpoint at addr.
 Example:
 	bp 401000
@@ -764,6 +764,12 @@ Example:
 	buf s
 	log s // output #313233#
 
+CALL label
+----------
+to call Labels (use RET to return)
+
+
+   
 CLOSE window
 ------------
 Close an Ollydbg MDI window
@@ -776,7 +782,7 @@ window parameter can be a constant or a HWND (like $RESULT of OPENDUMP/BACKUP).
 
 CMP dest, src [,size]
 ---------------------
-Compares dest to src. Works like it's ASM counterpart.
+Compares dest and src. Works like its ASM counterpart.
 see SCMP to compare strings or memory data
 Example: 
 	cmp y, x
@@ -805,19 +811,23 @@ Example:
 
 DBH
 ---
-Hides debugger
+Hides debugger against kernel32!IsDebuggerPresent()
+(Note that's done through [BYTE [[FS:18]+30]+2] = 0)
+
 Example:
 	dbh
 
 DBS
 ---
-Unhides debugger
+Unhides debugger so kernel32!IsDebuggerPresent() will find it.
+(Note that's done through [BYTE [[FS:18]+30]+2] = 1)
+
 Example:
 	dbs
 
 DEC var
 -------
-Substracts 1 from variable
+Subtracts 1 from variable
 Example:
 	dec v
 
@@ -843,6 +853,11 @@ DPE filename, ep
 ----------------
 Dumps the executable to file with specified name.
 Entry point is set to ep.
+Path is relative to the path of the currently loaded executable.
+Notes: * uses PEFileInfo.dwSizeOfImage
+  * Applies dumpfix to PE.sectionHdr
+    (PointerToRawData = VirtualAddress
+        SizeOfRawData = VirtualSize)
 Example:
 	dpe "c:\test.exe", eip
 
@@ -859,8 +874,8 @@ Transfer execution to some label on next exception.
 Example:
 	eob SOME_LABEL
 
-ERUN
-----
+ERUN   [formerly ESTO]
+----------------------
 Executes SHIFT-F9 in OllyDbg. Run with Ignore Exceptions
 Note: Was ESTO before, but the command is depreciated
 Example:
@@ -870,7 +885,7 @@ ESTEP
 -----
 Executes SHIFT-F8 in OllyDbg. Step Over ignoring Exceptions.
 Example:
-	esto
+	estep
 
 ESTI
 ----
@@ -892,9 +907,9 @@ EXEC/ENDE
 ---------
 Executes instructions between EXEC and ENDE in the context of the target process.
 Values in curly braces {} are replaced by their values.
-PUSHA / POPA commands could be usefull when you use this.
+PUSHA / POPA commands could be useful when you use this.
 Examples:
-	// This does some movs
+	// This does some mov's
 	mov x, "eax"
 	mov y, DEADBEEF
 	exec
@@ -964,15 +979,27 @@ FINDCMDS (this function name could be deleted in future versions)
 --------
 Same as FINDCMD
 
-FINDOP addr, what
+FINDOP addr, what [, maxsize]
 -----------------
 Searches code starting at addr for an instruction that begins with the specified bytes. 
-When found sets the reserved $RESULT variable. $RESULT == 0 if nothing found.
+It sets the reserved $RESULT variable to the start of the found instruction. If $RESULT == 0 nothing was found.
+The search string can also use the wildcard "??" (see below).
+Use maxsize to limit that search range.
+Examples:
+	findop 401000, #61# // find next POPAD
+	findop 401000, "1" // = #61#
+	findop 401000, #6A??# // find next PUSH of something
+
+
+FINDOPPREV addr, what
+-----------------
+Searches code backwards starting at addr for an instruction that begins with the specified bytes. 
+It sets the reserved $RESULT variable to the start of the found instruction. If $RESULT == 0 nothing was found.
 The search string can also use the wildcard "??" (see below).
 Example:
-	findop 401000, #61# // find next POPAD
-	findop 401000, #6A??# // find next PUSH of something
-	findop 401000, "1" // = #61#
+	findop FINDOPPREV, #68??????00# // find next PUSH 00xxxxxx backwards
+
+
 
 FINDMEM what [, StartAddr]
 --------------------------
@@ -985,8 +1012,8 @@ Example:
 
 FREE addr [, size]
 ------------------
-Free memory bloc allocated by ALLOC (or not). 
-If size not given, drop whole memory bloc.
+Free memory block allocated by ALLOC (or not). 
+If size not given, drop whole memory block.
 Example
     alloc 1000
 	free $RESULT
@@ -1030,19 +1057,19 @@ Example:
 
 GCI addr, info
 --------------
-Get information about asm command
-"info" can be :
+Get Command Information of asm instruction at "addr".
+"info" specifies what data should be returned in $RESULT:
 	- COMMAND for asm command string (like OPCODE)
+	- CONDITION {disasm.condition}
 	- DESTINATION for Destination of jump/call/return
 	- SIZE for number of command bytes
 	- TYPE for asm command string (one of C_xxx, see OllyDbg Plugin API)
-
 Example:
 	GCI eip, DESTINATION
 
 GCMT addr
 ---------
-Get the comment, automatic comment or analyse's comment at specified code address
+Get the comment, automatic comment or analyses comment at specified code address
 
 GMA name, info
 --------------
@@ -1149,10 +1176,17 @@ Set third param to 1 if you want to keep library in memory
 Example:
 	gpa "MessageBoxA", "user32.dll" // After this $RESULT is the address of MessageBoxA and you can do "bp $RESULT".
 
+GPP proc, lib, [0,1] 
+--------------------
+Calls GPA and tries to find API parameters count and types of the API
+$RESULT   = ref->addr
+$RESULT_1 = disasm.result //command text
+$RESULT_2 = disasm.comment
+
 GPI key
 -------
 Get process information, one of :
-HPROCESS,PROCESSID,HMAINTHREAD,MAINTHREADID,MAINBASE,PROCESSNAME,EXEFILENAME,CURRENTDIR,SYSTEMDIR
+HPROCESS, PROCESSID, HMAINTHREAD, MAINTHREADID, MAINBASE, PROCESSNAME, EXEFILENAME, CURRENTDIR, SYSTEMDIR
 
 GREF [line]
 -----------
@@ -1188,7 +1222,7 @@ Example:
 	gstr 401000     ; arg1 in this case is set to default (2 chars)
 	gstr 401000, 20 ; must be at least 20 chars
 
-GSTRU addr, [arg1]
+GSTRW addr, [arg1]
 ------------------
 Get String returns a unicode string from addr, the string is at least arg1 characters
 returns in
@@ -1196,8 +1230,8 @@ returns in
 - $RESULT_1  : len of string
 - $RESULT_2  : unicode string
 Example:
-	gstru 401000     ; arg1 in this case is set to default (2 chars)
-	gstru 401000, 20 ; must be at least 20 chars
+	gstrw 401000     ; arg1 in this case is set to default (2 chars)
+	gstrw 401000, 20 ; must be at least 20 chars
 
 HANDLE x, y, class
 ------------------
@@ -1224,33 +1258,33 @@ Example:
 	itoa F
 	itoa 10., 10.
 
-JA label
+JA label (JG)
 --------
-Use this after cmp. Works like it's asm counterpart.
+Use this after cmp. Works like its asm counterpart.
 Example:
 	ja SOME_LABEL
 
-JAE label
+JAE label (JGE)
 ---------
-Use this after cmp. Works like it's asm counterpart.
+Use this after cmp. Works like its asm counterpart.
 Example:
 	jae SOME_LABEL
 
 JB label
 --------
-Use this after cmp. Works like it's asm counterpart.
+Use this after cmp. Works like its asm counterpart.
 Example:
 	jb SOME_LABEL
 
 JBE label
 ---------
-Use this after cmp. Works like it's asm counterpart.
+Use this after cmp. Works like its asm counterpart.
 Example:
 	jbe SOME_LABEL
 
 JE label (JZ)
 --------
-Use this after cmp. Works like it's asm counterpart.
+Use this after cmp. Works like its asm counterpart.
 Example:
 	je SOME_LABEL
 
@@ -1262,7 +1296,7 @@ Example:
 
 JNE label (JNZ)
 ---------
-Use this after cmp. Works like it's asm counterpart.
+Use this after cmp. Works like its asm counterpart.
 Example:
 	jne SOME_LABEL
 
@@ -1308,7 +1342,7 @@ Example:
 LOADLIB dllname
 ---------------
 Load a dll into debugged program memory
-Could be usefull to set breakpoints on dynamically loaded library
+Could be useful to set breakpoints on dynamically loaded library
 Returns address of loaded library
 Example:
 	pusha
@@ -1330,7 +1364,7 @@ Example:
 
 LOGBUF var [,linecount [,separator]]
 ------------------------------------
-Logs a string or buffer like a memory dump, usefull for long data
+Logs a string or buffer like a memory dump, useful for long data
 
 MOV dest, src [,size]
 ---------------------
@@ -1478,14 +1512,16 @@ Example:
 	rbp
 	rbp STRICT
 
+
 READSTR str, len
 ----------------
 Copy len chars of str into $RESULT
 
+
 REF addr, [LOCATION]
 --------------------
 REF addr works as "Find references to .. Selected command" and "Find references", Ctrl R, in OllyDbg.
-Search LOCATION could be the MEMORY bloc (default), CODE of module, or whole MODULE
+Search LOCATION could be the MEMORY block (default), CODE of module, or whole MODULE
 $RESULT variable is set to the first reference addr 
 $RESULT_1 to the opcode (text asm command) 
 $RESULT_2 to the comment (like reference window). 
@@ -1500,6 +1536,18 @@ Example:
 		log $RESULT_2
 	cmp $RESULT,0
 	jne continue
+
+
+REFRESH
+-------
+to redraw memory map, module, and disasm windows
+(add in version 1.60)
+
+
+RESET
+-----
+Reloads target (same as Ctrl+F2 in ollydbg)
+
 
 REPL addr, find, repl, len
 --------------------------
@@ -1563,7 +1611,7 @@ return in:
 
 SCMP dest, src [,size]
 ----------------------
-Compares strings dest to src. Works like it's ASM counterpart.
+Compares strings dest to src. Works like its asm counterpart.
 Example: 
 	cmp x, "KERNEL32.DLL"
 	cmp [eax], "Hello World", 11.
@@ -1571,7 +1619,7 @@ Example:
 
 SCMPI dest, src [,size]
 -----------------------
-Compares strings dest to src (case insentitive). Works like it's ASM counterpart.
+Compares strings dest to src (case insentitive). Works like its asm counterpart.
 Example: 
 	cmp sVar, "KERNEL32.DLL"
 	cmp [eax], "Hello", 5
