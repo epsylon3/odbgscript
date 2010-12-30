@@ -57,6 +57,8 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
+1.79 (SVN)
+
 1.78 (08 Feb 2010)
 + Added GSTRW to get Wide Char String (wchar) at address, and returns wchar buffer, size and ascii
 + Added FINDOPREV (from ShaG 0.94 version)
@@ -766,7 +768,47 @@ Example:
 
 CALL label
 ----------
-to call Labels (use RET to return)
+jumps to the given label and runs it. The only difference to jmp is that it'll return if a 'RET' is executed.
+
+Call & Ret will help you structured and organises ya scripts.
+
+Example 1 - a procedure with a body and a parameter: 
+
+   var myArg1
+   mov myArg1,5
+   Call PROC_myproc2  // Arg1 is 'passed' byReference
+   log myArg1         
+Ret                   //  Exit the script
+
+PROC_myproc2:
+   add myArg1, 1
+RET                  //  Just exit 'PROC_myproc2'
+(Okay well actually Arg1 is just a global Var that is not really passed to the function.)
+
+--------
+Example2 - DIY-function like this "Func_myFunc1(myArg1, 3)"
+   var myArg1
+   mov myArg1,5
+   
+   push myArg1 // Arg1
+   push 3      // Arg2
+   Call Func_myFunc1
+   log $RESULT // Show return value
+   
+   log Local1  // if that were a real local that shouldn't work
+Ret   
+   
+Func_myFunc1:
+   var Local2  // Passing Arg2 byValue
+   pop Local2  // Local2=Arg2
+   
+   var Local1  // Passing Arg1 byValue
+   pop Local1  // Local1=Arg1
+   
+      sub Local1, Local2
+      
+   mov $RESULT, Local1
+RET
 
 
    
@@ -997,7 +1039,7 @@ Searches code backwards starting at addr for an instruction that begins with the
 It sets the reserved $RESULT variable to the start of the found instruction. If $RESULT == 0 nothing was found.
 The search string can also use the wildcard "??" (see below).
 Example:
-	findop FINDOPPREV, #68??????00# // find next PUSH 00xxxxxx backwards
+	FINDOPPREV, #68??????00# // find next PUSH 00xxxxxx backwards
 
 
 
@@ -1111,15 +1153,24 @@ GMI addr, info
 --------------
 Get information about a module to which the specified address belongs.
 "info" can be :
-MODULEBASE, MODULESIZE, CODEBASE, CODESIZE, MEMBASE, MEMSIZE, 
-ENTRY, NSECT, DATABASE, RELOCTABLE, RELOCSIZE
-RESBASE, RESSIZE, IDATABASE, IDATATABLE, EDATATABLE, EDATASIZE
-and strings NAME, PATH, VERSION
+                        ;ExampleData from some *.exe
+MODULEBASE, MODULESIZE  ;00400000  00031000
+  CODEBASE,   CODESIZE  ;00401000  00024000
+ENTRY, NSECT, DATABASE  ;0041AC04  00000003  00425000(.rdata-section)
+EDATATABLE, EDATASIZE    IDATABASE, IDATATABLE  
+RESBASE,    RESSIZE,     RELOCTABLE, RELOCSIZE
+
+...and strings:
+NAME, PATH, VERSION  ; "Sample_a" "C:\myApps\Sample_app.exe" ""
+
+
  (if you want other info in the future versions plz tell me).
 Sets the reserved $RESULT variable (0 if data not found).
 Example:
 	GMI eip, CODEBASE // After this $RESULT is the address to the codebase of the module to which eip belongs
+   GMI eip, VERSION // instead of that you may also just use $VERSION
 
+   
 GMIMP moduleaddr, info, [num]
 -----------------------------
 Get Import address and names in a module
@@ -1166,7 +1217,40 @@ Get information about operands of asm command
 
 Example:
 	GOPI eip, 1, SIZE
+   
+  Okay some more infomation about 'TYPE' (from plugin.h):
+   DEC_TYPEMASK   0x1F            // Type of memory byte
+     DEC_UNKNOWN  0x00            // Unknown type
+     DEC_BYTE     0x01            // Accessed as byte
+     DEC_WORD     0x02            // Accessed as short
+     DEC_NEXTDATA 0x03            // Subsequent byte of data
+     DEC_DWORD    0x04            // Accessed as long
+     DEC_FLOAT4   0x05            // Accessed as float
+     DEC_FWORD    0x06            // Accessed as descriptor/long pointer
+     DEC_FLOAT8   0x07            // Accessed as double
+     DEC_QWORD    0x08            // Accessed as 8-byte integer
+     DEC_FLOAT10  0x09            // Accessed as long double
+     DEC_TBYTE    0x0A            // Accessed as 10-byte integer
+     DEC_STRING   0x0B            // Zero-terminated ASCII string
+     DEC_UNICODE  0x0C            // Zero-terminated UNICODE string
+     DEC_3DNOW    0x0D            // Accessed as 3Dnow operand
+     DEC_SSE      0x0E            // Accessed as SSE operand
+     DEC_TEXT     0x10            // For use in t_result only
+     DEC_BYTESW   0x11            // Accessed as byte index to switch
+     DEC_NEXTCODE 0x13            // Subsequent byte of command
+     DEC_COMMAND  0x1D            // First byte of command
+     DEC_JMPDEST  0x1E            // Jump destination
+     DEC_CALLDEST 0x1F            // Call (and maybe jump) destination
 
+   DEC_PROCMASK   0x60            // Procedure analysis
+     DEC_PROC     0x20            // Start of procedure
+     DEC_PBODY    0x40            // Body of procedure
+     DEC_PEND     0x60            // End of procedure
+   DEC_CHECKED    0x80            // Byte was analysed
+   DEC_SIGNED     0x100           // For use in t_result only
+   
+   
+   
 GPA proc, lib, [0,1]
 --------------------
 Get the address of the specified procedure in the specified library.
@@ -1613,17 +1697,25 @@ SCMP dest, src [,size]
 ----------------------
 Compares strings dest to src. Works like its asm counterpart.
 Example: 
-	cmp x, "KERNEL32.DLL"
-	cmp [eax], "Hello World", 11.
-	je Label
+	var sVar
+      mov sVar, "Hello World"
+      scmp sVar, "Hello", 5
+      je Okay
+         log "Error."
+      Okay:
+
 
 SCMPI dest, src [,size]
 -----------------------
 Compares strings dest to src (case insentitive). Works like its asm counterpart.
 Example: 
-	cmp sVar, "KERNEL32.DLL"
-	cmp [eax], "Hello", 5
-	jne Label
+
+      var sVar
+      mov sVar, "HELLO WORLD"
+      scmpi sVar, "Hell", 4
+      je Okay
+         log "Error."
+      Okay:
 
 SETOPTION
 ---------
