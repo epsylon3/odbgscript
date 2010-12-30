@@ -1,11 +1,13 @@
-/L20"OllyDBG Script 1.78" ASM_LANG Line Comment = ; Block Comment On = /* Block Comment Off = */ String Chars = " File Extensions = OSC
-/Colors = 0,8421376,8421376,8421504,255,
-/Colors Back = 16777215,16777215,16777215,16777215,16777215,
-/Colors Auto Back = 1,1,1,1,1,
-/Font Style = 0,0,0,0,0,
+/L20"OllyDBG Script 1.78" ASM_LANG Line Comment = ; Block Comment On = /* Block Comment Off = */ String Chars = " Escape Char = \ File Extensions = OSC
+/Indent Strings = ":"
 /Delimiters = ~!%&^*()-+=|\/{}[]:;"'<> 	,
-/Function String = "%[a-zA-Z0-9_^;]+:$"
-/C1"Instructions" Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
+/Function String = "%[ ^t]++^([a-zA-Z_0-9]+^):$"
+/Variable String = "%[ ^t]++var[ ^t]++^([0-9a-zA-Z_]+^)$"
+/TGBegin "Variables"
+/TGFindStr = "%[ ^t]++var[ ^t]++^([0-9a-zA-Z_]+^)$"
+/TGFindStr = "%[ ^t]++mov[ ^t]++^([0-9a-zA-Z_]+^)?+$"
+/TGEnd
+/C1"Instructions" STYLE_FUNCTION Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
 add ai alloc an and ao ask asm asmtxt atoi
 backup bc bd beginsearch bp bpcnd bpd bpgoto bphwc bphwcall bphws bpl bplcnd bpmc bprm bpwm bpx buf
 close cmp cmt cob coe
