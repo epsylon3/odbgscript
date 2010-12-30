@@ -50,9 +50,14 @@ UNICODE
 VAR
 WRT WRTA
 XCHG XOR
-/C2"Preprocessor" STYLE_KEYWORD Colors = 255 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
-#INC #LOG
-/C3"Variables" STYLE_KEYWORD Colors = 0 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 1
+/C2"Jump Instructions" Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 1
+call
+ja jae jb jbe je jg jge jmp jne jnz jz
+ret
+CALL
+JA JAE JB JBE JE JG JGE JMP JNE JNZ JZ
+RET
+/C3"Constants" STYLE_KEYWORD Colors = 8323072 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
 ADDR
 CODE CODEBASE CODESIZE COMMAND CURRENTDIR
 DATA DATABASE DESTINATION
@@ -110,10 +115,5 @@ rcpps rcpss rdpmc rsqrtps rsqrtss
 sfence shufps sqrtps sqrtss stmxcsr subps subss syscall sysret
 ucomiss unpckhps unpckps unpcklps
 xmmword xorps
-/C6"Jump Instructions" Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 1
-call
-ja jae jb jbe je jg jge jmp jne jnz jz
-ret
-CALL
-JA JAE JB JBE JE JG JGE JMP JNE JNZ JZ
-RET
+/C6"Options" STYLE_KEYWORD Colors = 255 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
+#INC #LOG #VER
