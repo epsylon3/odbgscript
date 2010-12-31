@@ -90,7 +90,7 @@ bool OllyLang::DoALLOC(string args)
 	return false;
 }
 
-bool OllyLang::DoAN(string args)
+bool OllyLang::DoANA(string args)
 {
 	string ops[1];
 

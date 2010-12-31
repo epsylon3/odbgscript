@@ -44,6 +44,11 @@ typedef struct t_export {
 
 } t_export;
 
+typedef struct t_exec_history {
+	unsigned long	line;
+	unsigned long	time;
+} t_exec_history;
+
 class OllyLang
 {
 public:
@@ -134,6 +139,10 @@ public:
 	//hwnd to t_dump (OPENDUMP/BACKUP)
 	map<HWND, t_dump*> dumpWindows;
 
+	//left/right cursor to move like history
+	vector<t_exec_history> execHistory;
+	int execCursor;
+
 private:
 	
 	typedef bool (OllyLang::*PFCOMMAND)(string);
@@ -196,7 +205,7 @@ private:
 	bool DoADD(string args);
 	bool DoAI(string args);
 	bool DoALLOC(string args);
-	bool DoAN(string args);
+	bool DoANA(string args);
 	bool DoAND(string args);
 	bool DoAO(string args);
 	bool DoASK(string args);

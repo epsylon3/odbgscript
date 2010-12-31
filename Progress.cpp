@@ -327,6 +327,26 @@ t_wndprog_data *ppl;
 				ollylang->Pause();
 				return 1;
 			} 
+			else if (wp==VK_LEFT) 
+			{
+				if (ollylang->execCursor > 0) {
+					ollylang->execCursor--;
+					u = ollylang->execHistory.at(ollylang->execCursor).line;
+					Selectandscroll(&ollylang->wndProg,u,1);
+					InvalidateRect(hw, NULL, FALSE);
+				}
+				return 1;
+			} 
+			else if (wp==VK_RIGHT) 
+			{
+				if (ollylang->execCursor < ollylang->execHistory.size() -1 ) {
+					ollylang->execCursor++;
+					u = ollylang->execHistory.at(ollylang->execCursor).line;
+					Selectandscroll(&ollylang->wndProg,u,1);
+					InvalidateRect(hw, NULL, FALSE);
+				}
+				return 1;
+			} 
 			else if (wp=='F' && controlkey) //Search
 			{				
 				char buffer[TEXTLEN]={0};

@@ -55,7 +55,8 @@ OllyLang::OllyLang()
 	commands["add"] = &OllyLang::DoADD;
 	commands["ai"] = &OllyLang::DoAI;
 	commands["alloc"] = &OllyLang::DoALLOC;
-	commands["an"] = &OllyLang::DoAN;
+	commands["ana"] = &OllyLang::DoANA;
+	 commands["an"] = &OllyLang::DoANA;
 	commands["and"] = &OllyLang::DoAND;
 	commands["ao"] = &OllyLang::DoAO;
 	commands["ask"] = &OllyLang::DoASK;
@@ -292,6 +293,8 @@ bool OllyLang::Reset()
 	importsCacheAddr = 0;
 
 	dumpWindows.clear();
+	execHistory.clear();
+	execCursor=0;
 
 	if (wndProg.hw!=NULL)
 		Selectandscroll(&wndProg,pgr_scriptpos,2);
@@ -631,9 +634,10 @@ bool OllyLang::Step(int forceStep)
 	char lastchar;
 	bool jumped;
 	int old_pos;
+	struct t_exec_history step = {0};
 
 	while(!require_ollyloop && Getstatus() == STAT_STOPPED && (script_state == SS_RUNNING || script_state == SS_LOADED || (forceStep && script_state == SS_PAUSED)))
-	{		
+	{
 		jumped=false;
 
 		if (tickcount_startup==0) {
@@ -791,6 +795,18 @@ bool OllyLang::Step(int forceStep)
 			break;
 		}
 
+	}
+
+	step.line = pgr_scriptpos;
+	step.time = GetTickCount();
+	execHistory.push_back(step);
+	execCursor++;
+	if (execCursor > 1024) {
+		//cleanup...
+		for (int i=0; i<512; i++) {
+			execHistory.erase(execHistory.begin());
+		}
+		execCursor = execHistory.size()-1;
 	}
 
 	if (wndProg.hw!=NULL) //Visible && Not a RUN command 
