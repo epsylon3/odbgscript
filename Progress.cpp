@@ -370,7 +370,7 @@ t_wndprog_data *ppl;
 					ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
 					ollylang->script.insert(ollylang->script.begin()+ppl->line-1,cmd);
 
-					strcpy_s(ppl->command, sizeof(ppl->command), cmd.c_str());
+					strcpy(ppl->command, cmd.c_str());
 
 					cmd=trim(cmd);
 					ppl->type = analyseProgLineType(cmd,ppl->line);
