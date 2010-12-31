@@ -14,5 +14,5 @@ del /Q /f doc\plugins.chw
 attrib -h ODbgScript.VC9.suo
 del /Q /f ODbgScript.VC9.suo
 move ODbgScript.dll Release\
-move msvcrt.dll.dll Release\
+move msvcrt.dll Release\
 move msvcp60.dll Release\
