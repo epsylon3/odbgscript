@@ -1968,16 +1968,17 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdFirst) {
 			strcat(buffer,".");
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
 
-			AppendMenu(menu,MF_SEPARATOR,0,"-");
-			strcpy(buffer,"Follow in disassembler");
-			AppendMenu(menu,MF_STRING,CMD_POPUP_FDISASM + cmdIndex, buffer);
-			strcpy(buffer,"Follow in dump");
-			AppendMenu(menu,MF_STRING,CMD_POPUP_FDUMP   + cmdIndex, buffer);
-			strcpy(buffer,"Follow in stack");
-			AppendMenu(menu,MF_STRING,CMD_POPUP_FSTACK  + cmdIndex, buffer);
-			strcpy(buffer,"Open memory dump");
-			AppendMenu(menu,MF_STRING,CMD_POPUP_ODUMP   + cmdIndex, buffer);
-
+			if (p.second.dw != 0) {
+				AppendMenu(menu,MF_SEPARATOR,0,"-");
+				strcpy(buffer,"Follow in disassembler");
+				AppendMenu(menu,MF_STRING,CMD_POPUP_FDISASM + cmdIndex, buffer);
+				strcpy(buffer,"Follow in dump");
+				AppendMenu(menu,MF_STRING,CMD_POPUP_FDUMP   + cmdIndex, buffer);
+				strcpy(buffer,"Follow in stack");
+				AppendMenu(menu,MF_STRING,CMD_POPUP_FSTACK  + cmdIndex, buffer);
+				strcpy(buffer,"Open memory dump");
+				AppendMenu(menu,MF_STRING,CMD_POPUP_ODUMP   + cmdIndex, buffer);
+			}
 		}
 		
 		iter++;

@@ -1,5 +1,7 @@
 LRESULT CALLBACK wndprog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp) {
 int i,m,shiftkey,controlkey;
+BYTE keystate;
+WORD key;
 ulong u;
 HMENU menu,mLoad,mCmd,mRun,mLabels=NULL,mVars=NULL;
 t_wndprog_data *ppl;
@@ -350,6 +352,32 @@ t_wndprog_data *ppl;
 					InvalidateRect(hw, NULL, FALSE);
 				}
 				return 1;
+			}
+			Tablefunction(&ollylang->wndProg,hw,msg,wp,lp);
+			break;
+		case WM_CHAR:
+			if (wp==';')
+			{
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
+				if (ppl!=NULL) {
+					string cmd = ppl->command;
+					if (! (ppl->type & PROG_TYPE_COMMENT) ) {
+						cmd = " ;"+trim(cmd);
+					} else {
+						cmd = trim(cmd);
+						cmd = " "+cmd.substr(1);
+					}
+					ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
+					ollylang->script.insert(ollylang->script.begin()+ppl->line-1,cmd);
+
+					strcpy_s(ppl->command, sizeof(ppl->command), cmd.c_str());
+
+					cmd=trim(cmd);
+					ppl->type = analyseProgLineType(cmd,ppl->line);
+					InvalidateProgWindow();
+				}
+				return 1;
+			
 			}
 			Tablefunction(&ollylang->wndProg,hw,msg,wp,lp);
 			break;
