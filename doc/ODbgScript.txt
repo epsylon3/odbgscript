@@ -57,7 +57,12 @@ Get Trace Addr
 
 2.1 What's new? 
 ---------------
-1.79 (31 Dec 2010)
+1.80 (SVN 2011)
+
+1.79.9 (31 Dec 2010)
++ Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
+
+1.79.3 (31 Dec 2010)
 * Fix std namespace to be compatible with VC9
 + Added popup entries to follow variables (disam, stack, dump and dump window)
 + Comment/Uncomment script line with ";" key
