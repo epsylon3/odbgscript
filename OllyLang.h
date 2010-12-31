@@ -93,6 +93,7 @@ public:
 	void menuListVariables(HMENU mVars,int cmdIndex);
 
 	bool editVariable(int nVar);
+	bool followVariable(int nVar);
 	void execCommand(void);
 	
 	bool jumpToLine(int number);

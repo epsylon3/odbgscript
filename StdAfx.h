@@ -13,6 +13,10 @@
 //#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
 #include <iostream>
+
+using namespace std;
+
+#include <stdio.h>
 #include <fstream>
 #include <sstream>
 #include <tchar.h>
@@ -24,7 +28,6 @@
 #include <algorithm>
 #include <set>
 
-#include <stdio.h>
 #include <fcntl.h>
 //#include <io.h>
 //#include <stdlib.h> 
@@ -50,5 +53,3 @@
 #include "ODbgScript.h"
 
 #include "resource.h"
-
-

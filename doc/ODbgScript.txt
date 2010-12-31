@@ -58,6 +58,8 @@ Get Trace Addr
 2.1 What's new? 
 ---------------
 1.79 (SVN)
+* Fix std namespace to be compatible with VC9
++ Added popup entries to follow variables (disam, stack, dump and dump window)
 
 1.78 (08 Feb 2010)
 + Added GSTRW to get Wide Char String (wchar) at address, and returns wchar buffer, size and ascii

@@ -12,6 +12,15 @@
 #define PROG_ATTR_EXECUTED	0x10
 #define PROG_ATTR_ERROR		0x80
 
+#define MASK_POPUP_VAR		0x1000
+#define MASK_POPUP_LABEL	0x2000
+
+#define CMD_POPUP_FDISASM	0x100
+#define CMD_POPUP_FDUMP		0x200
+#define CMD_POPUP_FSTACK	0x400
+#define CMD_POPUP_ODUMP		0x800
+#define CMD_POPUP_MASK		0xF00
+
 // This is the table for Script Execution
 typedef struct t_wndprog_data {
 

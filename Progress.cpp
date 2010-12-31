@@ -87,7 +87,7 @@ t_wndprog_data *ppl;
 				mLabels=CreatePopupMenu();
 				AppendMenu(menu,MF_SEPARATOR,0,"-");
 				AppendMenu(menu,MF_POPUP,(DWORD) mLabels,"Scroll to Label"); 
-				ollylang->menuListLabels(mLabels,0x100);
+				ollylang->menuListLabels(mLabels,MASK_POPUP_LABEL);
 			}
 
 			if (ollylang->variables.size() > 0) 
@@ -95,7 +95,7 @@ t_wndprog_data *ppl;
 				mVars=CreatePopupMenu();
 				AppendMenu(menu,MF_SEPARATOR,0,"-");
 				AppendMenu(menu,MF_POPUP,(DWORD) mVars,"Edit Variables"); 
-				ollylang->menuListVariables(mVars,40);
+				ollylang->menuListVariables(mVars,MASK_POPUP_VAR);
 			}
 			if (Getstatus() == STAT_STOPPED) 
 			{
@@ -140,18 +140,21 @@ t_wndprog_data *ppl;
 				}
 				return 1;
 			} 
-			else if (i>=40 && i<0x100) 
+			else if (i & MASK_POPUP_VAR) 
 			{
-				if (ollylang->editVariable(i-40))
-					InvalidateRect(hw, NULL, FALSE);
-				return 1;
-			} 
-			else if (i>=0x100 && i<0x1000) 
-			{
-				Selectandscroll(&ollylang->wndProg,i-0xFF,2);
+				if (i & CMD_POPUP_MASK)
+					ollylang->followVariable(i-MASK_POPUP_VAR);
+				else
+					ollylang->editVariable(i-MASK_POPUP_VAR);
 				InvalidateRect(hw, NULL, FALSE);
 				return 1;
 			} 
+			else if (i & MASK_POPUP_LABEL) 
+			{
+				Selectandscroll(&ollylang->wndProg,i-MASK_POPUP_LABEL,2);
+				InvalidateRect(hw, NULL, FALSE);
+				return 1;
+			}
 			else
 
 			switch (i) 

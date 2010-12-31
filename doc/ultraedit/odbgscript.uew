@@ -2,9 +2,9 @@
 /Indent Strings = ":"
 /Delimiters = ~!%&^*()-+=|\/{}[]:;"'<> 	,
 /Function String = "%[ ^t]++^([a-zA-Z_0-9]+^):$"
-/Variable String = "%[ ^t]++var[ ^t]++^([0-9a-zA-Z_]+^)$"
 /TGBegin "Variables"
 /TGFindStr = "%[ ^t]++var[ ^t]++^([0-9a-zA-Z_]+^)$"
+/TGFindStr = "%[ ^t]++pop[ ^t]++^([0-9a-zA-Z_]+^)$"
 /TGFindStr = "%[ ^t]++mov[ ^t]++^([0-9a-zA-Z_]+^)?+$"
 /TGEnd
 /C1"Instructions" STYLE_FUNCTION Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0

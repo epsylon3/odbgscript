@@ -8,6 +8,7 @@ typedef unsigned long ulong;
 
 class var
 {
+typedef unsigned long ulong;
 public:
 	ulong dw;
 	string str;

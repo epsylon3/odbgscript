@@ -1914,7 +1914,10 @@ void OllyLang::menuListLabels(HMENU mLabels,int cmdIndex) {
 	}
 }
 
-void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
+void OllyLang::menuListVariables(HMENU mVars,int cmdFirst) {
+
+	//0x000-0x0FF > vars
+	//0x100-0xF00 > cmd flags
 
 	map<string, var>::iterator iter;
 	iter = variables.begin();
@@ -1927,8 +1930,12 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
 	string str;
 
 	pair<string, var> p;
+
+	int nIndex=0, cmdIndex=0;
+
 	while(iter != variables.end())
 	{
+		cmdIndex = cmdFirst + nIndex;
 		p = *iter;
 		menu = CreateMenu();
 		Popups.push_back(menu);
@@ -1960,10 +1967,24 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdIndex) {
 			itoa(p.second.dw,buffer,10);
 			strcat(buffer,".");
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
+
+			AppendMenu(menu,MF_SEPARATOR,0,"-");
+			strcpy(buffer,"Follow in disassembler");
+			AppendMenu(menu,MF_STRING,CMD_POPUP_FDISASM + cmdIndex, buffer);
+			strcpy(buffer,"Follow in dump");
+			AppendMenu(menu,MF_STRING,CMD_POPUP_FDUMP   + cmdIndex, buffer);
+			strcpy(buffer,"Follow in stack");
+			AppendMenu(menu,MF_STRING,CMD_POPUP_FSTACK  + cmdIndex, buffer);
+			strcpy(buffer,"Open memory dump");
+			AppendMenu(menu,MF_STRING,CMD_POPUP_ODUMP   + cmdIndex, buffer);
+
 		}
 		
 		iter++;
-		cmdIndex++;
+		nIndex++;
+		//256 vars max.
+		if (nIndex > 0xFF)
+			break;
 	}
 	imenu = Popups.begin();
 	while(imenu != Popups.end())
@@ -2028,6 +2049,50 @@ bool OllyLang::editVariable(int nVar) {
 	return false;
 }
 
+bool OllyLang::followVariable(int nVar) {
+
+	map<string, var>::iterator iter;
+	pair<string, var> p;
+	int n=0;
+	iter = variables.begin();
+	ulong addr, base=0, size=0;
+	t_memory* mem = {0};
+
+	while(iter != variables.end()) {
+		if (n == (nVar & 0xFF)) {
+			p = *iter;
+			addr = p.second.dw;
+			switch (nVar & CMD_POPUP_MASK) {
+				case 0: //do nothing
+						return false;
+				case CMD_POPUP_FDISASM:
+					if (addr) Setcpu(0,addr,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					break;
+				case CMD_POPUP_FDUMP:
+					if (addr) Setcpu(0,0,addr,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					break;
+				case CMD_POPUP_FSTACK:
+					if (addr) Setcpu(0,0,0,addr,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					break;
+				case CMD_POPUP_ODUMP:
+					if (addr==0) //do nothing
+						return false;
+					mem = Findmemory(addr);
+					if (mem==NULL)
+						return false;
+					if (base==0) base=mem->base;
+					if (size==0) size=mem->size;
+					Createdumpwindow(NULL,base,size,addr,0x01081,NULL);
+					break;
+				default:
+					break;
+			}
+		}
+		iter++;
+		n++;
+	}
+	return false;
+}
 
 void OllyLang::execCommand() {
 	char buffer[TEXTLEN]={0};
