@@ -340,7 +340,7 @@ int Str2RgchWithWC(string &s, char* arr, uint size, char wc)
 	while(i < s.length() / 2)
 	{
 		if(s[i*2] != '?')
-			arr[i] = (byte) strtoul(s.substr(i * 2, 2).c_str(), 0, 16);
+			arr[i] = (BYTE) strtoul(s.substr(i * 2, 2).c_str(), 0, 16);
 		else
 			arr[i] = wc;
 		i++;
@@ -357,19 +357,19 @@ long double strtof(string &s)
 
 char GetWildcard(string &s)
 {
-	vector<byte> stringchars;
+	vector<BYTE> stringchars;
 	int i = 0;
 
 	while(i < s.length() / 2)
 	{
 		char current = (char)s[i*2];
 		if(current != '?')
-			stringchars.push_back((byte) strtoul(s.substr(i * 2, 2).c_str(), 0, 16));
+			stringchars.push_back((BYTE) strtoul(s.substr(i * 2, 2).c_str(), 0, 16));
 		i++;
 	}
 
 	// Find wildcard
-	for(byte c = 1; i <= 0xFF; i++)
+	for(BYTE c = 1; i <= 0xFF; i++)
 	{
 		if(find(stringchars.begin(), stringchars.end(), c) == stringchars.end())
 			return (char)c;
