@@ -634,7 +634,6 @@ bool OllyLang::Step(int forceStep)
 	char lastchar;
 	bool jumped;
 	int old_pos;
-	struct t_exec_history step = {0};
 
 	while(!require_ollyloop && Getstatus() == STAT_STOPPED && (script_state == SS_RUNNING || script_state == SS_LOADED || (forceStep && script_state == SS_PAUSED)))
 	{
@@ -790,23 +789,13 @@ bool OllyLang::Step(int forceStep)
 		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);			
 		
+		addHistoryStep(pgr_scriptpos);
+
 		if(forceStep == 1) {
 			InvalidateProgWindow();
 			break;
 		}
 
-	}
-
-	step.line = pgr_scriptpos;
-	step.time = GetTickCount();
-	execHistory.push_back(step);
-	execCursor++;
-	if (execCursor > 1024) {
-		//cleanup...
-		for (int i=0; i<512; i++) {
-			execHistory.erase(execHistory.begin());
-		}
-		execCursor = execHistory.size()-1;
 	}
 
 	if (wndProg.hw!=NULL) //Visible && Not a RUN command 
@@ -2576,5 +2565,21 @@ void OllyLang::FreeBpMem()
 	alloc_bp = 0;
 }
 
+void OllyLang::addHistoryStep(int line)
+{
+	struct t_exec_history step = {0};
+
+	step.line = line;
+	step.time = GetTickCount();
+	execHistory.push_back(step);
+	execCursor++;
+	if (execCursor > 1024) {
+		//cleanup...
+		for (int i=0; i<512; i++) {
+			execHistory.erase(execHistory.begin());
+		}
+		execCursor = execHistory.size()-1;
+	}
+}
 
 #include "OllyLangCommands.cpp"

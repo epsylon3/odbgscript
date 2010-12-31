@@ -119,6 +119,9 @@ public:
 	void regBlockToFree(void * hMem, ulong size, bool autoclean);
 	bool unregMemBlock(void * hMem);
 
+	// History
+	void addHistoryStep(int line);
+
 	// The script that is being executed
 	vector<string> script;
 	// Variables that exist
