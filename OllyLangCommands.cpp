@@ -798,10 +798,20 @@ bool OllyLang::DoBUF(string args)
 
 bool OllyLang::DoCALL(string args)
 {
-	if (args=="") 
-		return false;
+	string ops[1];
+	string str = args;
+	
+	if (args=="") return false;
 
-	if (labels.find(args)!=labels.end()) 
+	str = args;
+	if(CreateOperands(args, ops, 1)) {
+		if(! GetSTROpValue(ops[0], str) )
+			str = args;
+	}
+
+	if (str=="") return false;
+
+	if (labels.find(str)!=labels.end()) 
 	{
 		calls.push_back(script_pos);
 		return DoJMP(args);
@@ -3469,22 +3479,28 @@ bool OllyLang::DoJE(string args)
 
 bool OllyLang::DoJMP(string args)
 {
-	string ops[1];
+	string str, ops[1];
 
-	if(!CreateOperands(args, ops, 1))
+	if(!CreateOperands(args, ops, 1) )
 		return false;
 
-	if(labels.find(ops[0]) == labels.end())
+	if(!GetSTROpValue(ops[0], str) )
+		str = ops[0];
+
+	if (str=="")
+		return false;
+
+	if(labels.find(str) == labels.end() )
 		return false;
 
 	//Store jump destination to display it
 	t_wndprog_data *pline;
 	pline = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,pgr_scriptpos);
 	if (pline != NULL) {
-		pline->jumpto = labels[ops[0]];
+		pline->jumpto = labels[str];
 	}
 
-	script_pos = labels[ops[0]];
+	script_pos = labels[str];
 	return true;
 }
 

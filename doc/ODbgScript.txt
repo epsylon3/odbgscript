@@ -59,6 +59,8 @@ Get Trace Addr
 ---------------
 1.80.1 (SVN 2011)
 + Add Left/Right Keys support to follow history of execution in script
++ Added support for variables in jumps and calls
++ Added GOTO (alias to JMP)
 
 1.79.9 (31 Dec 2010)
 + Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)

@@ -148,6 +148,7 @@ OllyLang::OllyLang()
 	 commands["jg"] = &OllyLang::DoJA;
 	 commands["jge"] = &OllyLang::DoJAE;
 	commands["jmp"] = &OllyLang::DoJMP;
+	 commands["goto"] = &OllyLang::DoJMP;
 	commands["jne"] = &OllyLang::DoJNE;
 	 commands["jnz"] = &OllyLang::DoJNE;
 	 commands["jz"] = &OllyLang::DoJE;
