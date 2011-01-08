@@ -4233,6 +4233,7 @@ bool OllyLang::DoOLLY(string args)
 {
     string ops[1], param;
 	ulong value;
+	string str;
 
 	if(!CreateOp(args, ops, 1))
 		return false;
@@ -4252,6 +4253,26 @@ bool OllyLang::DoOLLY(string args)
 		{
 			value = (ulong) hwndOllyDbg();
 			variables["$RESULT"] = value;
+			return true;
+		}
+		else if (param == "THREADID")
+		{
+			value = GetCurrentThreadId();
+			variables["$RESULT"] = value;
+			return true;
+		}
+		else if (param == "THREAD")
+		{
+			value = (ulong) GetCurrentThread();
+			variables["$RESULT"] = value;
+			return true;
+		}
+		else if (param == "PATH")
+		{
+			buffer[0] = 0;
+			GetCurrentDirectory(sizeof(buffer),buffer);
+			str = buffer;
+			variables["$RESULT"] = str;
 			return true;
 		}
 		

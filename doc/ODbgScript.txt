@@ -61,6 +61,7 @@ Get Trace Addr
 + Add Left/Right Keys support to follow history of execution in script
 + Added support for variables in jumps and calls
 + Added GOTO (alias to JMP)
++ Added OLLY attributes THREAD THREADID and PATH (GetCurrentDirectory)
 
 1.79.9 (31 Dec 2010)
 + Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
@@ -1271,6 +1272,10 @@ Set third param to 1 if you want to keep library in memory
 Example:
 	gpa "MessageBoxA", "user32.dll" // After this $RESULT is the address of MessageBoxA and you can do "bp $RESULT".
 
+GOTO label
+----------
+Alias for JMP
+
 GPP proc, lib, [0,1] 
 --------------------
 Calls GPA and tries to find API parameters count and types of the API
@@ -1355,43 +1360,43 @@ Example:
 
 JA label (JG)
 --------
-Use this after cmp. Works like its asm counterpart.
+Use this after CMP. Works like its asm counterpart.
 Example:
 	ja SOME_LABEL
 
 JAE label (JGE)
 ---------
-Use this after cmp. Works like its asm counterpart.
+Use this after CMP. Works like its asm counterpart.
 Example:
 	jae SOME_LABEL
 
 JB label
 --------
-Use this after cmp. Works like its asm counterpart.
+Use this after CMP. Works like its asm counterpart.
 Example:
 	jb SOME_LABEL
 
 JBE label
 ---------
-Use this after cmp. Works like its asm counterpart.
+Use this after CMP. Works like its asm counterpart.
 Example:
 	jbe SOME_LABEL
 
 JE label (JZ)
 --------
-Use this after cmp. Works like its asm counterpart.
+Use this after CMP. Works like its asm counterpart.
 Example:
 	je SOME_LABEL
 
 JMP label
 ---------
-Unconditionally jump to a label.
+Unconditionally jump to a label. label can be a string variable.
 Example:
 	jmp SOME_LABEL
 
 JNE label (JNZ)
 ---------
-Use this after cmp. Works like its asm counterpart.
+Use this after CMP. Works like its asm counterpart.
 Example:
 	jne SOME_LABEL
 
@@ -1528,6 +1533,9 @@ Get information about ollydbg
 "info" can be :
 	- PID retrieve the Ollydbg Process ID
 	- HWND retrieve the main Ollydbg HWND
+	- THREAD retrieve the main Ollydbg Thread Handle
+	- THREADID retrieve the main Ollydbg Thread ID
+	- PATH GetCurrentDirectory()
 
 Example:
 	OLLY PID
