@@ -1,6 +1,6 @@
 // OllyLang.cpp : Defines the entry point for the console application.
 //
-#include "stdafx.h"
+#include "StdAfx.h"
 
 using namespace std;
 

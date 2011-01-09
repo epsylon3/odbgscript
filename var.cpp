@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "var.h"
 
+#define strupr _strupr
+
 var::var()
 {
 	vt = EMP;

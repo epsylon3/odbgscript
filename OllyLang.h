@@ -17,6 +17,10 @@ INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 #include "Progress.h"
 #include "LogWindows.h"
 
+#define itoa _itoa
+#define ultoa _ultoa
+#define stricmp _stricmp
+
 // This is the table for Script Execution
 typedef struct t_dbgmemblock {
 
