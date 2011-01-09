@@ -4189,7 +4189,7 @@ bool OllyLang::DoMSG(string args)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 		
 		//hwndOllyDbg() or 0: modal or not
-		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
+		int ret = MessageBox(0, msg.c_str(), TEXT("MSG ODbgScript"), MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
 		FocusProgWindow();
 		if(ret == IDCANCEL) {
 			return Pause();

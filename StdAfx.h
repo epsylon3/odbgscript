@@ -38,10 +38,6 @@ using namespace std;
 #include <shlwapi.h>
 #include <shellapi.h>
 
-#ifdef _DEBUG
-#include <io.h>
-#endif 
-
 #include "var.h"
 #include "plugin.h"
 

@@ -1,4 +1,3 @@
-#include "StdAfx.h"
 #include <math.h>
 
 bool CompareChar(const char src, char* cmp)

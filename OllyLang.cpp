@@ -4,6 +4,11 @@
 
 using namespace std;
 
+#ifdef _DEBUG
+#  undef TEXT
+#  define TEXT(x) x
+#endif
+
 OllyLang::OllyLang()
 {
 	memset(&wndProg,0,sizeof(wndProg));
@@ -446,7 +451,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			}
 			else
 			{
-				MessageBox(hwmain, "Bad #inc directive!", "OllyScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+				MessageBox(hwmain, TEXT("Bad #inc directive!"), TEXT("OllyScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
 			}
 		}
 		// Logging
@@ -734,19 +739,19 @@ bool OllyLang::Step(int forceStep)
 		// Error in processing, show error and die
 		if(!result)
 		{
-			string message = "Error on line ";
+			string message = TEXT("Error on line ");
 			char buffer[32] = {0};
 			message.append(itoa(script_pos + 1, buffer, 10));
-			message.append("\n");
-			message.append("Text: ");
+			message.append(TEXT("\n"));
+			message.append(TEXT("Text: "));
 			message.append(script.at(script_pos));
-			message.append("\n");
+			message.append(TEXT("\n"));
 			setProgLineAttr(script_pos+1,PROG_ATTR_ERROR);
-			if(errorstr != "")
+			if(errorstr != TEXT(""))
 			{
 				message += errorstr;
 			}
-			MessageBox(0, message.c_str(), "OllyScript error!", MB_ICONERROR | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
+			MessageBox(0, message.c_str(), TEXT("OllyScript error!"), MB_ICONERROR | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
 			errorstr = "";
 			script_pos++;
 			pgr_scriptpos=script_pos+1;
@@ -2151,7 +2156,7 @@ void OllyLang::execCommand() {
 				message.append(errorstr);
 				message.append("\n");
 			}
-			MessageBox(hwmain, message.c_str(), "OllyScript error!", MB_ICONERROR | MB_OK | MB_TOPMOST);
+			MessageBox(hwmain, message.c_str(), TEXT("OllyScript error!"), MB_ICONERROR | MB_OK | MB_TOPMOST);
 			errorstr = "";
 		}
 	}
@@ -2582,5 +2587,7 @@ void OllyLang::addHistoryStep(int line)
 		execCursor = execHistory.size()-1;
 	}
 }
+
+#include "var.cpp"
 
 #include "OllyLangCommands.cpp"

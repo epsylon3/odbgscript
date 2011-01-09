@@ -20,6 +20,7 @@ INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 #define itoa _itoa
 #define ultoa _ultoa
 #define stricmp _stricmp
+#define strupr _strupr
 
 // This is the table for Script Execution
 typedef struct t_dbgmemblock {

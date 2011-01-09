@@ -1,5 +1,7 @@
 #ifdef _DEBUG
 
+#include <io.h>
+
 #include "StdAfx.h"
 
 #ifndef _USE_OLD_IOSTREAMS

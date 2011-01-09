@@ -641,6 +641,7 @@ extc void _export cdecl ODBG_Plugindestroy()
 }
 
 
+#include "Dialogs.cpp"
 #include "Progress.cpp"
 #include "LogWindows.cpp"
-#include "Dialogs.cpp"
+#include "Search.cpp"
