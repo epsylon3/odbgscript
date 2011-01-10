@@ -19,10 +19,8 @@
 
 using namespace std;
 
-#include <stdio.h>
 #include <fstream>
 #include <sstream>
-#include <tchar.h>
 
 #include <string>
 #include <map>
@@ -31,13 +29,11 @@ using namespace std;
 #include <algorithm>
 #include <set>
 
-#include <fcntl.h>
-//#include <io.h>
-//#include <stdlib.h> 
+//#include <fcntl.h>
 
 #include <windows.h>
 #include <Commdlg.h>
-#include <Winuser.h>
+//#include <Winuser.h>
 #include <shlwapi.h>
 #include <shellapi.h>
 
@@ -45,10 +41,13 @@ using namespace std;
 #include "plugin.h"
 
 #include "HelperFunctions.h"
-#include "Search.h"
-#include "guicon.h"
 
 #include "OllyLang.h"
 #include "ODbgScript.h"
+#include "Search.h"
+
+#ifdef _DEBUG
+#include "guicon.h"
+#endif
 
 #include "resource.h"

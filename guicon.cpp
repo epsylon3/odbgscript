@@ -1,6 +1,7 @@
 #ifdef _DEBUG
 
-#include <io.h>
+#include <io.h>		//_open_osfhandle
+#include <fcntl.h>	//_O_TEXT
 
 #include "StdAfx.h"
 
