@@ -254,6 +254,7 @@
 				>
 				<FileConfiguration
 					Name="ReleaseWDK|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -717,6 +718,10 @@
 			</File>
 			<File
 				RelativePath="script.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\version.h"
 				>
 			</File>
 		</Filter>
