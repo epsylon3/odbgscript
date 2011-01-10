@@ -89,11 +89,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "GUI Enhanced Version of OllyScript" "\0"
             VALUE "CompanyName", "Epsylon3" "\0"
-            VALUE "FileDescription", "ODbgScript " VERSIONCOMPILED "\0"
+            VALUE "FileDescription", "ODbgScript" "\0"
             VALUE "FileVersion", VERSIONSTR "\0"
             VALUE "InternalName", "ODbgScript" "\0"
             VALUE "LegalCopyright", "Copyright © 2007 - 2011" "\0"
             VALUE "OriginalFilename", "ODbgScript.dll" "\0"
+            VALUE "ProductName", "ODbgScript Plugin" "\0"
             VALUE "ProductVersion", VERSIONSTR " for Ollydbg " VERSIONODBG "\0"
             VALUE "URL", "http://odbgscript.sf.net" "\0"
         END

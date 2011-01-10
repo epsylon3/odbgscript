@@ -57,7 +57,7 @@ extc int _export cdecl ODBG_Plugininit(int ollydbgversion, HWND hw, ulong *featu
 	}
 
 	// Report plugin in the log window.
-	Addtolist(0, 0, "ODbgScript v%i.%i.%i",VERSIONHI,VERSIONLO,VERSIONST);
+	Addtolist(0, 0, "ODbgScript v%i.%i.%i " VERSIONCOMPILED ,VERSIONHI,VERSIONLO,VERSIONST);
 	Addtolist(0, -1,"  http://odbgscript.sf.net");
 	ollylang = new OllyLang();
 
@@ -397,7 +397,8 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 				  "PE dumper by R@dier\n"
 				  "Byte replacement algo by Hex\n\n"
 				  "http://odbgscript.sf.net/ \n\n"
-				  "Compiled %s %s",
+				  "Compiled %s %s \n"
+			       VERSIONCOMPILED "\n",
 			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
 		MessageBox(hwmain,s,"ODbgScript",MB_OK|MB_ICONINFORMATION);
 		break;
