@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /Zp4 /MD /O2 /Ob0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /Fr /J /FD /c
+# ADD CPP /nologo /G6 /Zp4 /MD /O2 /Ob0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_WINDLL" /D "ODBGSCRIPT_EXPORTS" /D "_AFXDLL" /Fr /J /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /win32
@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /pdb:none /machine:I386 /libpath:"C:\Windows\SysWOW64"
+# ADD LINK32 mfcs42.lib mfc42.lib msvcprt.lib msvcrt.lib ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /pdb:none /machine:I386
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=copy.bat
@@ -75,7 +75,7 @@ PostBuild_Cmds=copy.bat
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /Zp1 /MTd /Gi /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /FR /J /FD /GZ /c
+# ADD CPP /nologo /G6 /Zp1 /MDd /Gi /GX- /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_WINDLL" /D "ODBGSCRIPT_EXPORTS" /D "_AFXDLL" /FR /J /FD /GZ /c
 # SUBTRACT CPP /Gy /u /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /win32
@@ -87,7 +87,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/ODbgScript.dll " /pdbtype:sept
+# ADD LINK32 mfcs42d.lib mfc42d.lib msvcprtd.lib msvcrt.lib ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /incremental:no /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /out:"Debug/ODbgScript.dll " /pdbtype:sept
 # SUBTRACT LINK32 /verbose /profile /map /nodefaultlib /force
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
@@ -134,6 +134,10 @@ SOURCE=.\HelperFunctions.cpp
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\IniReader.cpp
 # End Source File
 # Begin Source File
 
@@ -208,6 +212,11 @@ SOURCE=.\guicon.h
 # Begin Source File
 
 SOURCE=.\HelperFunctions.h
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
+SOURCE=.\IniReader.h
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
