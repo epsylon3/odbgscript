@@ -1424,8 +1424,8 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 		{
 			if (addr!=0) {
 
-				//Pointer Mark in Values column
-				setProgLineValue(script_pos+1,(string) "®");
+				//Pointer Mark in Values column (open quote char '<<')
+				setProgLineValue(script_pos+1, (string) "\xAE");
 				
 				char buffer[STRING_READSIZE] = {0};
 				Readmemory(&buffer[0], addr, STRING_READSIZE, MM_SILENT);
@@ -1527,8 +1527,8 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 
 		if(GetDWOpValue(op, addr)) {
 
-			//Pointer Mark in Values column
-			setProgLineValue(script_pos+1,(string) "®");
+			//Pointer Mark in Values column (open quote char '<<')
+			setProgLineValue(script_pos+1, (string) "\xAE");
 
 			if (size>0) {
 				
@@ -1764,8 +1764,8 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 
 		if(GetDWOpValue(op, addr)) {
 
-			//Pointer Mark in Values column
-			setProgLineValue(script_pos+1,(string) "®");
+			//Pointer Mark in Values column (open quote char '<<')
+			setProgLineValue(script_pos+1, (string) "\xAE");
 
 			Readmemory(&value, addr, 4, MM_SILENT);
 			if (var_logging)
@@ -1821,8 +1821,9 @@ bool OllyLang::GetFLTOpValue(string op, long double &value)
 
 		if(GetDWOpValue(op, addr)) {
 
-			//Pointer Mark in Values column
-			setProgLineValue(script_pos+1,(string) "®");
+			//Pointer Mark in Values column (open quote char '<<')
+			string openquote = "®";
+			setProgLineValue(script_pos+1, openquote);
 
 			Readmemory(&value, addr, 8, MM_SILENT);
 			if (var_logging)

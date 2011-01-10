@@ -15,7 +15,7 @@ char buff[65535] = {0};
 // Script state
 int script_state = SS_NONE;
 
-/*
+#ifndef __AFX_H__
 // Entry point into a plugin DLL. Many system calls require DLL instance
 // which is passed to DllEntryPoint() as one of parameters. Remember it.
 BOOL APIENTRY DllMain(HINSTANCE hi,DWORD reason,LPVOID reserved)
@@ -37,12 +37,12 @@ BOOL APIENTRY DllMain(HINSTANCE hi,DWORD reason,LPVOID reserved)
 
     return TRUE;
 }
-*/
+#endif
 
 // Report plugin name and return version of plugin interface.
 extc int _export cdecl ODBG_Plugindata(char shortname[32]) 
 {
-	strcpy(shortname,"ODbgScript");
+	strcpy(shortname, "ODbgScript");
 	return PLUGIN_VERSION;
 }
 
@@ -54,13 +54,13 @@ extc int _export cdecl ODBG_Plugininit(int ollydbgversion, HWND hw, ulong *featu
 	HINSTANCE hinst;
 
 	if(ollydbgversion < PLUGIN_VERSION) {
-		MessageBox(hwndOllyDbg(), "Incompatible Ollydbg Version !", "ODbgScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+		MessageBox(hwndOllyDbg(), TEXT("Incompatible Ollydbg Version !"), TEXT("ODbgScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
 		return -1;
 	}
 
 	// Report plugin in the log window.
 	Addtolist(0, 0, "ODbgScript v%i.%i.%i " VERSIONCOMPILED ,VERSIONHI,VERSIONLO,VERSIONST);
-	Addtolist(0, -1,"  http://odbgscript.sf.net");
+	Addtolist(0, -1, "  http://odbgscript.sf.net");
 	ollylang = new OllyLang();
 
 	if (Createsorteddata(&ollylang->wndProg.data,"ODbgScript Data", 
@@ -146,7 +146,7 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 			}
 			catch( ... )
 			{
-				MessageBox(hwndOllyDbg(), "An error occured in the plugin!\nPlease contact Epsylon3.", "ODbgScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+				MessageBox(hwndOllyDbg(), TEXT("An error occured in the plugin!\nPlease contact Epsylon3."), TEXT("ODbgScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
 			}
 		}
 
@@ -163,7 +163,7 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 		}
 		catch( ... )
 		{
-			MessageBox(hwndOllyDbg(), "An error occured in the plugin!\nPlease contact Epsylon3.", "ODbgScript", MB_OK | MB_ICONERROR | MB_TOPMOST);
+			MessageBox(hwndOllyDbg(), TEXT("An error occured in the plugin!\nPlease contact Epsylon3."), TEXT("ODbgScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
 			delete ollylang;
 		}
 
@@ -368,7 +368,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		break;
 
 	case 1: // Abort
-		MessageBox(hwmain,"Script aborted!","ODbgScript",MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(hwmain, TEXT("Script aborted!"), TEXT("ODbgScript"), MB_OK|MB_ICONEXCLAMATION );
 		ollylang->Reset(); 
 		ollylang->Pause();
 		break;
@@ -402,7 +402,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 				  "Compiled %s %s \n"
 			       VERSIONCOMPILED "\n",
 			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
-		MessageBox(hwmain,s,"ODbgScript",MB_OK|MB_ICONINFORMATION);
+		MessageBox(hwmain, s, TEXT("ODbgScript"), MB_OK|MB_ICONINFORMATION );
 		break;
 	case 20: 
 		{
