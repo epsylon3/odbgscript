@@ -1,3 +1,4 @@
+
 LRESULT CALLBACK wndprog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp) {
 int i,m,shiftkey,controlkey;
 BYTE keystate;

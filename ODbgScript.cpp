@@ -12,9 +12,6 @@
 // Temp storage
 char buff[65535] = {0};
 
-// OllyLang object
-static OllyLang* ollylang;
-
 // Script state
 int script_state = SS_NONE;
 

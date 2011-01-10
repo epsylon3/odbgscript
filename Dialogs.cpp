@@ -1,4 +1,3 @@
-#include "StdAfx.h"
 
 INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {

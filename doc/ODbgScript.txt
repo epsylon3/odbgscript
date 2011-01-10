@@ -59,11 +59,11 @@ Get Trace Addr
 ---------------
 1.80.1 (SVN 2011)
 + Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
-  VC9: Updated Project Include/Lib directories and added win2k msvcrt obj to use except_handler3
+  VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
 + Add Left/Right Keys support to follow history of execution in script
 + Added support for variables in jumps and calls
 + Added GOTO (alias to JMP)
-+ Added OLLY attributes THREAD THREADID and PATH (GetCurrentDirectory)
++ Added OLLY attributes THREAD THREADID and PATH, EXE, INI, DIR
 
 1.79.3 (31 Dec 2010)
 * Fix std namespace to be compatible with VC9
@@ -1531,11 +1531,14 @@ OLLY info
 Get information about ollydbg
 "info" can be :
 	- PID retrieve the Ollydbg Process ID
-	- HWND retrieve the main Ollydbg HWND
-	- THREAD retrieve the main Ollydbg Thread Handle
-	- THREADID retrieve the main Ollydbg Thread ID
-	- PATH GetCurrentDirectory()
-
+	- HWND the main Ollydbg HWND
+	- THREAD the main Ollydbg Thread Handle
+	- THREADID the main Ollydbg Thread ID
+	- PATH fullpath of Ollydbg
+	- EXE Ollydbg.EXE
+	- INI Ollydbg.INI
+	- DIR Ollydbg directory
+	
 Example:
 	OLLY PID
 	mov pid, $RESULT

@@ -35,6 +35,8 @@ using namespace std;
 #include <shlwapi.h>
 #include <shellapi.h>
 
+
+
 #include "var.h"
 #include "plugin.h"
 

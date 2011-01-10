@@ -19,6 +19,10 @@ extc HWND _export cdecl DebugScript(const char* const filename);
 
 #include "version.h"
 #include "mru.h"
+
 //For unique vars btw processes
 //#pragma data_seg( ".GLOBALS" )
 //#pragma data_seg()
+
+// OllyLang object
+static OllyLang* ollylang;

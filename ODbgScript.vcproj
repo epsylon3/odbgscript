@@ -89,11 +89,11 @@
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="true"
 				UseLibraryDependencyInputs="true"
-				AdditionalDependencies="ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib msvcrt_win2000.obj msvcrt.lib msvcprt.lib"
+				AdditionalDependencies="ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib msvcrt_winxp.obj delayimp.lib msvcprt.lib msvcrt.lib"
 				OutputFile="./Release/ODbgScript.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="C:\WinDDK\7600.16385.1\lib\wlh\i386;C:\WinDDK\7600.16385.1\lib\Crt\i386"
+				AdditionalLibraryDirectories="C:\WinDDK\7600.16385.1\lib\wxp\i386;C:\WinDDK\7600.16385.1\lib\Crt\i386"
 				EnableUAC="false"
 				IgnoreAllDefaultLibraries="true"
 				IgnoreDefaultLibraryNames=""
@@ -201,11 +201,11 @@
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="true"
 				UseLibraryDependencyInputs="true"
-				AdditionalDependencies="ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib msvcrt_win2000.obj msvcrt.lib msvcprt.lib"
+				AdditionalDependencies="ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib msvcrt_winxp.obj delayimp.lib msvcprt.lib msvcrt.lib"
 				OutputFile="Debug/ODbgScript.dll "
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="C:\WinDDK\7600.16385.1\lib\wlh\i386;C:\WinDDK\7600.16385.1\lib\Crt\i386"
+				AdditionalLibraryDirectories="C:\WinDDK\7600.16385.1\lib\wnet\i386;C:\WinDDK\7600.16385.1\lib\Crt\i386"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/ODbgScript.pdb"
@@ -249,6 +249,25 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
+			<File
+				RelativePath=".\Dialogs.cpp"
+				>
+				<FileConfiguration
+					Name="ReleaseWDK|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ToDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
 			<File
 				RelativePath="guicon.cpp"
 				>
@@ -408,6 +427,26 @@
 				>
 			</File>
 			<File
+				RelativePath="Progress.h"
+				>
+				<FileConfiguration
+					Name="ReleaseWDK|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ToDebug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="StdAfx.h"
 				>
 				<FileConfiguration
@@ -427,30 +466,22 @@
 					/>
 				</FileConfiguration>
 			</File>
-		</Filter>
-		<Filter
-			Name="Source Included"
-			>
 			<File
-				RelativePath=".\Dialogs.cpp"
+				RelativePath=".\version.h"
 				>
 				<FileConfiguration
 					Name="ReleaseWDK|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ToDebug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
+						Name="VCCustomBuildTool"
 					/>
 				</FileConfiguration>
 			</File>
+		</Filter>
+		<Filter
+			Name="Source Included"
+			>
 			<File
 				RelativePath="LogWindows.cpp"
 				>
@@ -580,26 +611,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="Progress.h"
-				>
-				<FileConfiguration
-					Name="ReleaseWDK|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ToDebug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="Search.cpp"
 				>
 				<FileConfiguration
@@ -718,10 +729,6 @@
 			</File>
 			<File
 				RelativePath="script.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\version.h"
 				>
 			</File>
 		</Filter>

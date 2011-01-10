@@ -4232,6 +4232,7 @@ bool OllyLang::DoMSGYN(string args)
 bool OllyLang::DoOLLY(string args)
 {
     string ops[1], param;
+	char buf[MAX_PATH];
 	ulong value;
 	string str;
 
@@ -4270,8 +4271,35 @@ bool OllyLang::DoOLLY(string args)
 		else if (param == "PATH")
 		{
 			buffer[0] = 0;
-			GetCurrentDirectory(sizeof(buffer),buffer);
+			GetModuleFileName(0,buffer,sizeof(buffer));
 			str = buffer;
+			variables["$RESULT"] = str;
+			return true;
+		}
+		else if (param == "EXE")
+		{
+			buffer[0] = 0;
+			GetModuleFileName(0,buffer,sizeof(buffer));
+			_splitpath(buffer,NULL,NULL,buf,NULL);
+			str = buf;
+			variables["$RESULT"] = str + TEXT(".EXE");
+			return true;
+		}
+		else if (param == "INI")
+		{
+			buffer[0] = 0;
+			GetModuleFileName(0,buffer,sizeof(buffer));
+			_splitpath(buffer,NULL,NULL,buf,NULL);
+			str = buf;
+			variables["$RESULT"] = str + TEXT(".INI");
+			return true;
+		}
+		else if (param == "DIR")
+		{
+			buffer[0] = 0;
+			GetModuleFileName(0,buffer,sizeof(buffer));
+			_splitpath(buffer,NULL,buf,NULL,NULL);
+			str = buf;
 			variables["$RESULT"] = str;
 			return true;
 		}
