@@ -29,8 +29,6 @@ using namespace std;
 #include <algorithm>
 #include <set>
 
-//#include <fcntl.h>
-
 #include <windows.h>
 #include <Commdlg.h>
 //#include <Winuser.h>
