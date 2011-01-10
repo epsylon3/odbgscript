@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /Zp4 /MD /GX- /O2 /Oy- /Ob0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /Fr /J /FD /c
+# ADD CPP /nologo /G6 /Zp4 /MD /O2 /Ob0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /Fr /J /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /win32
@@ -239,10 +239,6 @@ SOURCE=.\Progress.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\resource.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Search.h
 # PROP Exclude_From_Build 1
 # End Source File
@@ -256,6 +252,10 @@ SOURCE=.\StdAfx.h
 SOURCE=.\var.h
 # PROP Exclude_From_Build 1
 # End Source File
+# Begin Source File
+
+SOURCE=.\version.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 
@@ -267,6 +267,10 @@ SOURCE=.\log.ico
 # Begin Source File
 
 SOURCE=.\ODbgScript.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\resource.h
 # End Source File
 # Begin Source File
 

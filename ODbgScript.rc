@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "version.h"
+#include "plugin.h"
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -65,10 +66,12 @@ LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
 // Version
 //
 
-#define VERSIONDESC VERSIONHI,VERSIONLO,VERSIONST,0
+#define VERSIONDESC VERSIONHI,VERSIONLO,VERSIONST,PLUGIN_VERSION
+#if _MSC_VER == 1500
 #define VERSIONCOMPILED "i686 VC9 WDK7.1 CRT/STL60"
-
-#include "plugin.h"
+#else
+#define VERSIONCOMPILED "i686 VC6"
+#endif
 #define VERSIONODBG TOSTRING(PLUGIN_VERSION)
 
 VS_VERSION_INFO VERSIONINFO
@@ -90,16 +93,13 @@ BEGIN
         BEGIN
             VALUE "Comments", "GUI Enhanced Version of OllyScript" "\0"
             VALUE "CompanyName", "Epsylon3" "\0"
-            VALUE "FileDescription", "ODbgScript" "\0"
+            VALUE "FileDescription", "ODbgScript " VERSIONCOMPILED "\0"
             VALUE "FileVersion", VERSIONSTR "\0"
             VALUE "InternalName", "ODbgScript" "\0"
             VALUE "LegalCopyright", "Copyright © 2007 - 2011" "\0"
             VALUE "OriginalFilename", "ODbgScript.dll" "\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "OllyDbg" "\0"
             VALUE "ProductVersion", VERSIONSTR " for Ollydbg " VERSIONODBG "\0"
-            VALUE "SpecialBuild", VERSIONCOMPILED "\0"
-			VALUE "URL", "http://odbgscript.sf.net" "\0"
+            VALUE "URL", "http://odbgscript.sf.net" "\0"
         END
     END
     BLOCK "VarFileInfo"
