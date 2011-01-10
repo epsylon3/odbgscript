@@ -296,6 +296,8 @@ private:
 	bool DoHANDLE(string args);
 	bool DoHISTORY(string args);
 	bool DoINC(string args);
+	bool DoINIR(string args);
+	bool DoINIW(string args);
 	bool DoITOA(string args);
 	bool DoJA(string args);
 	bool DoJAE(string args);

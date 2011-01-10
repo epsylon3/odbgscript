@@ -64,6 +64,7 @@ Get Trace Addr
 + Added support for variables in jumps and calls
 + Added GOTO (alias to JMP)
 + Added OLLY attributes THREAD THREADID and PATH, EXE, INI, DIR
++ Added INIR and INIW to read and write to ollydbg.ini file (with Odbg plugin API)
 
 1.79.3 (31 Dec 2010)
 * Fix std namespace to be compatible with VC9
@@ -1348,6 +1349,22 @@ INC var
 Adds 1 to variable
 Example:
 	inc v
+
+INIR key, def
+-------------
+Read ODBGScript Key value in ollydbg.ini
+def(ault) value determines type (string or dword)
+Example :
+	inir "key", ""
+	inir "key", 0
+
+INIW key, val
+-------------
+Write ODBGScript Key value in ollydbg.ini
+val can be a string or a dword
+Example :
+	iniw "key", "x"
+	iniw "key", 10.
 
 ITOA n [, base=16.]
 -------------------

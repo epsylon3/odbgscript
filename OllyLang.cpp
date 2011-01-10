@@ -144,6 +144,8 @@ OllyLang::OllyLang()
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["inc"] = &OllyLang::DoINC;
+	commands["inir"] = &OllyLang::DoINIR;
+	commands["iniw"] = &OllyLang::DoINIW;
 	commands["itoa"] = &OllyLang::DoITOA;
 	commands["ja"] = &OllyLang::DoJA;
 	commands["jae"] = &OllyLang::DoJAE;

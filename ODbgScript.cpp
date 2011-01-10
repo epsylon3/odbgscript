@@ -15,6 +15,7 @@ char buff[65535] = {0};
 // Script state
 int script_state = SS_NONE;
 
+/*
 // Entry point into a plugin DLL. Many system calls require DLL instance
 // which is passed to DllEntryPoint() as one of parameters. Remember it.
 BOOL APIENTRY DllMain(HINSTANCE hi,DWORD reason,LPVOID reserved)
@@ -36,6 +37,7 @@ BOOL APIENTRY DllMain(HINSTANCE hi,DWORD reason,LPVOID reserved)
 
     return TRUE;
 }
+*/
 
 // Report plugin name and return version of plugin interface.
 extc int _export cdecl ODBG_Plugindata(char shortname[32]) 

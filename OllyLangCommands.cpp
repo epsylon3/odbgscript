@@ -3403,6 +3403,71 @@ bool OllyLang::DoINC(string args)
 	return DoADD(ops[0] + ", 1");
 }
 
+bool OllyLang::DoINIR(string args)
+{
+	string ops[2],key,str;
+	ulong valdef;
+	char bufkey[256];
+	char bufdef[256];
+	HINSTANCE hinst = hinstModule(); //GetModuleHandle("ODbgScript.dll");
+
+	if(!CreateOperands(args, ops, 2)) {
+		errorstr = TEXT("Default value needed to get type");
+		return false;
+	}
+
+	if(!GetSTROpValue(ops[0], key)) {
+		return false;
+	}
+
+	strcpy(bufkey,key.c_str());
+
+	if(GetSTROpValue(ops[1], str)) {
+		strcpy(bufdef,str.c_str());
+		variables["$RESULT_1"] = Pluginreadstringfromini(hinst, bufkey, buffer, bufdef);
+		variables["$RESULT"] = buffer;
+		return true;
+	}
+
+	if(GetDWOpValue(ops[1], valdef)) {
+		variables["$RESULT"] = Pluginreadintfromini(hinst, bufkey, valdef);
+		return true;
+	}
+
+	return false;
+}
+
+bool OllyLang::DoINIW(string args)
+{
+	string ops[2],key,str;
+	ulong val;
+	char bufkey[256];
+	HINSTANCE hinst = hinstModule(); //GetModuleHandle("ODbgScript.dll");
+
+	if(!CreateOperands(args, ops, 2))
+		return false;
+
+	if(!GetSTROpValue(ops[0], key)) {
+		return false;
+	}
+
+	strcpy(bufkey,key.c_str());
+	
+	if(GetDWOpValue(ops[1], val)) {
+		Pluginwriteinttoini(hinst, bufkey, val);
+		return true;
+	}
+
+	if(GetSTROpValue(ops[1], str)) {
+		strcpy(buffer,str.c_str());
+		Pluginwritestringtoini(hinst, bufkey, buffer);
+		return true;
+	}
+
+	return false;
+}
+
+
 bool OllyLang::DoHISTORY(string args)
 {
 	string ops[1];
@@ -3596,7 +3661,7 @@ bool OllyLang::DoLM(string args)
 
 		if(fin.fail()) {
 	        variables["$RESULT"] = 0;
-            errorstr = "Couldn't open file!";
+            errorstr = TEXT("Couldn't open file!");
 			fin.close();
             return false;
 		}

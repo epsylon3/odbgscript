@@ -29,7 +29,9 @@ using namespace std;
 #include <algorithm>
 #include <set>
 
-#include <windows.h>
+
+#include <afx.h>
+//#include <windows.h>
 #include <Commdlg.h>
 //#include <Winuser.h>
 #include <shlwapi.h>
@@ -41,6 +43,7 @@ using namespace std;
 #include "plugin.h"
 
 #include "HelperFunctions.h"
+#include "IniReader.h"
 
 #include "OllyLang.h"
 #include "ODbgScript.h"
