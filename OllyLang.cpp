@@ -147,6 +147,7 @@ OllyLang::OllyLang()
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["ifeq"] = &OllyLang::DoIFEQ;
+	commands["ifneq"] = &OllyLang::DoIFNEQ;
 	commands["inc"] = &OllyLang::DoINC;
 	commands["inir"] = &OllyLang::DoINIR;
 	commands["iniw"] = &OllyLang::DoINIW;
@@ -489,7 +490,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 											|	((in_cond && !(in_cond & 1))*PROG_ATTR_IFLEVODD)
 						);
 
-			if (!in_comment && ToLower(scriptline).substr(0,5) == "ifeq ") {
+			if (!in_comment && ToLower(scriptline).substr(0,2) == "if") {
 				in_cond++;
 			} else if (!in_comment && ToLower(scriptline) == "else") {
 				in_cond++;

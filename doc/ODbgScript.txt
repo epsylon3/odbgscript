@@ -62,7 +62,7 @@ Get Trace Addr
   VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
 + Add Left/Right Keys support to follow history of execution in script
 + Added support for variables in jumps and calls
-+ Added IFEQ/ELSE/ENDIF condition bloc commands
++ Added IFEQ/IFNEQ..ELSE/ENDIF condition bloc commands
 + Added CRET to clear stack of calls
 + Added OLLY attributes THREAD THREADID and PATH, EXE, INI, DIR
 + Added GOTO (alias to JMP)
@@ -926,7 +926,7 @@ Example:
 
 ELSE/ENDIF
 ----------
-See IFEQ command, other conditionnal commands could be added in future versions
+See IFxx commands
 
 EOB label
 ---------
@@ -1365,6 +1365,16 @@ Example:
 		log "val = 0"
 	ELSE
 		log "val <> 0"
+	ENDIF
+
+IFNEQ x, y
+---------
+Simple condition if equals
+Example:
+	IFNEQ val, 0
+		log "val <> 0"
+	ELSE
+		log "val = 0"
 	ENDIF
 
 INC var

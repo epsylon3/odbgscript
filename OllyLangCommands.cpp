@@ -1276,7 +1276,7 @@ bool OllyLang::DoELSE(string args)
 		if (ToLower(script[pos]) == "endif") {
 			condlevel--;
 		}
-		if (ToLower(script[pos]).substr(0,5) == "ifeq ") {
+		if (ToLower(script[pos]).substr(0,2) == "if") {
 			condlevel++;
 		}
 		pos++;
@@ -2481,38 +2481,57 @@ bool OllyLang::DoGMEMI(string args)
 	return false;
 }
 
+bool OllyLang::DoIF()
+{
+	int condlevel = 0;
+	int pos = script_pos+1;
+	//goto to else or endif
+	while(ToLower(script[pos]) != "endif" || condlevel > 0) {
+		if (ToLower(script[pos]) == "endif") {
+			condlevel--;
+		}
+		if (ToLower(script[pos]).substr(0,2) == "if") {
+			condlevel++;
+		}
+		if (condlevel == 0 && ToLower(script[pos]) == "else") {
+			pos++;
+			break;
+		}
+		pos++;
+		if (pos>script.size()) {
+			DoENDIF("");
+			errorstr = "IF needs ENDIF command !";
+			return false;
+		}
+	}
+	script_pos = pos-1;
+	setProgLineResult(pos,variables["$RESULT"]);
+	return true;
+}
+
 bool OllyLang::DoIFEQ(string args)
 {
-	int pos = script_pos+1;
 	bool result = DoCMP(args);
-	int condlevel = 0;
 	conditions.push_back(args);
 	if (!result) {
 		return false;
 	}
 	if (zf == 0) {
-		//goto to else or endif
-		while(ToLower(script[pos]) != "endif" || condlevel > 0) {
-			if (ToLower(script[pos]) == "endif") {
-				condlevel--;
-			}
-			if (ToLower(script[pos]).substr(0,5) == "ifeq ") {
-				condlevel++;
-			}
-			if (condlevel == 0 && ToLower(script[pos]) == "else") {
-				pos++;
-				break;
-			}
-			pos++;
-			if (pos>script.size()) {
-				DoENDIF("");
-				errorstr = "IFEQ needs ENDIF command !";
-				return false;
-			}
-		}
-		script_pos = pos-1;
-		setProgLineResult(pos,variables["$RESULT"]);
-		return true;
+		return DoIF();
+	}
+	return true;
+}
+
+bool OllyLang::DoIFNEQ(string args)
+{
+	int pos = script_pos+1;
+	bool result = DoCMP(args);
+	conditions.push_back(args);
+	if (!result) {
+		return false;
+	}
+	if (zf != 0) {
+		return DoIF();
 	}
 	return true;
 }
