@@ -1,4 +1,4 @@
-/L20"OllyDBG Script 1.78" ASM_LANG Line Comment = ; Block Comment On = /* Block Comment Off = */ String Chars = " Escape Char = \ File Extensions = OSC
+/L20"OllyDBG Script 1.80" ASM_LANG Line Comment = ; Block Comment On = /* Block Comment Off = */ String Chars = " Escape Char = \ File Extensions = OSC
 /Indent Strings = ":"
 /Delimiters = ~!%&^*()-+=|\/{}[]:;"'<> 	,
 /Function String = "%[ ^t]++^([a-zA-Z_0-9]+^):$"
@@ -10,7 +10,7 @@
 /C1"Instructions" STYLE_FUNCTION Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
 add ai alloc an and ao ask asm asmtxt atoi
 backup bc bd beginsearch bp bpcnd bpd bpgoto bphwc bphwcall bphws bpl bplcnd bpmc bprm bpwm bpx buf
-close cmp cmt cob coe
+close cmp cmt cob coe cret
 dbh dbs dec div dm dma dpe
 ende eob eoe erun estep esti esto eval exec
 fill find findcalls findcmd findcmds findmem findop findoprev free
@@ -32,7 +32,7 @@ wrt wrta
 xchg xor
 ADD AI ALLOC AN AND AO ASK ASM ASMTXT ATOI
 BACKUP BC BD BEGINSEARCH BP BPCND BPD BPGOTO BPHWC BPHWCALL BPHWS BPL BPLCND BPMC BPRM BPWM BPX BUF
-CLOSE CMP CMT COB COE
+CLOSE CMP CMT COB COE CRET
 DBH DBS DEC DIV DM DMA DPE
 ENDE EOB EOE ERUN ESTEP ESTI ESTO EVAL EXEC
 FILL FIND FINDCALLS FINDCMD FINDCMDS FINDMEM FINDOP FINDOPREV FREE
@@ -54,29 +54,35 @@ WRT WRTA
 XCHG XOR
 /C2"Jump Instructions" Colors = 16711680 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 1
 call
+else endif
+goto
+ifeq ifneq
 ja jae jb jbe je jg jge jmp jne jnz jz
 ret
 CALL
+ELSE ENDIF
+GOTO
+IFEQ IFNEQ
 JA JAE JB JBE JE JG JGE JMP JNE JNZ JZ
 RET
 /C3"Constants" STYLE_KEYWORD Colors = 8323072 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
 ADDR
 CODE CODEBASE CODESIZE COMMAND CURRENTDIR
-DATA DATABASE DESTINATION
+DATA DATABASE DESTINATION DIR
 EDATASIZE EDATATABLE EXEFILENAME
-ENTRY
+ENTRY EXE
 GOOD
 HMAINTHREAD HPROCESS HWND
-IDATABASE IDATATABLE
+IDATABASE IDATATABLE INI
 MAINBASE MAINTHREADID MEMBASE MEMSIZE
 MEMORY MEMORYBASE MEMORYOWNER MEMORYSIZE
 MODULE MODULEBASE MODULESIZE
-PROCESSID PROCESSNAME
+PATH PROCESSID PROCESSNAME
 NAME NSECT
 PATH PID 
 RELOCSIZE RELOCTABLE RESBASE RESSIZE
 SIZE SYSTEMDIR
-TYPE
+THREAD THREADID TYPE
 VERSION
 $RESULT $RESULT_1 $RESULT_2 $RESULT_3 $RESULT_4 $VERSION
 /C4"Registers" Colors = 255 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
