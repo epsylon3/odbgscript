@@ -58,12 +58,12 @@ Get Trace Addr
 2.1 What's new?
 ---------------
 1.81.6 (07 Feb 2011)
-+ Fix internal EXEC/ENDE jump addresses beginning with a letter
-+ Fix label test characters, ooops
-
-1.80.6 (07 Feb 2011)
 + Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
   VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
+* Fix internal EXEC/ENDE jump address beginning with a letter
+* Fix label test characters, ooops
+
+1.80.6 (07 Feb 2011)
 + Add Left/Right Keys support to follow history of execution in script
 + Added support for variables in jumps and calls
 + Added IFEQ/IFNEQ..ELSE/ENDIF condition bloc commands
