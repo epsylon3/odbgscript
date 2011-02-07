@@ -92,6 +92,7 @@ OllyLang::OllyLang()
 	commands["cmt"] = &OllyLang::DoCMT;
 	commands["cob"] = &OllyLang::DoCOB;
 	commands["coe"] = &OllyLang::DoCOE;
+	commands["cret"] = &OllyLang::DoCRET;
 	commands["dbh"] = &OllyLang::DoDBH;
 	commands["dbs"] = &OllyLang::DoDBS;
 	commands["dec"] = &OllyLang::DoDEC;
@@ -99,7 +100,9 @@ OllyLang::OllyLang()
 	commands["dm"] = &OllyLang::DoDM;
 	commands["dma"] = &OllyLang::DoDMA;
 	commands["dpe"] = &OllyLang::DoDPE;
+	commands["else"] = &OllyLang::DoELSE;
 	commands["ende"] = &OllyLang::DoENDE;
+	commands["endif"] = &OllyLang::DoENDIF;
 	commands["endsearch"] = &OllyLang::DoENDSEARCH;
 	commands["erun"] = &OllyLang::DoERUN;
 	commands["esti"] = &OllyLang::DoESTI;
@@ -143,6 +146,7 @@ OllyLang::OllyLang()
 	commands["gstrw"] = &OllyLang::DoGSTRW;
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
+	commands["ifeq"] = &OllyLang::DoIFEQ;
 	commands["inc"] = &OllyLang::DoINC;
 	commands["inir"] = &OllyLang::DoINIR;
 	commands["iniw"] = &OllyLang::DoINIW;
@@ -275,6 +279,7 @@ bool OllyLang::Reset()
 	variables.clear();
 	bpjumps.clear();
 	calls.clear();
+	conditions.clear();
 	char s[10] = {0};
 	sprintf(s,"%i.%i", VERSIONHI, VERSIONLO);
 	string str(s);

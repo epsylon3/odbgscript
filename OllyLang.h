@@ -137,6 +137,8 @@ public:
 	map<int, int> bpjumps;
 	// Call/Ret in script
 	vector<ulong> calls;
+	// IF/ELSE in script
+	vector<string> conditions;
 
 	bool showVarHistory;
 
@@ -246,6 +248,7 @@ private:
 	bool DoCMT(string args);
 	bool DoCOB(string args);
 	bool DoCOE(string args);
+	bool DoCRET(string args);
 	bool DoDBH(string args);
 	bool DoDBS(string args);
 	bool DoDEC(string args);
@@ -253,7 +256,9 @@ private:
 	bool DoDM(string args);
 	bool DoDMA(string args);
 	bool DoDPE(string args);
+	bool DoELSE(string args);
 	bool DoENDE(string args);
+	bool DoENDIF(string args);
 	bool DoENDSEARCH(string args);
 	bool DoEOB(string args);
 	bool DoEOE(string args);
@@ -295,6 +300,7 @@ private:
 	bool DoGSTRW(string args);
 	bool DoHANDLE(string args);
 	bool DoHISTORY(string args);
+	bool DoIFEQ(string args);
 	bool DoINC(string args);
 	bool DoINIR(string args);
 	bool DoINIW(string args);

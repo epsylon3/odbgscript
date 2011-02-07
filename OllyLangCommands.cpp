@@ -1072,6 +1072,14 @@ bool OllyLang::DoCOE(string args)
 	return true;
 }
 
+bool OllyLang::DoCRET(string args)
+{
+	if (calls.size() > 0) {
+		calls.clear();
+	}
+	return true;
+}
+
 bool OllyLang::DoDBH(string args)
 {
 	t_thread* thr = Findthread(Getcputhreadid());
@@ -1259,12 +1267,44 @@ bool OllyLang::DoDPE(string args)
 	return false;
 }
 
+bool OllyLang::DoELSE(string args)
+{
+	int pos = script_pos;
+	int condlevel=0;
+	//goto endif
+	while(ToLower(script[pos]) != "endif" || condlevel > 0) {
+		if (ToLower(script[pos]) == "endif") {
+			condlevel--;
+		}
+		if (ToLower(script[pos]).substr(0,5) == "ifeq ") {
+			condlevel++;
+		}
+		pos++;
+		if (pos>script.size()) {
+			DoENDIF("");
+			errorstr = "ELSE needs ENDIF command !";
+			return false;
+		}
+	}
+	script_pos = pos-1;
+	setProgLineResult(pos,variables["$RESULT"]);
+	return true;
+}
+
 bool OllyLang::DoENDE(string args)
 {
 	// Free memory
 	if (pmemforexec!=NULL)
 		DelProcessMemoryBloc((DWORD) pmemforexec);
 	pmemforexec=NULL;
+	return true;
+}
+
+bool OllyLang::DoENDIF(string args)
+{
+	if (conditions.size() > 0) {
+		conditions.pop_back();
+	}
 	return true;
 }
 
@@ -2439,6 +2479,42 @@ bool OllyLang::DoGMEMI(string args)
 
 	errorstr = "Bad operand";
 	return false;
+}
+
+bool OllyLang::DoIFEQ(string args)
+{
+	int pos = script_pos+1;
+	bool result = DoCMP(args);
+	int condlevel = 0;
+	conditions.push_back(args);
+	if (!result) {
+		return false;
+	}
+	if (zf == 0) {
+		//goto to else or endif
+		while(ToLower(script[pos]) != "endif" || condlevel > 0) {
+			if (ToLower(script[pos]) == "endif") {
+				condlevel--;
+			}
+			if (ToLower(script[pos]).substr(0,5) == "ifeq ") {
+				condlevel++;
+			}
+			if (condlevel == 0 && ToLower(script[pos]) == "else") {
+				pos++;
+				break;
+			}
+			pos++;
+			if (pos>script.size()) {
+				DoENDIF("");
+				errorstr = "IFEQ needs ENDIF command !";
+				return false;
+			}
+		}
+		script_pos = pos-1;
+		setProgLineResult(pos,variables["$RESULT"]);
+		return true;
+	}
+	return true;
 }
 
 bool OllyLang::DoNAMES(string args)
@@ -4977,7 +5053,6 @@ bool OllyLang::DoROL(string args)
 	BYTE dw2;
 	if(GetDWOpValue(ops[0], dw1) && GetBYTEOpValue(ops[1], dw2))
 	{
-        
 		__asm
 		{
 			push eax
@@ -5008,7 +5083,6 @@ bool OllyLang::DoROR(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetBYTEOpValue(ops[1], dw2))
 	{
-        
 		__asm
 		{
 			push eax

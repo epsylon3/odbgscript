@@ -57,13 +57,15 @@ Get Trace Addr
 
 2.1 What's new?
 ---------------
-1.80.1 (SVN 2011)
+1.80.1 (SVN 02/2011)
 + Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
   VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
 + Add Left/Right Keys support to follow history of execution in script
 + Added support for variables in jumps and calls
-+ Added GOTO (alias to JMP)
++ Added IFEQ/ELSE/ENDIF condition bloc commands
++ Added CRET to clear stack of calls
 + Added OLLY attributes THREAD THREADID and PATH, EXE, INI, DIR
++ Added GOTO (alias to JMP)
 + Added INIR and INIW to read and write to ollydbg.ini file (with Odbg plugin API)
 
 1.79.3 (31 Dec 2010)
@@ -863,6 +865,13 @@ Makes script continue execution after an exception has occured (removes EOE)
 Example:
 	COE
 
+CRET
+----
+Clear stack of calls, to terminate script in a function.
+Example:
+	CRET
+	RET
+
 DBH
 ---
 Hides debugger against kernel32!IsDebuggerPresent()
@@ -914,6 +923,10 @@ Notes: * uses PEFileInfo.dwSizeOfImage
         SizeOfRawData = VirtualSize)
 Example:
 	dpe "c:\test.exe", eip
+
+ELSE/ENDIF
+----------
+See IFEQ command, other conditionnal commands could be added in future versions
 
 EOB label
 ---------
@@ -1343,6 +1356,16 @@ Enable or Disable Value history in Script Progress Window, could optimize loops
 Example:
 	history 0 //disable
 	history 1 //enable
+
+IFEQ x, y
+---------
+Simple condition if equals
+Example:
+	IFEQ val, 0
+		log "val = 0"
+	ELSE
+		log "val <> 0"
+	ENDIF
 
 INC var
 -------
