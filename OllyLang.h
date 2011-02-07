@@ -97,7 +97,7 @@ public:
 	bool ProcessAddonAction();
 
 	// Script Window
-	ulong GetFirstCodeLine(ulong from=0);
+	int GetFirstCodeLine(int from);
 
 	void menuListLabels(HMENU mLabels,int cmdIndex);
 	void menuListVariables(HMENU mVars,int cmdIndex);

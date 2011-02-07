@@ -288,7 +288,7 @@ bool OllyLang::Reset()
 	EOE_row = -1;
 	script_state = SS_LOADED;
 	enable_logging = false;
-	script_pos = GetFirstCodeLine();
+	script_pos = GetFirstCodeLine(0);
 	pgr_scriptpos = script_pos+1; 
 	resetProgLines();
 	tickcount_startup=0;
@@ -339,6 +339,7 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 	int inc_pos = -1, linesAdded = 0;
 	int p;
 	bool comment_todisplay, in_asm=false, in_comment=false;
+	int in_cond = 0;
 
 	while(iter != toInsert.end())
 	{
@@ -472,13 +473,29 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			linesAdded++;
 			posInScript++;
 
-			if(in_asm && lcline == "ende" && !in_comment) {
+			if(!in_comment && in_asm && lcline == "ende") {
 				in_asm = false;
 			}
 
-			addProgLine(posInScript,scriptline,comment_todisplay*PROG_TYPE_COMMENT + in_asm*PROG_TYPE_ASM);
+			if (!in_comment && ToLower(scriptline) == "endif") {
+				in_cond--;
+			} else if (!in_comment && ToLower(scriptline) == "else") {
+				in_cond--;
+			}
 
-			if(lcline == "exec"  && !in_comment) {
+			addProgLine(posInScript,scriptline,	(comment_todisplay * PROG_TYPE_COMMENT)
+											|	(in_asm * PROG_TYPE_ASM)
+											|	((in_cond & 1)*PROG_ATTR_IFLEVEVN)
+											|	((in_cond && !(in_cond & 1))*PROG_ATTR_IFLEVODD)
+						);
+
+			if (!in_comment && ToLower(scriptline).substr(0,5) == "ifeq ") {
+				in_cond++;
+			} else if (!in_comment && ToLower(scriptline) == "else") {
+				in_cond++;
+			}
+
+			if(!in_comment && lcline == "exec") {
 				in_asm = true;
 			}
 
@@ -496,17 +513,20 @@ int OllyLang::GetState()
 }
 */
 
-ulong OllyLang::GetFirstCodeLine(ulong from) //=0
+int OllyLang::GetFirstCodeLine(int from)
 {
-	ulong nline=from;
+	int nline=from;
+	int ltype;
 
 	// Check for label after (skip it/them)
 	if(nline < script.size()) {
 		
+		ltype = getProgLineType(nline+1);
 		// Check if its a label or comment
-		while(nline < script.size() && (!(getProgLineType(nline+1) & PROG_TYPE_COMMAND)))
+		while(nline < script.size() && (ltype & PROG_TYPE_COMMAND) == 0)
 		{
 			nline++;
+			ltype = getProgLineType(nline+1);
 		} 
 
 	}
@@ -615,7 +635,7 @@ bool OllyLang::LoadScript(LPSTR file)
 	Pluginwritestringtoini(hinstModule(), "ScriptDir", file);
 	mruAddFile(file);
 
-	pgr_scriptpos=GetFirstCodeLine()+1;
+	pgr_scriptpos=GetFirstCodeLine(0)+1;
 	setProgLineEIP(pgr_scriptpos,0);
 
 	LoadBreakPoints(file);

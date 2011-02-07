@@ -531,7 +531,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			}
 			break;
 		case 1:
-			if (pline->type & PROG_TYPE_COMMENT) //comment
+			if (pline->type & PROG_TYPE_COMMENT)
 			{
 				ret = sprintf(s, "%s", &pline->command);
 				*select=DRAW_MASK;
@@ -550,9 +550,14 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
 			}
-			else 
-			{
-				ret = sprintf(s, "%s", pline->command);
+			else
+			{	
+				if (pline->type & PROG_ATTR_IFLEVEVN)
+					ret = sprintf(s, " %s", pline->command);
+				else if (pline->type & PROG_ATTR_IFLEVODD)
+					ret = sprintf(s, "  %s", pline->command);
+				else
+					ret = sprintf(s, "%s", pline->command);
 				memset(mask,DRAW_NORMAL,ret);
 			}
 
@@ -600,11 +605,7 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				ret=PROG_RES_LEN;
 				memset(s,'_',ret);
 				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);				
-				
-				//ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");			
-				//ret=30;strcpy(s,"Duvdeijrsfgahztbcl");			
-				//memset(mask,DRAW_GRAPH,ret);
+				memset(mask,DRAW_GRAY,ret);
 			}
 			else if (*pline->result != NULL) 
 			{
@@ -744,13 +745,15 @@ void FocusProgWindow(void)
 
 bool editProgLine(t_wndprog_data *ppl) 
 {
-	string s=ollylang->script[ppl->line-1];
 	char buffer[PROG_CMD_LEN]={0};
+	string s=ollylang->script[ppl->line-1];
+	s=trim(s);
 
 	strcpy(buffer,(char*)s.c_str());
 
 	if (Gettext("Edit script line...",buffer,0,0,FIXEDFONT)) {
 
+		int lvl = ppl->type | PROG_ATTR_IFLEVELS;
 		strcpy(ppl->command," ");
 		strncat(ppl->command,buffer,PROG_CMD_LEN-2);
 		s.assign(buffer);
@@ -760,6 +763,7 @@ bool editProgLine(t_wndprog_data *ppl)
 
 		s=trim(s);
 		ppl->type = analyseProgLineType(s,ppl->line);
+		ppl->type |= lvl;
 
 		InvalidateProgWindow();
 		return true;
@@ -822,10 +826,11 @@ int addProgLine(int line, string & command, int type)
 	strncat(pline.command,command.c_str(),PROG_CMD_LEN-2);
 	strcpy(pline.result,"");	
 	strcpy(pline.values,"");
-	if (type)
-		pline.type = type;
-	else
-		pline.type = PROG_TYPE_COMMAND;
+
+	pline.type = type;
+
+	if (!(type & PROG_TYPE))
+		pline.type |= PROG_TYPE_COMMAND;
 
 	pline.eip = 0;
 		
@@ -1015,7 +1020,7 @@ void resetProgLines()
 		
 		//reset executed color
 		if ((ppl->type & PROG_TYPE_COMMAND)) //ignore labels/comments
-			ppl->type &= PROG_TYPE_COMMAND;
+			ppl->type &= PROG_TYPE_COMMAND | PROG_ATTR_IFLEVELS;
 		
 		strcpy(ppl->result,"");	
 		strcpy(ppl->values,"");
@@ -1041,15 +1046,15 @@ int getProgLineType(int line)
 
 }
 
-int setProgLineAttr(int line,int type) 
+int setProgLineAttr(int line,int attr) 
 {
 	t_wndprog_data *ppl;
 	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
 	if (ppl==NULL)
 		return false;
 
-	ppl->type &= PROG_TYPE;
-	ppl->type |= type;
+	ppl->type &= PROG_TYPE | PROG_ATTR_IFLEVELS;
+	ppl->type |= attr;
 
 	return true;
 }

@@ -164,9 +164,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				Optimization="0"
+				EnableIntrinsicFunctions="false"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories="C:\WinDDK\7600.16385.1\inc\api\crt\stl60;C:\WinDDK\7600.16385.1\inc\api;C:\WinDDK\7600.16385.1\inc\crt;C:\WinDDK\7600.16385.1\inc\crt\sys;C:\WinDDK\7600.16385.1\inc\mfc42"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ODBGSCRIPT_EXPORTS"
 				IgnoreStandardIncludePath="true"
@@ -296,20 +296,6 @@
 			<File
 				RelativePath=".\IniReader.cpp"
 				>
-				<FileConfiguration
-					Name="ReleaseWDK|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ToDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ODbgScript.cpp"
