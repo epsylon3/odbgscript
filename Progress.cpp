@@ -382,11 +382,12 @@ t_wndprog_data *ppl;
 				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
 				if (ppl!=NULL) {
 					string cmd = ppl->command;
+					int lvl = ppl->type & PROG_ATTR_IFLEVELS;
 					if (! (ppl->type & PROG_TYPE_COMMENT) ) {
 						cmd = " ;"+trim(cmd);
 					} else {
 						cmd = trim(cmd);
-						cmd = " "+cmd.substr(1);
+						cmd = " "+trim(cmd.substr(1));
 					}
 					ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
 					ollylang->script.insert(ollylang->script.begin()+ppl->line-1,cmd);
@@ -395,6 +396,7 @@ t_wndprog_data *ppl;
 
 					cmd=trim(cmd);
 					ppl->type = analyseProgLineType(cmd,ppl->line);
+					ppl->type |= lvl;
 					InvalidateProgWindow();
 				}
 				return 1;
@@ -552,12 +554,13 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			}
 			else
 			{	
-				if (pline->type & PROG_ATTR_IFLEVEVN)
+				if (pline->type & PROG_ATTR_IFLEVEVN) {
 					ret = sprintf(s, " %s", pline->command);
-				else if (pline->type & PROG_ATTR_IFLEVODD)
+				} else if (pline->type & PROG_ATTR_IFLEVODD) {
 					ret = sprintf(s, "  %s", pline->command);
-				else
+				} else
 					ret = sprintf(s, "%s", pline->command);
+				*select=DRAW_MASK;
 				memset(mask,DRAW_NORMAL,ret);
 			}
 
@@ -572,6 +575,12 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				//Hilite executed lines
 				*select=DRAW_MASK;
 				memset(mask,DRAW_HILITE,ret);
+			}
+
+			//if else endif
+			if ((pline->type & PROG_ATTR_IFLEVELS) && (pline->type & PROG_TYPE_COMMAND)) {
+				mask[1]=DRAW_GRAPH;
+				s[1]=D_GRAYPATH;
 			}
 
 			//Error warning
@@ -606,6 +615,16 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				memset(s,'_',ret);
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
+				
+				//to draw all special chars
+				ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");
+				//ret=30;strcpy(s,"Duvdeijrsfgahztbcl");
+				//ret=30;strcpy(s,"abcdefghijklmnopqrstuvwxyz");
+				//ret=30;strcpy(s,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+				//ret=30;strcpy(s,"0123456789.&é'(-è_çà)^$ù*!;,");
+				//ret=30;strcpy(s,"?./§%µ¨£°+^@`|[]¤~\"");
+				//ret=30;strcpy(s,"?./§%µ¨£°");
+				memset(mask,DRAW_GRAPH,ret);
 			}
 			else if (*pline->result != NULL) 
 			{
@@ -747,13 +766,12 @@ bool editProgLine(t_wndprog_data *ppl)
 {
 	char buffer[PROG_CMD_LEN]={0};
 	string s=ollylang->script[ppl->line-1];
-	s=trim(s);
 
-	strcpy(buffer,(char*)s.c_str());
+	strcpy(buffer,(char*)trim(s).c_str());
 
-	if (Gettext("Edit script line...",buffer,0,0,FIXEDFONT)) {
+	if (Gettext("Edit script line...",buffer,0,0,FIXEDFONT) != -1) {
 
-		int lvl = ppl->type | PROG_ATTR_IFLEVELS;
+		int lvl = ppl->type & PROG_ATTR_IFLEVELS;
 		strcpy(ppl->command," ");
 		strncat(ppl->command,buffer,PROG_CMD_LEN-2);
 		s.assign(buffer);
@@ -761,9 +779,14 @@ bool editProgLine(t_wndprog_data *ppl)
 		ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
 		ollylang->script.insert(ollylang->script.begin()+ppl->line-1,s);
 
-		s=trim(s);
 		ppl->type = analyseProgLineType(s,ppl->line);
 		ppl->type |= lvl;
+		if (ppl->type & PROG_TYPE_COMMAND) {
+			s=trim(s);
+		}
+		if (ppl->type & PROG_ATTR_IFLEVELS) {
+			s=" "+trim(s);
+		}
 
 		InvalidateProgWindow();
 		return true;
