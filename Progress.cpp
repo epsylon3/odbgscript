@@ -617,14 +617,14 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				memset(mask,DRAW_GRAY,ret);
 				
 				//to draw all special chars
-				ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");
+				//ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");
 				//ret=30;strcpy(s,"Duvdeijrsfgahztbcl");
 				//ret=30;strcpy(s,"abcdefghijklmnopqrstuvwxyz");
 				//ret=30;strcpy(s,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 				//ret=30;strcpy(s,"0123456789.&é'(-è_çà)^$ù*!;,");
 				//ret=30;strcpy(s,"?./§%µ¨£°+^@`|[]¤~\"");
 				//ret=30;strcpy(s,"?./§%µ¨£°");
-				memset(mask,DRAW_GRAPH,ret);
+				//memset(mask,DRAW_GRAPH,ret);
 			}
 			else if (*pline->result != NULL) 
 			{

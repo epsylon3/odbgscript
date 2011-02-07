@@ -1432,7 +1432,7 @@ bool OllyLang::DoEXEC(string args)
 	script_pos--;
 
 	// Assemble and write jump to original EIP
-	sprintf(buffer, "JMP %lX", eip);
+	sprintf(buffer, "JMP 0%lX", eip);
 	len = Assemble(buffer, (ulong)pmemforexec + totallen, &model, 0, 0, error);
 	if (len < 0) {
 		errorstr = error;
@@ -3025,12 +3025,12 @@ bool OllyLang::DoGPA(string args)
 				ulong pmem = AddProcessMemoryBloc(lib);
 
 				string tmp;
-				sprintf(buffer,"%09X",pmem);
+				sprintf(buffer,"0%lX",pmem);
 				tmp.assign(buffer);
 
 				if (DoPUSH(tmp)) {
 
-					sprintf(buffer,"%09X",variables["$RESULT"].dw);
+					sprintf(buffer,"0%lX",variables["$RESULT"].dw);
 
 					ExecuteASM("call "+tmp);
 				
@@ -3845,14 +3845,14 @@ bool OllyLang::DoLOADLIB(string args)
 	void * hMem = VirtualAllocEx(hDbgPrc,NULL,0x1000,MEM_RESERVE|MEM_COMMIT,PAGE_EXECUTE_READWRITE);
 
 	char bfdlladdr[10]={0};
-	sprintf(bfdlladdr, "%09lX", hMem);
+	sprintf(bfdlladdr, "0%lX", hMem);
 	
 	Writememory((void*)str.c_str(), (ulong) hMem, str.length(), MM_DELANAL|MM_SILENT);
 
 	if (DoPUSH(bfdlladdr)) {
 
 		char bffnloadlib[10]={0};
-		sprintf(bffnloadlib,"%09X",fnload);
+		sprintf(bffnloadlib,"0%lX",fnload);
 		string libPtrToLoad = bffnloadlib;
 
 		ExecuteASM("call "+libPtrToLoad);	

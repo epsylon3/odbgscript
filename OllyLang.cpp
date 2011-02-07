@@ -2406,7 +2406,7 @@ bool OllyLang::ExecuteASM(string command)
 	}
 
 	// Assemble and write jump to original EIP
-	sprintf(buffer, "JMP %lX", eip);
+	sprintf(buffer, "JMP 0%lX", eip);
 	len = Assemble(buffer, pmemexec + totallen, &model, 0, 0, error);
 	if (len < 0) {
 		errorstr = error;
