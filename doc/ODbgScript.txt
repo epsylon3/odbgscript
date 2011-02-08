@@ -55,19 +55,19 @@ Get Trace Addr
 
 2.1 What's new?
 ---------------
-1.82.6 (08 Feb 2011)
+1.82 (08 Feb 2011)
 + Added IFA,IFAE,IFB,IFBE condition commands and their aliases IFG,IFGE,IFL,IFLE
 + Added Aliases IFE, IFNE to IFEQ and IFNEQ
 + Added Aliases JL, JLE to JB and JBE
 + Allow all IF commands to use last compare result (without parameter)
 
-1.81.6 (07 Feb 2011)
-+ Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
-  VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
+1.81 (07 Feb 2011)
 * Fix internal EXEC/ENDE jump address beginning with a letter
 * Fix label test characters, ooops
 
-1.80.6 (07 Feb 2011)
+1.80 (07 Feb 2011)
++ Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
+  VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
 + Add Left/Right Keys support to follow history of execution in script
 + Added support for variables in jumps and calls
 + Added IFEQ/IFNEQ..ELSE/ENDIF condition bloc commands
@@ -76,7 +76,7 @@ Get Trace Addr
 + Added GOTO (alias to JMP)
 + Added INIR and INIW to read and write to ollydbg.ini file (with Odbg plugin API)
 
-1.79.3 (31 Dec 2010)
+1.79 (31 Dec 2010)
 * Fix std namespace to be compatible with VC9
 + Added popup entries to follow variables (disam, stack, dump and dump window)
 + Comment/Uncomment script line with ";" key

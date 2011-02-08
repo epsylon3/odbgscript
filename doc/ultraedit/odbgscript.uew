@@ -56,13 +56,13 @@ XCHG XOR
 call
 else endif
 goto
-ifa ifae ifb ifbe ife ifeq ifg ige ifl ifle ifne ifneq
+ifa ifae ifb ifbe ife ifeq ifg ifge ifl ifle ifne ifneq
 ja jae jb jbe je jg jge jl jle jmp jne jnz jz
 ret
 CALL
 ELSE ENDIF
 GOTO
-IFA IFAE IFB IFBE IFE IFEQ IFG IGE IFL IFLE IFNE IFNEQ
+IFA IFAE IFB IFBE IFE IFEQ IFG IFGE IFL IFLE IFNE IFNEQ
 JA JAE JB JBE JE JG JGE JL JLE JMP JNE JNZ JZ
 RET
 /C3"Constants" STYLE_KEYWORD Colors = 8323072 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
