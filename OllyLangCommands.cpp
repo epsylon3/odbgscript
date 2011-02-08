@@ -2481,7 +2481,7 @@ bool OllyLang::DoGMEMI(string args)
 	return false;
 }
 
-bool OllyLang::DoIF()
+bool OllyLang::DoElse()
 {
 	int condlevel = 0;
 	int pos = script_pos+1;
@@ -2509,29 +2509,74 @@ bool OllyLang::DoIF()
 	return true;
 }
 
+bool OllyLang::DoIFA(string args)
+{
+	conditions.push_back(args);
+	if (args != "" && !DoCMP(args)) {
+		return false;
+	}
+	if(zf == 1 || cf == 1) {
+		return DoElse();
+	}
+	return true;
+}
+
+bool OllyLang::DoIFAE(string args)
+{
+	conditions.push_back(args);
+	if (args != "" && !DoCMP(args)) {
+		return false;
+	}
+	if(cf == 1) {
+		return DoElse();
+	}
+	return true;
+}
+
+bool OllyLang::DoIFB(string args)
+{
+	conditions.push_back(args);
+	if (args != "" && !DoCMP(args)) {
+		return false;
+	}
+	if(cf == 0) {
+		return DoElse();
+	}
+	return true;
+}
+
+bool OllyLang::DoIFBE(string args)
+{
+	conditions.push_back(args);
+	if (args != "" && !DoCMP(args)) {
+		return false;
+	}
+	if(zf == 0 && cf == 0) {
+		return DoElse();
+	}
+	return true;
+}
+
 bool OllyLang::DoIFEQ(string args)
 {
-	bool result = DoCMP(args);
 	conditions.push_back(args);
-	if (!result) {
+	if (args != "" && !DoCMP(args)) {
 		return false;
 	}
 	if (zf == 0) {
-		return DoIF();
+		return DoElse();
 	}
 	return true;
 }
 
 bool OllyLang::DoIFNEQ(string args)
 {
-	int pos = script_pos+1;
-	bool result = DoCMP(args);
 	conditions.push_back(args);
-	if (!result) {
+	if (args != "" && !DoCMP(args)) {
 		return false;
 	}
-	if (zf != 0) {
-		return DoIF();
+	if (zf == 1) {
+		return DoElse();
 	}
 	return true;
 }

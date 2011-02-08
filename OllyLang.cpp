@@ -147,7 +147,17 @@ OllyLang::OllyLang()
 	commands["handle"] = &OllyLang::DoHANDLE;
 	commands["history"] = &OllyLang::DoHISTORY;
 	commands["ifeq"] = &OllyLang::DoIFEQ;
+	 commands["ife"] = &OllyLang::DoIFEQ;
 	commands["ifneq"] = &OllyLang::DoIFNEQ;
+	 commands["ifne"] = &OllyLang::DoIFNEQ;
+	commands["ifa"] = &OllyLang::DoIFA;
+	commands["ifae"] = &OllyLang::DoIFAE;
+	commands["ifb"] = &OllyLang::DoIFB;
+	commands["ifbe"] = &OllyLang::DoIFBE;
+	 commands["ifg"] = &OllyLang::DoIFA;
+	 commands["ifge"] = &OllyLang::DoIFAE;
+	 commands["ifl"] = &OllyLang::DoIFB;
+	 commands["ifle"] = &OllyLang::DoIFBE;
 	commands["inc"] = &OllyLang::DoINC;
 	commands["inir"] = &OllyLang::DoINIR;
 	commands["iniw"] = &OllyLang::DoINIW;
@@ -159,6 +169,8 @@ OllyLang::OllyLang()
 	commands["je"] = &OllyLang::DoJE;
 	 commands["jg"] = &OllyLang::DoJA;
 	 commands["jge"] = &OllyLang::DoJAE;
+	 commands["jl"] = &OllyLang::DoJB;
+	 commands["jle"] = &OllyLang::DoJBE;
 	commands["jmp"] = &OllyLang::DoJMP;
 	 commands["goto"] = &OllyLang::DoJMP;
 	commands["jne"] = &OllyLang::DoJNE;

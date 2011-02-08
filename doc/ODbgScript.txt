@@ -46,8 +46,6 @@ OllyScript becomes ODbgScript with the new GUI Windows
 v0.9
 OllyScript has now been downloaded more then 10000 times! That means more then 2Gb of raw
 scripting power flowing down the optic cable veins of the Internet. Not bad if you ask me!
-The development of the plugin has been a bit slow, I've got a job programming xray systems
-which has taken a lot of time. Sorry about that.
 
 TODO:
 Memory BP reason (to enhance)
@@ -57,6 +55,12 @@ Get Trace Addr
 
 2.1 What's new?
 ---------------
+1.82.6 (08 Feb 2011)
++ Added IFA,IFAE,IFB,IFBE condition commands and their aliases IFG,IFGE,IFL,IFLE
++ Added Aliases IFE, IFNE to IFEQ and IFNEQ
++ Added Aliases JL, JLE to JB and JBE
++ Allow all IF commands to use last compare result (without parameter)
+
 1.81.6 (07 Feb 2011)
 + Special build compiled with VC9, WDK 7.1 CRT and STL60 (to keep same msvcrt and msvcp60.dll imports)
   VC9: Updated Project Include/Lib directories and added win2k/xp msvcrt obj to use except_handler3
@@ -1361,9 +1365,22 @@ Example:
 	history 0 //disable
 	history 1 //enable
 
-IFEQ x, y
----------
+IFA,IFAE,IFB,IFBE x, y, [z]
+---------------------------
+Conditions similar to JA, JAE, JB, JBE
+See CMP for parameters
+Without parameter, IF commands use last CMP result
+Example:
+	IFB $VERSION, "1.82"
+		MSG "This script requires ODBGScript version 1.82"
+		RET
+	ENDIF
+
+IFEQ x, y, [z]
+--------------
 Simple condition if equals
+See CMP for parameters
+Without parameter, IF commands use last CMP result
 Example:
 	IFEQ val, 0
 		log "val = 0"
@@ -1371,9 +1388,10 @@ Example:
 		log "val <> 0"
 	ENDIF
 
-IFNEQ x, y
----------
-Simple condition if equals
+IFNEQ x, y, [z]
+---------------
+Simple condition if not equals
+Without parameter, IF commands use last CMP result
 Example:
 	IFNEQ val, 0
 		log "val <> 0"

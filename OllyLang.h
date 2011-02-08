@@ -300,7 +300,11 @@ private:
 	bool DoGSTRW(string args);
 	bool DoHANDLE(string args);
 	bool DoHISTORY(string args);
-	bool DoIF(void);
+	bool DoElse(void);
+	bool DoIFA(string args);
+	bool DoIFAE(string args);
+	bool DoIFB(string args);
+	bool DoIFBE(string args);
 	bool DoIFEQ(string args);
 	bool DoIFNEQ(string args);
 	bool DoINC(string args);
