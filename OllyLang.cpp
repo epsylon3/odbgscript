@@ -46,6 +46,15 @@ OllyLang::OllyLang()
 	reg_names.insert("dl");
 	reg_names.insert("dh");
 
+	// Segments
+	seg_names.clear();
+	seg_names.insert("es");
+	seg_names.insert("cs");
+	seg_names.insert("ss");
+	seg_names.insert("ds");
+	seg_names.insert("fs");
+	seg_names.insert("gs");
+
 	// Init array of flag names
 	flag_names.clear();
 	flag_names.insert("!CF");
@@ -1639,6 +1648,24 @@ int OllyLang::GetRegNr(string& name)
 		return -1;
 }
 
+int OllyLang::GetSegNr(string& name)
+{
+	if(name == "es")
+		return SEG_ES;
+	else if(name == "cs")
+		return SEG_CS;
+	else if(name == "ss")
+		return SEG_SS;
+	else if(name == "ds")
+		return SEG_DS;
+	else if(name == "fs")
+		return SEG_FS;
+	else if(name == "gs")
+		return SEG_GS;
+	else 
+		return SEG_UNDEF;
+}
+
 bool OllyLang::GetBYTEOpValue(string op, BYTE &value)   //new add
 {
 	if(is_hex(op))
@@ -1774,6 +1801,36 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 		}
 		return false;
 	}
+	else if(is_segment(op))
+	{
+		// We have a register
+		int segnr = GetSegNr(op);
+
+		t_thread* pt = Findthread(Getcputhreadid());
+		
+		if(segnr != SEG_UNDEF)
+		{
+			// It's a segment register 
+			// Note: plugin.h constants were bad before v1.83
+			switch (segnr) {
+				case SEG_SS:
+				case SEG_DS:
+				case SEG_FS:
+				case SEG_GS:
+					value = pt->reg.base[segnr];
+					break;
+				case SEG_ES:
+				case SEG_CS:
+					value = pt->reg.s[segnr];
+					break;
+			}
+
+			if (var_logging)
+				setProgLineValue(script_pos+1,value);
+			return true;
+		}
+		return false;
+	}
 	else if(is_hex(op))
 	{
 		// We have a HEX constant
@@ -1879,6 +1936,17 @@ bool OllyLang::is_register(string s)
 	transform(s.begin(), s.end(), s.begin(), pf);
 
 	if(reg_names.find(s) != reg_names.end())
+		return true;
+
+	return false;
+}
+
+bool OllyLang::is_segment(string s)
+{
+	int (*pf)(int) = tolower; 
+	transform(s.begin(), s.end(), s.begin(), pf);
+
+	if(seg_names.find(s) != seg_names.end())
 		return true;
 
 	return false;

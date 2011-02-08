@@ -518,12 +518,12 @@ typedef struct t_table {               // Window with sorted data and bar
 #define REG_EDI        7
 
 #define SEG_UNDEF     -1
-#define SEG_ES         0               // Indexes of segment/selector registers
-#define SEG_CS         1               // in t_reg.
-#define SEG_SS         2
-#define SEG_DS         3
-#define SEG_FS         4
-#define SEG_GS         5
+#define SEG_SS         0               // Indexes of segment/selector registers
+#define SEG_DS         1               // in t_reg.
+#define SEG_FS         2
+#define SEG_GS         3
+#define SEG_ES         4
+#define SEG_CS         5
 
 // Selected items in register window.
 #define RS_NONE        0x0000          // No selection

@@ -55,6 +55,9 @@ Get Trace Addr
 
 2.1 What's new?
 ---------------
+1.83
++ Added Support for segment registers ES,CS,SS,DS,FS,GS (readonly and lower priority than vars)
+
 1.82 (08 Feb 2011)
 + Added IFA,IFAE,IFB,IFBE condition commands and their aliases IFG,IFGE,IFL,IFLE
 + Added Aliases IFE, IFNE to IFEQ and IFNEQ

@@ -162,6 +162,8 @@ private:
 	set<string> reg_names;
 	// Possible flag names
 	set<string> flag_names;
+	// Possible segment registers
+	set<string> seg_names;
 
 	bool bUnicode;
 
@@ -399,7 +401,9 @@ private:
 	bool GetANYOpValue(string op, string &value, bool hex8forExec=false);
 	void LogRegNr(string& name);
 	int GetRegNr(string& name);
+	int GetSegNr(string& name);
 	bool is_register(string s);
+	bool is_segment(string s);
 	bool is_floatreg(string s);
 	bool is_flag(string s);
 	bool is_variable(string& s);
