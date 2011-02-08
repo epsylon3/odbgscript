@@ -1,4 +1,4 @@
-/L20"OllyDBG Script 1.80" ASM_LANG Line Comment = ; Block Comment On = /* Block Comment Off = */ String Chars = " Escape Char = \ File Extensions = OSC
+/L20"OllyDBG Script 1.82" ASM_LANG Line Comment = ; Block Comment On = /* Block Comment Off = */ String Chars = " Escape Char = \ File Extensions = OSC
 /Indent Strings = ":"
 /Delimiters = ~!%&^*()-+=|\/{}[]:;"'<> 	,
 /Function String = "%[ ^t]++^([a-zA-Z_0-9]+^):$"
@@ -56,14 +56,14 @@ XCHG XOR
 call
 else endif
 goto
-ifeq ifneq
-ja jae jb jbe je jg jge jmp jne jnz jz
+ifa ifae ifb ifbe ife ifeq ifg ige ifl ifle ifne ifneq
+ja jae jb jbe je jg jge jl jle jmp jne jnz jz
 ret
 CALL
 ELSE ENDIF
 GOTO
-IFEQ IFNEQ
-JA JAE JB JBE JE JG JGE JMP JNE JNZ JZ
+IFA IFAE IFB IFBE IFE IFEQ IFG IGE IFL IFLE IFNE IFNEQ
+JA JAE JB JBE JE JG JGE JL JLE JMP JNE JNZ JZ
 RET
 /C3"Constants" STYLE_KEYWORD Colors = 8323072 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
 ADDR
