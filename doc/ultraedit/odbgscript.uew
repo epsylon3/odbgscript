@@ -88,7 +88,7 @@ $RESULT $RESULT_1 $RESULT_2 $RESULT_3 $RESULT_4 $VERSION
 /C4"Registers" Colors = 255 Colors Back = 16777215 Colors Auto Back = 1 Font Style = 0
 ah al ax
 bh bl bp bx
-carry? ch cl cr0 cr2 cr3 cr4 cs cx
+cf ch cl cr0 cr2 cr3 cr4 cs cx
 dh di dl dr0 dr1 dr2 dr3 dr4 dr5 dr6 dr7 ds dx
 eax ebx ebp ecx edi edx es esi esp ext0 ext1 ext2 ext3 ext4 ext5 ext6 ext7
 extb0 extb1 extb2 extb3
