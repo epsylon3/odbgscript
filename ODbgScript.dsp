@@ -43,19 +43,19 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /Zp4 /MD /O2 /Ob0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_WINDLL" /D "ODBGSCRIPT_EXPORTS" /D "_AFXDLL" /Fr /J /FD /c
+# ADD CPP /nologo /G6 /Zp4 /MD /GX /O2 /Ob0 /D "WIN32" /D "NDEBUG" /D "UNICODE" /D "_UNICODE" /D "_WINDOWS" /D "ODBGSCRIPT_EXPORTS" /D "_WINDLL" /D "_AFXDLL" /Fr /J /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /win32
 # SUBTRACT MTL /mktyplib203
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
-# ADD RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 mfcs42.lib mfc42.lib msvcprt.lib msvcrt.lib ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /pdb:none /machine:I386
+# ADD LINK32 MFCUIA32.LIB mfcs42u.lib mfc42u.lib msvcprt.lib msvcrt.lib ollydbg201.lib shlwapi.lib Comdlg32.lib /nologo /dll /pdb:none /machine:I386
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=copy.bat
@@ -75,7 +75,7 @@ PostBuild_Cmds=copy.bat
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODBGSCRIPT_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /Zp1 /MDd /Gi /GX- /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_WINDLL" /D "ODBGSCRIPT_EXPORTS" /D "_AFXDLL" /FR /J /FD /GZ /c
+# ADD CPP /nologo /G6 /Zp1 /MDd /Gi /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_WINDLL" /D "ODBGSCRIPT_EXPORTS" /D "_AFXDLL" /FR /J /FD /GZ /c
 # SUBTRACT CPP /Gy /u /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /win32
@@ -87,8 +87,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 mfcs42d.lib mfc42d.lib msvcprtd.lib msvcrt.lib ollydbgvc7.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /incremental:no /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /out:"Debug/ODbgScript.dll " /pdbtype:sept
-# SUBTRACT LINK32 /verbose /profile /map /nodefaultlib /force
+# ADD LINK32 MFCUIA32.LIB mfcs42ud.lib mfc42ud.lib msvcprtd.lib msvcrt.lib ollydbg201.lib kernel32.lib user32.lib shlwapi.lib Comdlg32.lib shell32.lib /nologo /dll /incremental:no /debug /machine:I386 /nodefaultlib:"msvcrtd.lib MSVCRTD mfcs42u.lib mfc42u.lib" /nodefaultlib /out:"Debug/ODbgScript.dll " /pdbtype:sept
+# SUBTRACT LINK32 /verbose /profile /map /force
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=copydbg.bat
@@ -239,7 +239,7 @@ SOURCE=.\OllyLang.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Plugin.h
+SOURCE=.\Plugin201.h
 # End Source File
 # Begin Source File
 
@@ -261,10 +261,6 @@ SOURCE=.\StdAfx.h
 SOURCE=.\var.h
 # PROP Exclude_From_Build 1
 # End Source File
-# Begin Source File
-
-SOURCE=.\version.h
-# End Source File
 # End Group
 # Begin Group "Resource Files"
 
@@ -284,6 +280,10 @@ SOURCE=.\resource.h
 # Begin Source File
 
 SOURCE=.\script.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\version.h
 # End Source File
 # End Group
 # Begin Source File

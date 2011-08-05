@@ -17,11 +17,6 @@ INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 #include "Progress.h"
 #include "LogWindows.h"
 
-#define itoa _itoa
-#define ultoa _ultoa
-#define stricmp _stricmp
-#define strupr _strupr
-
 // This is the table for Script Execution
 typedef struct t_dbgmemblock {
 
@@ -31,7 +26,7 @@ typedef struct t_dbgmemblock {
 	bool	autoclean;	 //On script restart/change
 
 	ulong	free_at_eip; //To free memory block used in ASM commands
-	
+
 	//Optional actions to do
 	bool	restore_registers;
 	bool	listmemory;
@@ -40,7 +35,7 @@ typedef struct t_dbgmemblock {
 	bool	result_register;
 	int		reg_to_return;
 
-} t_dbgmemblock; 
+} t_dbgmemblock;
 
 typedef struct t_export {
 
@@ -57,7 +52,7 @@ typedef struct t_exec_history {
 class OllyLang
 {
 public:
-	
+
 	//Window Objects
 	t_table wndProg;
 	vector<t_wndprog_data> tProgLines;
@@ -66,16 +61,16 @@ public:
 
 	t_table wndLog;
 	vector<t_wndlog_data> tLogLines;
-	
-	string scriptpath;
-	string currentdir;
+
+	wstring scriptpath;
+	wstring currentdir;
 
 	//allocated memory blocks to free at end of script
 	vector<t_dbgmemblock> tMemBlocks;
 
 	//to know if dialog is opened, to destroy on reset
 	HWND hwndinput;
-	
+
 	//last breakpoint reason
 	ulong break_reason;
 	ulong break_memaddr;
@@ -83,12 +78,12 @@ public:
 	// Constructor & destructor
 	OllyLang();
 	~OllyLang();
-	
+
 	// Public methods
 //	int GetState();
-	bool LoadScript(LPSTR fileName);
-	bool SaveBreakPoints(LPSTR fileName);
-	bool LoadBreakPoints(LPSTR fileName);
+	bool LoadScript(wstring fileName);
+	bool SaveBreakPoints(wstring fileName);
+	bool LoadBreakPoints(wstring fileName);
 
 	bool Pause();
 	bool Resume();
@@ -105,18 +100,18 @@ public:
 	bool editVariable(int nVar);
 	bool followVariable(int nVar);
 	void execCommand(void);
-	
+
 	bool jumpToLine(int number);
 
-	int SearchInScript(string text, ulong fromPos);
+	int SearchInScript(wstring text, ulong fromPos);
 
 	// "Events"
 	bool OnBreakpoint(int reason, int details);
 	bool OnException(DWORD ExceptionCode);
 
 	// For ODBG_Plugincmd (external calls)
-	bool isCommand(string cmd);
-	bool callCommand(string cmd, string args);
+	bool isCommand(wstring cmd);
+	bool callCommand(wstring cmd, wstring args);
 
 	// Free Allocated Virtual Memory
 	bool freeMemBlocks();
@@ -128,17 +123,17 @@ public:
 	void addHistoryStep(int line);
 
 	// The script that is being executed
-	vector<string> script;
+	vector<wstring> script;
 	// Variables that exist
-	map<string, var> variables;
+	map<wstring, var> variables;
 	// Labels in script
-	map<string, int> labels;
-	// Breakpoint Auto Jumps 
+	map<wstring, int> labels;
+	// Breakpoint Auto Jumps
 	map<int, int> bpjumps;
 	// Call/Ret in script
 	vector<ulong> calls;
 	// IF/ELSE in script
-	vector<string> conditions;
+	vector<wstring> conditions;
 
 	bool showVarHistory;
 
@@ -154,16 +149,16 @@ public:
 	int execCursor;
 
 private:
-	
-	typedef bool (OllyLang::*PFCOMMAND)(string);
+
+	typedef bool (OllyLang::*PFCOMMAND)(wstring);
 	// Commands that can be executed
-	map<string, PFCOMMAND> commands;
+	map<wstring, PFCOMMAND> commands;
 	// Possible register names
-	set<string> reg_names;
+	set<wstring> reg_names;
 	// Possible flag names
-	set<string> flag_names;
+	set<wstring> flag_names;
 	// Possible segment registers
-	set<string> seg_names;
+	set<wstring> seg_names;
 
 	bool bUnicode;
 
@@ -199,7 +194,7 @@ private:
 	bool bInternalBP;
 	ulong nIgnoreNextValuesHist;
 
-	string errorstr;
+	wstring errorstr;
 
 	DWORD tickcount;
 	DWORD tickcounthi;
@@ -214,205 +209,205 @@ private:
 	int adrREF; int curREF;
 
 	// Commands
-	bool DoADD(string args);
-	bool DoAI(string args);
-	bool DoALLOC(string args);
-	bool DoANA(string args);
-	bool DoAND(string args);
-	bool DoAO(string args);
-	bool DoASK(string args);
-	bool DoASM(string args);
-	bool DoASMTXT(string args);
-	bool DoATOI(string args);
-	bool DoBACKUP(string args);
-	bool DoBC(string args);
-	bool DoBCA(string args);
-	bool DoBD(string args);
-	bool DoBDA(string args);
-	bool DoBEGINSEARCH(string args);
-	bool DoBP(string args);
-	bool DoBPCND(string args);
-	bool DoBPD(string args);
-	bool DoBPGOTO(string args);
-	bool DoBPHWCA(string args);
-	bool DoBPHWC(string args);
-	bool DoBPHWS(string args);
-	bool DoBPL(string args);
-	bool DoBPLCND(string args);
-	bool DoBPMC(string args);
-	bool DoBPRM(string args);
-	bool DoBPWM(string args);
-	bool DoBPX(string args);
-	bool DoBUF(string args);
-	bool DoCALL(string args);
-	bool DoCLOSE(string args);
-	bool DoCMP(string args);
-	bool DoCMT(string args);
-	bool DoCOB(string args);
-	bool DoCOE(string args);
-	bool DoCRET(string args);
-	bool DoDBH(string args);
-	bool DoDBS(string args);
-	bool DoDEC(string args);
-	bool DoDIV(string args);
-	bool DoDM(string args);
-	bool DoDMA(string args);
-	bool DoDPE(string args);
-	bool DoELSE(string args);
-	bool DoENDE(string args);
-	bool DoENDIF(string args);
-	bool DoENDSEARCH(string args);
-	bool DoEOB(string args);
-	bool DoEOE(string args);
-	bool DoERUN(string args);
-	bool DoESTEP(string args);
-	bool DoESTI(string args);
-	bool DoEVAL(string args);
-	bool DoEXEC(string args);
-	bool DoFILL(string args);
-	bool DoFIND(string args);
-	bool DoFINDCALLS(string args);
-	bool DoFINDCMD(string args);
-	bool DoFINDOP(string args);
-	bool DoFINDOPREV(string args);
-	bool DoFINDMEM(string args);
-	bool DoFREE(string args);
-	bool DoGAPI(string args);
-	bool DoGBPM(string args);
-	bool DoGBPR(string args);
-	bool DoGCI(string args);
-	bool DoGCMT(string args);
-	bool DoGFO(string args);
-	bool DoGLBL(string args);
-	bool DoGMA(string args);
-	bool DoGMEMI(string args);
-	bool DoGMEXP(string args);
-	bool DoGMI(string args);
-	bool DoGMIMP(string args);
-	bool DoGN(string args);
-	bool DoGO(string args);
-	bool DoGOPI(string args);
-	bool DoGPA(string args);
-	bool DoGPP(string args);
-	bool DoGPI(string args);
-	bool DoGREF(string args);
-	bool DoGRO(string args);
-	bool DoGSL(string args);
-	bool DoGSTR(string args);
-	bool DoGSTRW(string args);
-	bool DoHANDLE(string args);
-	bool DoHISTORY(string args);
-	bool DoElse(void);
-	bool DoIFA(string args);
-	bool DoIFAE(string args);
-	bool DoIFB(string args);
-	bool DoIFBE(string args);
-	bool DoIFEQ(string args);
-	bool DoIFNEQ(string args);
-	bool DoINC(string args);
-	bool DoINIR(string args);
-	bool DoINIW(string args);
-	bool DoITOA(string args);
-	bool DoJA(string args);
-	bool DoJAE(string args);
-	bool DoJB(string args);
-	bool DoJBE(string args);
-	bool DoJE(string args);
-	bool DoJMP(string args);
-	bool DoJNE(string args);
-	bool DoKEY(string args);
-	bool DoLBL(string args);
-	bool DoLC(string args);	
-	bool DoLCLR(string args);
-	bool DoLEN(string args);	
-	bool DoLOADLIB(string args);
-	bool DoLOG(string args);
-	bool DoLOGBUF(string args);
-    bool DoLM(string args);
-	bool DoMEMCOPY(string args);
-	bool DoMOV(string args);
-	bool DoMSG(string args);
-	bool DoMSGYN(string args);
-	bool DoMUL(string args);
-	bool DoNAMES(string args);
-	bool DoNEG(string args);
-	bool DoNOT(string args);
-	bool DoOLLY(string args);
-	bool DoOR(string args);
-	bool DoOPCODE(string args);
-	bool DoOPENDUMP(string args);
-	bool DoOPENTRACE(string args);
-	bool DoPAUSE(string args);
-	bool DoPOP(string args);
-	bool DoPOPA(string args);
-	bool DoPREOP(string args);
-	bool DoPUSH(string args);
-	bool DoPUSHA(string args);
-	bool DoRBP(string args);
-	bool DoREADSTR(string args);
-	bool DoREFRESH(string args);
-	bool DoREPL(string args);
-	bool DoRESET(string args);
-	bool DoREF(string args);
-	bool DoRET(string args);
-	bool DoREV(string args);
-	bool DoROL(string args);
-	bool DoROR(string args);
-	bool DoRTR(string args);
-	bool DoRTU(string args);
-	bool DoRUN(string args);
-	bool DoSBP(string args);
-	bool DoSCMP(string args);
-	bool DoSCMPI(string args);
-	bool DoSETOPTION(string args);
-	bool DoSHL(string args);
-	bool DoSHR(string args);
-	bool DoSTI(string args);
-	bool DoSTO(string args);
-	bool DoSTR(string args);
-	bool DoSUB(string args);
-	bool DoTC(string args);
-	bool DoTEST(string args);
-	bool DoTI(string args);
-	bool DoTICK(string args);
-	bool DoTICND(string args);
-	bool DoTO(string args);
-	bool DoTOCND(string args);
-	bool DoUNICODE(string args);
-	bool DoVAR(string args);
-	bool DoXOR(string args);
-	bool DoXCHG(string args);
-	bool DoWRT(string args);
-	bool DoWRTA(string args);
+	bool DoADD(wstring args);
+	bool DoAI(wstring args);
+	bool DoALLOC(wstring args);
+	bool DoANA(wstring args);
+	bool DoAND(wstring args);
+	bool DoAO(wstring args);
+	bool DoASK(wstring args);
+	bool DoASM(wstring args);
+	bool DoASMTXT(wstring args);
+	bool DoATOI(wstring args);
+//	bool DoBACKUP(wstring args);
+	bool DoBC(wstring args);
+	bool DoBCA(wstring args);
+	bool DoBD(wstring args);
+	bool DoBDA(wstring args);
+	bool DoBEGINSEARCH(wstring args);
+	bool DoBP(wstring args);
+//	bool DoBPCND(wstring args);
+//	bool DoBPD(wstring args);
+//	bool DoBPGOTO(wstring args);
+//	bool DoBPHWCA(wstring args);
+//	bool DoBPHWC(wstring args);
+//	bool DoBPHWS(wstring args);
+//	bool DoBPL(wstring args);
+//	bool DoBPLCND(wstring args);
+//	bool DoBPMC(wstring args);
+//	bool DoBPRM(wstring args);
+//	bool DoBPWM(wstring args);
+//	bool DoBPX(wstring args);
+//	bool DoBUF(wstring args);
+//	bool DoCALL(wstring args);
+//	bool DoCLOSE(wstring args);
+//	bool DoCMP(wstring args);
+//	bool DoCMT(wstring args);
+//	bool DoCOB(wstring args);
+//	bool DoCOE(wstring args);
+//	bool DoCRET(wstring args);
+//	bool DoDBH(wstring args);
+//	bool DoDBS(wstring args);
+//	bool DoDEC(wstring args);
+//	bool DoDIV(wstring args);
+//	bool DoDM(wstring args);
+//	bool DoDMA(wstring args);
+//	bool DoDPE(wstring args);
+//	bool DoELSE(wstring args);
+//	bool DoENDE(wstring args);
+//	bool DoENDIF(wstring args);
+	bool DoENDSEARCH(wstring args);
+//	bool DoEOB(wstring args);
+//	bool DoEOE(wstring args);
+	bool DoERUN(wstring args);
+	bool DoESTEP(wstring args);
+	bool DoESTI(wstring args);
+//	bool DoEVAL(wstring args);
+//	bool DoEXEC(wstring args);
+//	bool DoFILL(wstring args);
+//	bool DoFIND(wstring args);
+//	bool DoFINDCALLS(wstring args);
+//	bool DoFINDCMD(wstring args);
+//	bool DoFINDOP(wstring args);
+//	bool DoFINDOPREV(wstring args);
+//	bool DoFINDMEM(wstring args);
+//	bool DoFREE(wstring args);
+//	bool DoGAPI(wstring args);
+//	bool DoGBPM(wstring args);
+//	bool DoGBPR(wstring args);
+//	bool DoGCI(wstring args);
+//	bool DoGCMT(wstring args);
+//	bool DoGFO(wstring args);
+//	bool DoGLBL(wstring args);
+//	bool DoGMA(wstring args);
+//	bool DoGMEMI(wstring args);
+//	bool DoGMEXP(wstring args);
+//	bool DoGMI(wstring args);
+//	bool DoGMIMP(wstring args);
+//	bool DoGN(wstring args);
+//	bool DoGO(wstring args);
+//	bool DoGOPI(wstring args);
+//	bool DoGPA(wstring args);
+//	bool DoGPP(wstring args);
+//	bool DoGPI(wstring args);
+//	bool DoGREF(wstring args);
+//	bool DoGRO(wstring args);
+//	bool DoGSL(wstring args);
+//	bool DoGSTR(wstring args);
+//	bool DoGSTRW(wstring args);
+//	bool DoHANDLE(wstring args);
+//	bool DoHISTORY(wstring args);
+//	bool DoElse(void);
+//	bool DoIFA(wstring args);
+//	bool DoIFAE(wstring args);
+//	bool DoIFB(wstring args);
+//	bool DoIFBE(wstring args);
+//	bool DoIFEQ(wstring args);
+//	bool DoIFNEQ(wstring args);
+//	bool DoINC(wstring args);
+	bool DoINIR(wstring args);
+	bool DoINIW(wstring args);
+	bool DoITOA(wstring args);
+//	bool DoJA(wstring args);
+//	bool DoJAE(wstring args);
+//	bool DoJB(wstring args);
+//	bool DoJBE(wstring args);
+//	bool DoJE(wstring args);
+//	bool DoJMP(wstring args);
+//	bool DoJNE(wstring args);
+//	bool DoKEY(wstring args);
+//	bool DoLBL(wstring args);
+//	bool DoLC(wstring args);
+//	bool DoLCLR(wstring args);
+//	bool DoLEN(wstring args);
+//	bool DoLOADLIB(wstring args);
+	bool DoLOG(wstring args);
+	bool DoLOGBUF(wstring args);
+	bool DoLM(wstring args);
+	bool DoMEMCOPY(wstring args);
+	bool DoMOV(wstring args);
+	bool DoMSG(wstring args);
+	bool DoMSGYN(wstring args);
+	bool DoMUL(wstring args);
+	bool DoNAMES(wstring args);
+	bool DoNEG(wstring args);
+	bool DoNOT(wstring args);
+	bool DoOLLY(wstring args);
+	bool DoOR(wstring args);
+//	bool DoOPCODE(wstring args);
+//	bool DoOPENDUMP(wstring args);
+//	bool DoOPENTRACE(wstring args);
+	bool DoPAUSE(wstring args);
+	bool DoPOP(wstring args);
+	bool DoPOPA(wstring args);
+//	bool DoPREOP(wstring args);
+	bool DoPUSH(wstring args);
+	bool DoPUSHA(wstring args);
+//	bool DoRBP(wstring args);
+//	bool DoREADSTR(wstring args);
+	bool DoREFRESH(wstring args);
+//	bool DoREPL(wstring args);
+//	bool DoRESET(wstring args);
+//	bool DoREF(wstring args);
+//	bool DoRET(wstring args);
+//	bool DoREV(wstring args);
+//	bool DoROL(wstring args);
+//	bool DoROR(wstring args);
+//	bool DoRTR(wstring args);
+//	bool DoRTU(wstring args);
+//	bool DoRUN(wstring args);
+//	bool DoSBP(wstring args);
+//	bool DoSCMP(wstring args);
+//	bool DoSCMPI(wstring args);
+//	bool DoSETOPTION(wstring args);
+//	bool DoSHL(wstring args);
+//	bool DoSHR(wstring args);
+	bool DoSTI(wstring args);
+	bool DoSTO(wstring args);
+//	bool DoSTR(wstring args);
+//	bool DoSUB(wstring args);
+//	bool DoTC(wstring args);
+//	bool DoTEST(wstring args);
+//	bool DoTI(wstring args);
+//	bool DoTICK(wstring args);
+//	bool DoTICND(wstring args);
+//	bool DoTO(wstring args);
+//	bool DoTOCND(wstring args);
+//	bool DoUNICODE(wstring args);
+	bool DoVAR(wstring args);
+	bool DoXOR(wstring args);
+	bool DoXCHG(wstring args);
+	bool DoWRT(wstring args);
+	bool DoWRTA(wstring args);
 
 	// Helper functions
-	vector<string> GetScriptFromFile(LPSTR fileName);
-	int InsertScript(vector<string> toInsert, int posInScript);
-	int getStringOperatorPos(string &ops);
-	int getDWOperatorPos(string &ops);
-	int getFLTOperatorPos(string &ops);
-	bool CreateOperands(string& args, string ops[], uint len, bool preferstr=false);
-	bool CreateOp(string& args, string ops[], uint len, bool preferstr=false);
-	bool GetBYTEOpValue(string op, BYTE &value);
-	bool GetDWOpValue(string op, DWORD &value, DWORD default_val=0);
-	bool GetAddrOpValue(string op, DWORD &value);
-	bool GetFLTOpValue(string op, long double &value);
-	bool GetSTROpValue(string op, string &value, int size=0);
-	bool GetANYOpValue(string op, string &value, bool hex8forExec=false);
-	void LogRegNr(string& name);
-	int GetRegNr(string& name);
-	int GetSegNr(string& name);
-	bool is_register(string s);
-	bool is_segment(string s);
-	bool is_floatreg(string s);
-	bool is_flag(string s);
-	bool is_variable(string& s);
+	vector<wstring> GetScriptFromFile(wstring fileName);
+	int InsertScript(vector<wstring> toInsert, int posInScript);
+	int getStringOperatorPos(wstring &ops);
+	int getDWOperatorPos(wstring &ops);
+	int getFLTOperatorPos(wstring &ops);
+	bool CreateOperands(wstring& args, wstring ops[], uint len, bool preferstr=false);
+	bool CreateOp(wstring& args, wstring ops[], uint len, bool preferstr=false);
+	bool GetBYTEOpValue(wstring op, BYTE &value);
+	bool GetDWOpValue(wstring op, DWORD &value, DWORD default_val=0);
+	bool GetAddrOpValue(wstring op, DWORD &value);
+	bool GetFLTOpValue(wstring op, long double &value);
+	bool GetSTROpValue(wstring op, wstring &value, int size=0);
+	bool GetANYOpValue(wstring op, wstring &value, bool hex8forExec=false);
+	void LogRegNr(wstring& name);
+	int GetRegNr(wstring& name);
+	int GetSegNr(wstring& name);
+	bool is_register(wstring s);
+	bool is_segment(wstring s);
+	bool is_floatreg(wstring s);
+	bool is_flag(wstring s);
+	bool is_variable(wstring& s);
 
 	bool ParseLabels();
-	bool Process(string& codeLine);
+	bool Process(wstring& codeLine);
 	bool AddBPJump(int bpaddr,int labelpos);
 
-	string ResolveVarsForExec(string in,bool hex8forExec);
+	wstring ResolveVarsForExec(wstring in,bool hex8forExec);
 
 	// Debug functions
 	void DumpVars();
@@ -420,18 +415,18 @@ private:
 	void DumpBPJumps();
 	void DumpScript();
 
-	void DropVariable(string var);
+	void DropVariable(wstring var);
 
-	string FormatAsmDwords(string asmLine);
+	wstring FormatAsmDwords(wstring asmLine);
 
-	DWORD AddProcessMemoryBloc(string data, int mode=PAGE_READWRITE);
+	DWORD AddProcessMemoryBloc(wstring data, int mode=PAGE_READWRITE);
 	DWORD AddProcessMemoryBloc(int size, int mode=PAGE_READWRITE);
 	bool  DelProcessMemoryBloc(DWORD address);
 
-	bool ExecuteASM(string command);
+	bool ExecuteASM(wstring command);
 
 	// Save / Restore Breakpoints
-	t_hardbpoint hwbp_t[4];
+	t_bphard hwbp_t[4];
 	t_sorted sortedsoftbp_t;
 	t_bpoint* softbp_t;
 
@@ -461,7 +456,7 @@ private:
 		DWORD eip;
 
 	} reg_backup;
-	
+
 	bool SaveRegisters(bool stackToo);
 	bool RestoreRegisters(bool stackToo);
 
@@ -472,5 +467,5 @@ private:
 	//cache for GMIMP
 	vector<t_export> tImportsCache;
 	ulong importsCacheAddr;
-		
+
 };

@@ -4,253 +4,250 @@
 
 using namespace std;
 
-#ifdef _DEBUG
-#  undef TEXT
-#  define TEXT(x) x
-#endif
-
 OllyLang::OllyLang()
 {
 	memset(&wndProg,0,sizeof(wndProg));
 	memset(&wndLog,0,sizeof(wndLog));
+	StrcopyW(wndLog.name,SHORTNAME,PLUGIN_NAME);
+	wndLog.mode=TABLE_SAVEALL;
 
 	script_state = SS_NONE;
 
 	// Init array with register names
 	reg_names.clear();
-	reg_names.insert("eax");
-	reg_names.insert("ebx");
-	reg_names.insert("ecx");
-	reg_names.insert("edx");
-	reg_names.insert("esi");
-	reg_names.insert("edi");
-	reg_names.insert("esp");
-	reg_names.insert("ebp");
-	reg_names.insert("eip");
+	reg_names.insert(L"eax");
+	reg_names.insert(L"ebx");
+	reg_names.insert(L"ecx");
+	reg_names.insert(L"edx");
+	reg_names.insert(L"esi");
+	reg_names.insert(L"edi");
+	reg_names.insert(L"esp");
+	reg_names.insert(L"ebp");
+	reg_names.insert(L"eip");
 //  new reg
 
-	reg_names.insert("ax");
-    reg_names.insert("bx");
-    reg_names.insert("cx");
-	reg_names.insert("dx");
-	reg_names.insert("bp");
-	reg_names.insert("si");
-    reg_names.insert("di");
+	reg_names.insert(L"ax");
+	reg_names.insert(L"bx");
+	reg_names.insert(L"cx");
+	reg_names.insert(L"dx");
+	reg_names.insert(L"bp");
+	reg_names.insert(L"si");
+	reg_names.insert(L"di");
 
-	reg_names.insert("al");
-	reg_names.insert("ah");
-	reg_names.insert("bl");
-	reg_names.insert("bh");
-	reg_names.insert("cl");
-	reg_names.insert("ch");
-	reg_names.insert("dl");
-	reg_names.insert("dh");
+	reg_names.insert(L"al");
+	reg_names.insert(L"ah");
+	reg_names.insert(L"bl");
+	reg_names.insert(L"bh");
+	reg_names.insert(L"cl");
+	reg_names.insert(L"ch");
+	reg_names.insert(L"dl");
+	reg_names.insert(L"dh");
 
 	// Segments
 	seg_names.clear();
-	seg_names.insert("es");
-	seg_names.insert("cs");
-	seg_names.insert("ss");
-	seg_names.insert("ds");
-	seg_names.insert("fs");
-	seg_names.insert("gs");
+	seg_names.insert(L"es");
+	seg_names.insert(L"cs");
+	seg_names.insert(L"ss");
+	seg_names.insert(L"ds");
+	seg_names.insert(L"fs");
+	seg_names.insert(L"gs");
 
 	// Init array of flag names
 	flag_names.clear();
-	flag_names.insert("!CF");
-	flag_names.insert("!PF");
-	flag_names.insert("!AF");
-	flag_names.insert("!ZF");
-	flag_names.insert("!SF");
-	flag_names.insert("!DF");
-	flag_names.insert("!OF");
+	flag_names.insert(L"!CF");
+	flag_names.insert(L"!PF");
+	flag_names.insert(L"!AF");
+	flag_names.insert(L"!ZF");
+	flag_names.insert(L"!SF");
+	flag_names.insert(L"!DF");
+	flag_names.insert(L"!OF");
 
 	// Init command array
-	commands["add"] = &OllyLang::DoADD;
-	commands["ai"] = &OllyLang::DoAI;
-	commands["alloc"] = &OllyLang::DoALLOC;
-	commands["ana"] = &OllyLang::DoANA;
-	 commands["an"] = &OllyLang::DoANA;
-	commands["and"] = &OllyLang::DoAND;
-	commands["ao"] = &OllyLang::DoAO;
-	commands["ask"] = &OllyLang::DoASK;
-	commands["asm"] = &OllyLang::DoASM;	
-    commands["asmtxt"] = &OllyLang::DoASMTXT;	
-	commands["atoi"] = &OllyLang::DoATOI;
-	commands["backup"] = &OllyLang::DoBACKUP;
-	commands["bc"] = &OllyLang::DoBC;
-	commands["bd"] = &OllyLang::DoBD;
-	commands["beginsearch"] = &OllyLang::DoBEGINSEARCH;
-	commands["bp"] = &OllyLang::DoBP;
-	commands["bpcnd"] = &OllyLang::DoBPCND;
-	commands["bpd"] = &OllyLang::DoBPD;
-	commands["bpgoto"] = &OllyLang::DoBPGOTO;
-	 commands["bphwcall"] = &OllyLang::DoBPHWCA;
-	commands["bphwc"] = &OllyLang::DoBPHWC;
-	commands["bphws"] = &OllyLang::DoBPHWS;
-	commands["bpl"] = &OllyLang::DoBPL;
-	commands["bplcnd"] = &OllyLang::DoBPLCND;
-	commands["bpmc"] = &OllyLang::DoBPMC;
-	commands["bprm"] = &OllyLang::DoBPRM;
-	commands["bpwm"] = &OllyLang::DoBPWM;
-	commands["bpx"] = &OllyLang::DoBPX;
-	commands["buf"] = &OllyLang::DoBUF;
-	commands["call"] = &OllyLang::DoCALL;
-	commands["close"] = &OllyLang::DoCLOSE;
-	commands["cmp"] = &OllyLang::DoCMP;
-	commands["cmt"] = &OllyLang::DoCMT;
-	commands["cob"] = &OllyLang::DoCOB;
-	commands["coe"] = &OllyLang::DoCOE;
-	commands["cret"] = &OllyLang::DoCRET;
-	commands["dbh"] = &OllyLang::DoDBH;
-	commands["dbs"] = &OllyLang::DoDBS;
-	commands["dec"] = &OllyLang::DoDEC;
-	commands["div"] = &OllyLang::DoDIV;
-	commands["dm"] = &OllyLang::DoDM;
-	commands["dma"] = &OllyLang::DoDMA;
-	commands["dpe"] = &OllyLang::DoDPE;
-	commands["else"] = &OllyLang::DoELSE;
-	commands["ende"] = &OllyLang::DoENDE;
-	commands["endif"] = &OllyLang::DoENDIF;
-	commands["endsearch"] = &OllyLang::DoENDSEARCH;
-	commands["erun"] = &OllyLang::DoERUN;
-	commands["esti"] = &OllyLang::DoESTI;
-	 commands["esto"] = &OllyLang::DoERUN;
-	commands["estep"] = &OllyLang::DoESTEP;
-	commands["eob"] = &OllyLang::DoEOB;
-	commands["eoe"] = &OllyLang::DoEOE;
-	commands["eval"] = &OllyLang::DoEVAL;
-	commands["exec"] = &OllyLang::DoEXEC;
-	commands["fill"] = &OllyLang::DoFILL;
-	commands["find"] = &OllyLang::DoFIND;
-	commands["findcalls"] = &OllyLang::DoFINDCALLS;
-	commands["findcmd"] = &OllyLang::DoFINDCMD;
-	 commands["findcmds"] = &OllyLang::DoFINDCMD;
-	commands["findop"] = &OllyLang::DoFINDOP;
-	commands["findoprev"] = &OllyLang::DoFINDOPREV;	
-	commands["findmem"] = &OllyLang::DoFINDMEM;
-	commands["free"] = &OllyLang::DoFREE;
-	commands["gapi"] = &OllyLang::DoGAPI;
-	commands["gbpm"] = &OllyLang::DoGBPM;
-	commands["gbpr"] = &OllyLang::DoGBPR;
-	commands["gci"] = &OllyLang::DoGCI;
-	commands["gcmt"] = &OllyLang::DoGCMT;
-	commands["gfo"] = &OllyLang::DoGFO;
-	commands["glbl"] = &OllyLang::DoGLBL;
-	commands["gmemi"] = &OllyLang::DoGMEMI;
-	commands["gmexp"] = &OllyLang::DoGMEXP;
-	commands["gma"] = &OllyLang::DoGMA;
-	commands["gmi"] = &OllyLang::DoGMI;
-	commands["gmimp"] = &OllyLang::DoGMIMP;
-	commands["gn"] = &OllyLang::DoGN;
-	commands["go"] = &OllyLang::DoGO;
-	commands["gopi"] = &OllyLang::DoGOPI;	
-	commands["gpa"] = &OllyLang::DoGPA;
-	commands["gpi"] = &OllyLang::DoGPI;
-	commands["gpp"] = &OllyLang::DoGPP;
-	commands["gro"] = &OllyLang::DoGRO;
-	commands["gref"] = &OllyLang::DoGREF;
-	commands["gsl"] = &OllyLang::DoGSL;
-	commands["gstr"] = &OllyLang::DoGSTR;
-	commands["gstrw"] = &OllyLang::DoGSTRW;
-	commands["handle"] = &OllyLang::DoHANDLE;
-	commands["history"] = &OllyLang::DoHISTORY;
-	commands["ifeq"] = &OllyLang::DoIFEQ;
-	 commands["ife"] = &OllyLang::DoIFEQ;
-	commands["ifneq"] = &OllyLang::DoIFNEQ;
-	 commands["ifne"] = &OllyLang::DoIFNEQ;
-	commands["ifa"] = &OllyLang::DoIFA;
-	commands["ifae"] = &OllyLang::DoIFAE;
-	commands["ifb"] = &OllyLang::DoIFB;
-	commands["ifbe"] = &OllyLang::DoIFBE;
-	 commands["ifg"] = &OllyLang::DoIFA;
-	 commands["ifge"] = &OllyLang::DoIFAE;
-	 commands["ifl"] = &OllyLang::DoIFB;
-	 commands["ifle"] = &OllyLang::DoIFBE;
-	commands["inc"] = &OllyLang::DoINC;
-	commands["inir"] = &OllyLang::DoINIR;
-	commands["iniw"] = &OllyLang::DoINIW;
-	commands["itoa"] = &OllyLang::DoITOA;
-	commands["ja"] = &OllyLang::DoJA;
-	commands["jae"] = &OllyLang::DoJAE;
-	commands["jb"] = &OllyLang::DoJB;
-	commands["jbe"] = &OllyLang::DoJBE;
-	commands["je"] = &OllyLang::DoJE;
-	 commands["jg"] = &OllyLang::DoJA;
-	 commands["jge"] = &OllyLang::DoJAE;
-	 commands["jl"] = &OllyLang::DoJB;
-	 commands["jle"] = &OllyLang::DoJBE;
-	commands["jmp"] = &OllyLang::DoJMP;
-	 commands["goto"] = &OllyLang::DoJMP;
-	commands["jne"] = &OllyLang::DoJNE;
-	 commands["jnz"] = &OllyLang::DoJNE;
-	 commands["jz"] = &OllyLang::DoJE;
-	commands["key"] = &OllyLang::DoKEY;
-	commands["lbl"] = &OllyLang::DoLBL;
-    commands["lc"] = &OllyLang::DoLC;
-    commands["lclr"] = &OllyLang::DoLCLR;
-    commands["len"] = &OllyLang::DoLEN;
-	commands["loadlib"] = &OllyLang::DoLOADLIB;
-    commands["lm"] = &OllyLang::DoLM;
-	commands["log"] = &OllyLang::DoLOG;
-	commands["logbuf"] = &OllyLang::DoLOGBUF;
-	commands["memcpy"] = &OllyLang::DoMEMCOPY;
-	commands["mov"] = &OllyLang::DoMOV;
-	commands["msg"] = &OllyLang::DoMSG;
-	commands["msgyn"] = &OllyLang::DoMSGYN;
-	commands["mul"] = &OllyLang::DoMUL;
-	commands["names"] = &OllyLang::DoNAMES;	
-    commands["neg"] = &OllyLang::DoNEG;
-	commands["not"] = &OllyLang::DoNOT;
-	commands["or"] = &OllyLang::DoOR;
-	commands["olly"] = &OllyLang::DoOLLY;
-	commands["opcode"] = &OllyLang::DoOPCODE;
-	commands["opendump"] = &OllyLang::DoOPENDUMP;
-	commands["opentrace"] = &OllyLang::DoOPENTRACE;
-	commands["pause"] = &OllyLang::DoPAUSE;
-	commands["pop"] = &OllyLang::DoPOP;
-	commands["popa"] = &OllyLang::DoPOPA;
-	commands["preop"] = &OllyLang::DoPREOP;
-	commands["push"] = &OllyLang::DoPUSH;
-	commands["pusha"] = &OllyLang::DoPUSHA;
-	commands["rbp"] = &OllyLang::DoRBP;
-	commands["readstr"] = &OllyLang::DoREADSTR;
-	commands["refresh"] = &OllyLang::DoREFRESH;
-	commands["ref"] = &OllyLang::DoREF;
-	commands["repl"] = &OllyLang::DoREPL;
-	commands["reset"] = &OllyLang::DoRESET;
-	commands["ret"] = &OllyLang::DoRET;
-	commands["rev"] = &OllyLang::DoREV;
-    commands["rol"] = &OllyLang::DoROL;
-    commands["ror"] = &OllyLang::DoROR;
-	commands["rtr"] = &OllyLang::DoRTR;
-	commands["rtu"] = &OllyLang::DoRTU;
-	commands["run"] = &OllyLang::DoRUN;
-	commands["sbp"] = &OllyLang::DoSBP;
-	commands["scmp"] = &OllyLang::DoSCMP;
-	commands["scmpi"] = &OllyLang::DoSCMPI;
-    commands["setoption"] = &OllyLang::DoSETOPTION;
-	commands["shl"] = &OllyLang::DoSHL;
-	commands["shr"] = &OllyLang::DoSHR;
-	 commands["step"] = &OllyLang::DoSTO;
-	commands["sti"] = &OllyLang::DoSTI;
-	commands["sto"] = &OllyLang::DoSTO;
-	commands["str"] = &OllyLang::DoSTR;
-	commands["sub"] = &OllyLang::DoSUB;
-	commands["tc"] = &OllyLang::DoTC;
-	commands["test"] = &OllyLang::DoTEST;
-	commands["ti"] = &OllyLang::DoTI;
-	commands["tick"] = &OllyLang::DoTICK;
-	commands["ticnd"] = &OllyLang::DoTICND;
-	commands["to"] = &OllyLang::DoTO;
-	commands["tocnd"] = &OllyLang::DoTOCND;
-	 commands["ubp"] = &OllyLang::DoBP;
-	commands["unicode"] = &OllyLang::DoUNICODE;
-	commands["var"] = &OllyLang::DoVAR;
-	commands["xor"] = &OllyLang::DoXOR;
-	commands["xchg"] = &OllyLang::DoXCHG;
-	commands["wrt"] = &OllyLang::DoWRT;
-	commands["wrta"] = &OllyLang::DoWRTA;
+	commands[L"add"] = &OllyLang::DoADD;					//ok v2
+	commands[L"ai"] = &OllyLang::DoAI;
+	commands[L"alloc"] = &OllyLang::DoALLOC;
+	commands[L"ana"] = &OllyLang::DoANA;
+	 commands[L"an"] = &OllyLang::DoANA;					//todo K_ANALYSE
+	commands[L"and"] = &OllyLang::DoAND;
+	commands[L"ao"] = &OllyLang::DoAO;
+	commands[L"ask"] = &OllyLang::DoASK;					//ok v2
+	commands[L"asm"] = &OllyLang::DoASM;	
+	commands[L"asmtxt"] = &OllyLang::DoASMTXT;	
+	commands[L"atoi"] = &OllyLang::DoATOI;
+//	commands[L"backup"] = &OllyLang::DoBACKUP;
+	commands[L"bc"] = &OllyLang::DoBC;						//ok v2
+	commands[L"bd"] = &OllyLang::DoBD;						//ok v2
+	commands[L"beginsearch"] = &OllyLang::DoBEGINSEARCH;
+	commands[L"bp"] = &OllyLang::DoBP;						//ok v2
+//	commands[L"bpcnd"] = &OllyLang::DoBPCND;
+//	commands[L"bpd"] = &OllyLang::DoBPD;
+//	commands[L"bpgoto"] = &OllyLang::DoBPGOTO;
+//	 commands[L"bphwcall"] = &OllyLang::DoBPHWCA;
+//	commands[L"bphwc"] = &OllyLang::DoBPHWC;
+//	commands[L"bphws"] = &OllyLang::DoBPHWS;
+//	commands[L"bpl"] = &OllyLang::DoBPL;
+//	commands[L"bplcnd"] = &OllyLang::DoBPLCND;
+//	commands[L"bpmc"] = &OllyLang::DoBPMC;
+//	commands[L"bprm"] = &OllyLang::DoBPRM;
+//	commands[L"bpwm"] = &OllyLang::DoBPWM;
+//	commands[L"bpx"] = &OllyLang::DoBPX;
+//	commands[L"buf"] = &OllyLang::DoBUF;
+//	commands[L"call"] = &OllyLang::DoCALL;
+//	commands[L"close"] = &OllyLang::DoCLOSE;
+//	commands[L"cmp"] = &OllyLang::DoCMP;
+//	commands[L"cmt"] = &OllyLang::DoCMT;
+//	commands[L"cob"] = &OllyLang::DoCOB;
+//	commands[L"coe"] = &OllyLang::DoCOE;
+//	commands[L"cret"] = &OllyLang::DoCRET;
+//	commands[L"dbh"] = &OllyLang::DoDBH;
+//	commands[L"dbs"] = &OllyLang::DoDBS;
+//	commands[L"dec"] = &OllyLang::DoDEC;
+//	commands[L"div"] = &OllyLang::DoDIV;
+//	commands[L"dm"] = &OllyLang::DoDM;
+//	commands[L"dma"] = &OllyLang::DoDMA;
+//	commands[L"dpe"] = &OllyLang::DoDPE;
+//	commands[L"else"] = &OllyLang::DoELSE;
+//	commands[L"ende"] = &OllyLang::DoENDE;
+//	commands[L"endif"] = &OllyLang::DoENDIF;
+//	commands[L"endsearch"] = &OllyLang::DoENDSEARCH;
+	commands[L"erun"] = &OllyLang::DoERUN;
+	commands[L"esti"] = &OllyLang::DoESTI;
+	 commands[L"esto"] = &OllyLang::DoERUN;
+	commands[L"estep"] = &OllyLang::DoESTEP;
+//	commands[L"eob"] = &OllyLang::DoEOB;
+//	commands[L"eoe"] = &OllyLang::DoEOE;
+//	commands[L"eval"] = &OllyLang::DoEVAL;
+//	commands[L"exec"] = &OllyLang::DoEXEC;
+//	commands[L"fill"] = &OllyLang::DoFILL;
+//	commands[L"find"] = &OllyLang::DoFIND;
+//	commands[L"findcalls"] = &OllyLang::DoFINDCALLS;
+//	commands[L"findcmd"] = &OllyLang::DoFINDCMD;
+//	 commands[L"findcmds"] = &OllyLang::DoFINDCMD;
+//	commands[L"findop"] = &OllyLang::DoFINDOP;
+//	commands[L"findoprev"] = &OllyLang::DoFINDOPREV;	
+//	commands[L"findmem"] = &OllyLang::DoFINDMEM;
+//	commands[L"free"] = &OllyLang::DoFREE;
+//	commands[L"gapi"] = &OllyLang::DoGAPI;
+//	commands[L"gbpm"] = &OllyLang::DoGBPM;
+//	commands[L"gbpr"] = &OllyLang::DoGBPR;
+//	commands[L"gci"] = &OllyLang::DoGCI;
+//	commands[L"gcmt"] = &OllyLang::DoGCMT;
+//	commands[L"gfo"] = &OllyLang::DoGFO;
+//	commands[L"glbl"] = &OllyLang::DoGLBL;
+//	commands[L"gmemi"] = &OllyLang::DoGMEMI;
+//	commands[L"gmexp"] = &OllyLang::DoGMEXP;
+//	commands[L"gma"] = &OllyLang::DoGMA;
+//	commands[L"gmi"] = &OllyLang::DoGMI;
+//	commands[L"gmimp"] = &OllyLang::DoGMIMP;
+//	commands[L"gn"] = &OllyLang::DoGN;
+//	commands[L"go"] = &OllyLang::DoGO;
+//	commands[L"gopi"] = &OllyLang::DoGOPI;	
+//	commands[L"gpa"] = &OllyLang::DoGPA;
+//	commands[L"gpi"] = &OllyLang::DoGPI;
+//	commands[L"gpp"] = &OllyLang::DoGPP;
+//	commands[L"gro"] = &OllyLang::DoGRO;
+//	commands[L"gref"] = &OllyLang::DoGREF;
+//	commands[L"gsl"] = &OllyLang::DoGSL;
+//	commands[L"gstr"] = &OllyLang::DoGSTR;
+//	commands[L"gstrw"] = &OllyLang::DoGSTRW;
+//	commands[L"handle"] = &OllyLang::DoHANDLE;
+//	commands[L"history"] = &OllyLang::DoHISTORY;
+//	commands[L"ifeq"] = &OllyLang::DoIFEQ;
+//	 commands[L"ife"] = &OllyLang::DoIFEQ;
+//	commands[L"ifneq"] = &OllyLang::DoIFNEQ;
+//	 commands[L"ifne"] = &OllyLang::DoIFNEQ;
+//	commands[L"ifa"] = &OllyLang::DoIFA;
+//	commands[L"ifae"] = &OllyLang::DoIFAE;
+//	commands[L"ifb"] = &OllyLang::DoIFB;
+//	commands[L"ifbe"] = &OllyLang::DoIFBE;
+//	 commands[L"ifg"] = &OllyLang::DoIFA;
+//	 commands[L"ifge"] = &OllyLang::DoIFAE;
+//	 commands[L"ifl"] = &OllyLang::DoIFB;
+//	 commands[L"ifle"] = &OllyLang::DoIFBE;
+//	commands[L"inc"] = &OllyLang::DoINC;
+	commands[L"inir"] = &OllyLang::DoINIR;
+	commands[L"iniw"] = &OllyLang::DoINIW;
+//	commands[L"_itow"] = &OllyLang::DoITOA;
+//	commands[L"ja"] = &OllyLang::DoJA;
+//	commands[L"jae"] = &OllyLang::DoJAE;
+//	commands[L"jb"] = &OllyLang::DoJB;
+//	commands[L"jbe"] = &OllyLang::DoJBE;
+//	commands[L"je"] = &OllyLang::DoJE;
+//	 commands[L"jg"] = &OllyLang::DoJA;
+//	 commands[L"jge"] = &OllyLang::DoJAE;
+//	 commands[L"jl"] = &OllyLang::DoJB;
+//	 commands[L"jle"] = &OllyLang::DoJBE;
+//	commands[L"jmp"] = &OllyLang::DoJMP;
+//	 commands[L"goto"] = &OllyLang::DoJMP;
+//	commands[L"jne"] = &OllyLang::DoJNE;
+//	 commands[L"jnz"] = &OllyLang::DoJNE;
+//	 commands[L"jz"] = &OllyLang::DoJE;
+//	commands[L"key"] = &OllyLang::DoKEY;
+//	commands[L"lbl"] = &OllyLang::DoLBL;
+//	commands[L"lc"] = &OllyLang::DoLC;
+//	commands[L"lclr"] = &OllyLang::DoLCLR;
+//	commands[L"len"] = &OllyLang::DoLEN;
+//	commands[L"loadlib"] = &OllyLang::DoLOADLIB;
+//	commands[L"lm"] = &OllyLang::DoLM;
+	commands[L"log"] = &OllyLang::DoLOG;					//ok v2
+	commands[L"logbuf"] = &OllyLang::DoLOGBUF;
+	commands[L"memcpy"] = &OllyLang::DoMEMCOPY;
+	commands[L"mov"] = &OllyLang::DoMOV;					//ok v2
+	commands[L"msg"] = &OllyLang::DoMSG;					//ok v2
+	commands[L"msgyn"] = &OllyLang::DoMSGYN;
+	commands[L"mul"] = &OllyLang::DoMUL;
+	commands[L"names"] = &OllyLang::DoNAMES;	
+	commands[L"neg"] = &OllyLang::DoNEG;
+	commands[L"not"] = &OllyLang::DoNOT;
+	commands[L"or"] = &OllyLang::DoOR;
+	commands[L"olly"] = &OllyLang::DoOLLY;
+//	commands[L"opcode"] = &OllyLang::DoOPCODE;
+//	commands[L"opendump"] = &OllyLang::DoOPENDUMP;
+//	commands[L"opentrace"] = &OllyLang::DoOPENTRACE;
+	commands[L"pause"] = &OllyLang::DoPAUSE;
+//	commands[L"pop"] = &OllyLang::DoPOP;
+	commands[L"popa"] = &OllyLang::DoPOPA;					//ok v2
+//	commands[L"preop"] = &OllyLang::DoPREOP;
+//	commands[L"push"] = &OllyLang::DoPUSH;
+	commands[L"pusha"] = &OllyLang::DoPUSHA;				//ok v2
+//	commands[L"rbp"] = &OllyLang::DoRBP;
+//	commands[L"readstr"] = &OllyLang::DoREADSTR;
+	commands[L"refresh"] = &OllyLang::DoREFRESH;
+//	commands[L"ref"] = &OllyLang::DoREF;
+//	commands[L"repl"] = &OllyLang::DoREPL;
+//	commands[L"reset"] = &OllyLang::DoRESET;
+//	commands[L"ret"] = &OllyLang::DoRET;
+//	commands[L"rev"] = &OllyLang::DoREV;
+//	commands[L"rol"] = &OllyLang::DoROL;
+//	commands[L"ror"] = &OllyLang::DoROR;
+//	commands[L"rtr"] = &OllyLang::DoRTR;
+//	commands[L"rtu"] = &OllyLang::DoRTU;
+//	commands[L"run"] = &OllyLang::DoRUN;
+//	commands[L"sbp"] = &OllyLang::DoSBP;
+//	commands[L"scmp"] = &OllyLang::DoSCMP;
+//	commands[L"scmpi"] = &OllyLang::DoSCMPI;
+//	commands[L"setoption"] = &OllyLang::DoSETOPTION;
+//	commands[L"shl"] = &OllyLang::DoSHL;
+//	commands[L"shr"] = &OllyLang::DoSHR;
+	 commands[L"step"] = &OllyLang::DoSTO;
+	commands[L"sti"] = &OllyLang::DoSTI;
+	commands[L"sto"] = &OllyLang::DoSTO;
+//	commands[L"str"] = &OllyLang::DoSTR;
+//	commands[L"sub"] = &OllyLang::DoSUB;
+//	commands[L"tc"] = &OllyLang::DoTC;
+//	commands[L"test"] = &OllyLang::DoTEST;
+//	commands[L"ti"] = &OllyLang::DoTI;
+//	commands[L"tick"] = &OllyLang::DoTICK;
+//	commands[L"ticnd"] = &OllyLang::DoTICND;
+//	commands[L"to"] = &OllyLang::DoTO;
+//	commands[L"tocnd"] = &OllyLang::DoTOCND;
+//	 commands[L"ubp"] = &OllyLang::DoBP;
+//	commands[L"unicode"] = &OllyLang::DoUNICODE;
+	commands[L"var"] = &OllyLang::DoVAR;					//ok v2
+	commands[L"xor"] = &OllyLang::DoXOR;					//ok v2
+	commands[L"xchg"] = &OllyLang::DoXCHG;
+	commands[L"wrt"] = &OllyLang::DoWRT;
+	commands[L"wrta"] = &OllyLang::DoWRTA;
 
 	script_state = SS_INITIALIZED;
 	script_pos = 0;
@@ -263,7 +260,7 @@ OllyLang::OllyLang()
 
 	search_buffer=NULL;
 
-	hwmain = hwndOllyDbg();
+	hwmain = _hwollymain;
 	hwndinput = 0;
 
 	require_ollyloop = 0;
@@ -284,7 +281,7 @@ OllyLang::OllyLang()
 OllyLang::~OllyLang()
 {
 	if (search_buffer!=NULL)
-		DoENDSEARCH("");
+		DoENDSEARCH(L"");
 
 	FreeBpMem();
 	labels.clear();
@@ -302,10 +299,10 @@ bool OllyLang::Reset()
 	bpjumps.clear();
 	calls.clear();
 	conditions.clear();
-	char s[10] = {0};
-	sprintf(s,"%i.%i", VERSIONHI, VERSIONLO);
-	string str(s);
-	variables["$VERSION"] = str;
+	wchar_t s[10] = {0};
+	wsprintf(s,L"%i.%i", VERSIONHI, VERSIONLO);
+	wstring str(s);
+	variables[L"$VERSION"] = str;
 	EOB_row = -1;
 	EOE_row = -1;
 	script_state = SS_LOADED;
@@ -336,14 +333,15 @@ bool OllyLang::Reset()
 	return true;
 }
 
-vector<string> OllyLang::GetScriptFromFile(LPSTR file)
+vector<wstring> OllyLang::GetScriptFromFile(wstring file)
 {
-    currentdir = file;
-    currentdir = currentdir.substr(0, currentdir.rfind('\\') + 1);
+	currentdir = file;
+	currentdir = currentdir.substr(0, currentdir.rfind('\\') + 1);
 	
-	vector<string> script;
-	string scriptline;
-	ifstream fin(file, ios::in);
+	vector<wstring> script;
+	wstring scriptline;
+
+	wifstream fin(w_wstrto(file).c_str(), ios::in);
 
 	while(getline(fin, scriptline))
 		script.push_back(scriptline);
@@ -353,11 +351,11 @@ vector<string> OllyLang::GetScriptFromFile(LPSTR file)
 	return script;
 }
 
-int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
+int OllyLang::InsertScript(vector<wstring> toInsert, int posInScript)
 {
-	vector<string>::iterator iter = toInsert.begin();
+	vector<wstring>::iterator iter = toInsert.begin();
 
-	string scriptline, cleanline;
+	wstring scriptline, cleanline;
 	int inc_pos = -1, linesAdded = 0;
 	int p;
 	bool comment_todisplay, in_asm=false, in_comment=false;
@@ -366,79 +364,79 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 	while(iter != toInsert.end())
 	{
 		comment_todisplay=0;
-		scriptline = trim(*iter);
+		scriptline = w_trim(*iter);
 		// Handle comments
-		if(scriptline == "/*")
+		if(scriptline == L"/*")
 		{
 			in_comment = true;
 			comment_todisplay=1;
 			//iter++;
 			//continue;
 		}
-		else if(scriptline == "*/")
+		else if(scriptline == L"*/")
 		{
 			in_comment = false;
 			comment_todisplay=1;
 			//iter++;
 			//continue;
 		}
-		else if (scriptline.find("/*")==0 && scriptline.find("*/")==string::npos) {
+		else if (scriptline.find(L"/*")==0 && scriptline.find(L"*/")==wstring::npos) {
 			in_comment = true;
 			comment_todisplay=1;
 		}
-		else if (scriptline.find("*/")==(scriptline.length()-2) ) {
+		else if (scriptline.find(L"*/")==(scriptline.length()-2) ) {
 			in_comment = false;
 			comment_todisplay=1;
 		}
-		else if (scriptline.find("/*")!=string::npos && scriptline.find("*/")==string::npos) 
+		else if (scriptline.find(L"/*")!=wstring::npos && scriptline.find(L"*/")==wstring::npos) 
 		{
-			p=scriptline.find("/*");
+			p=scriptline.find(L"/*");
 			scriptline.erase(p,scriptline.length()-p);
 			in_comment = true;
 		}
-		else if (scriptline.find("*/")!=string::npos && scriptline.find("/*")==string::npos) 
+		else if (scriptline.find(L"*/")!=wstring::npos && scriptline.find(L"/*")==wstring::npos) 
 		{
-			p=scriptline.find("*/");
+			p=scriptline.find(L"*/");
 			scriptline.erase(0,p+2);
 			in_comment = false;
 		}
-		else if (scriptline.find("/*")!=string::npos && scriptline.find("*/")!=string::npos) 
+		else if (scriptline.find(L"/*")!=wstring::npos && scriptline.find(L"*/")!=wstring::npos) 
 		{
-			p=scriptline.find("/*");
-			scriptline.erase(p,scriptline.find("*/")-p+2);
+			p=scriptline.find(L"/*");
+			scriptline.erase(p,scriptline.find(L"*/")-p+2);
 		}
 		// Check for comments at the end of rows and erase those
-		else if(!in_comment && scriptline.find("//")!=string::npos) 
+		else if(!in_comment && scriptline.find(L"//")!=wstring::npos) 
 		{
 			cleanline=scriptline;
-			p=scriptline.find("//");
-			if (scriptline.find("\"")!=string::npos) {
+			p=scriptline.find(L"//");
+			if (scriptline.find(L"\"")!=wstring::npos) {
 
-				if (p > scriptline.rfind("\"") || p < scriptline.find("\""))
+				if (p > scriptline.rfind(L"\"") || p < scriptline.find(L"\""))
 					scriptline.erase(p,scriptline.length()-p);
 
 			} else
 				scriptline.erase(p,scriptline.length()-p);
 
-			if (trim(scriptline) == "") {
+			if (w_trim(scriptline).empty()) {
 				scriptline = cleanline;
 				comment_todisplay=1;
 			}
 		}
-		else if(!in_comment && scriptline.find(";")!=string::npos) 
+		else if(!in_comment && scriptline.find(L";")!=wstring::npos) 
 		{
-			p=scriptline.find(";");
+			p=scriptline.find(L";");
 			if (p==0) {
 				comment_todisplay=1;
 				scriptline.erase(p,1);
-				scriptline = ";" + trim(scriptline);
-				while(scriptline.find("\t")!=string::npos)
-					scriptline.replace(scriptline.find("\t"),1," ");
+				scriptline = L";" + w_trim(scriptline);
+				while(scriptline.find(L"\t")!=wstring::npos)
+					scriptline.replace(scriptline.find(L"\t"),1,L" ");
 
 			}
-			else if (scriptline.find("\"")!=string::npos) {
+			else if (scriptline.find(L"\"")!=wstring::npos) {
 
-				if (p > scriptline.rfind("\"") || p < scriptline.find("\""))
+				if (p > scriptline.rfind(L"\"") || p < scriptline.find(L"\""))
 					scriptline.erase(p,scriptline.length()-p);
 
 			} else
@@ -452,28 +450,28 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 		} 
 		// ASM Blocks
 
-		scriptline = trim(scriptline);
-		if (scriptline=="") {
+		scriptline = w_trim(scriptline);
+		if (scriptline.empty()) {
 			comment_todisplay=1;
 //			iter++;
 //			continue;
 		}
 
-		string lcline = scriptline;
+		wstring lcline = scriptline;
 		int (*pf)(int)=tolower;
 		transform(lcline.begin(), lcline.end(), lcline.begin(), pf);
 
 		// Check for #inc and include file if it exists, else add line
-		if((inc_pos = lcline.find("#inc")) != string::npos)
+		if((inc_pos = lcline.find(L"#inc")) != wstring::npos)
 		{
 			cout << inc_pos;
-			string args = trim(scriptline.substr(inc_pos + 4, scriptline.length()));
-			string filename;
+			wstring args = w_trim(scriptline.substr(inc_pos + 4, scriptline.length()));
+			wstring filename;
 			if(GetSTROpValue(args, filename))
 			{
-				if (filename.find('\\')==string::npos)
+				if (filename.find('\\')==wstring::npos)
 					filename = currentdir+filename;
-				vector<string> newScript = GetScriptFromFile((LPSTR)filename.c_str());				
+				vector<wstring> newScript = GetScriptFromFile(filename);				
 				posInScript += InsertScript(newScript, posInScript);
 
 				iter++;
@@ -481,11 +479,11 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			}
 			else
 			{
-				MessageBox(hwmain, TEXT("Bad #inc directive!"), TEXT("OllyScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
+				MessageBox(hwmain, L"Bad #inc directive!", PLUGIN_NAME L" error", MB_OK | MB_ICONERROR | MB_TOPMOST);
 			}
 		}
 		// Logging
-		else if((inc_pos = lcline.find("#log")) > -1 && !in_comment)
+		else if((inc_pos = lcline.find(L"#log")) > -1 && !in_comment)
 		{
 			enable_logging = true;
 		}
@@ -495,13 +493,13 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 			linesAdded++;
 			posInScript++;
 
-			if(!in_comment && in_asm && lcline == "ende") {
+			if(!in_comment && in_asm && lcline == L"ende") {
 				in_asm = false;
 			}
 
-			if (!in_comment && ToLower(scriptline) == "endif") {
+			if (!in_comment && ToLower(scriptline) == L"endif") {
 				in_cond--;
-			} else if (!in_comment && ToLower(scriptline) == "else") {
+			} else if (!in_comment && ToLower(scriptline) == L"else") {
 				in_cond--;
 			}
 
@@ -511,13 +509,13 @@ int OllyLang::InsertScript(vector<string> toInsert, int posInScript)
 											|	((in_cond && !(in_cond & 1))*PROG_ATTR_IFLEVODD)
 						);
 
-			if (!in_comment && ToLower(scriptline).substr(0,2) == "if") {
+			if (!in_comment && ToLower(scriptline).substr(0,2) == L"if") {
 				in_cond++;
-			} else if (!in_comment && ToLower(scriptline) == "else") {
+			} else if (!in_comment && ToLower(scriptline) == L"else") {
 				in_cond++;
 			}
 
-			if(!in_comment && lcline == "exec") {
+			if(!in_comment && lcline == L"exec") {
 				in_asm = true;
 			}
 
@@ -558,69 +556,71 @@ int OllyLang::GetFirstCodeLine(int from)
 	return nline;
 }
 
-bool OllyLang::SaveBreakPoints(LPSTR fileName) {
+bool OllyLang::SaveBreakPoints(wstring fileName) {
 
-	if (strcmp(fileName,"")==0)
+	if (fileName.empty())
 		return false;
 
-	Pluginwritestringtoini(hinstModule(), "BP_FILE", fileName);	
+	Writetoini(NULL,PLUGIN_NAME, L"BP_FILE", L"%s", fileName);
 
 	int i,bpcnt=1;
-	char* buffer[5]={0};
-	string s,sline;
+	wchar_t buffer[5]={0};
+	wstring s,sline;
 
 	t_wndprog_data *ppl;
 	for (i=1;i<script.size();i++) {
-		ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,i);
+		ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.sorted,i);
 		if (ppl==NULL)
 			return false; 
 		if (ppl->pause) {
-			s="BP_";
-			sprintf((char*)buffer,"%04u",bpcnt);
-			s.append((char*)buffer);
-			sprintf((char*)buffer,"%u",i);
-			sline.assign((char*)buffer);
-			sline.append(",");
+			s=L"BP_";
+			wsprintf((wchar_t*)buffer,L"%04u",bpcnt);
+			s.append((wchar_t*)buffer);
+			wsprintf((wchar_t*)buffer,L"%u",i);
+			sline.assign((wchar_t*)buffer);
+			sline.append(L",");
 			sline.append(ppl->command);
-			Pluginwritestringtoini(hinstModule(), (char*)s.c_str(), (char*)sline.c_str());			
+			
+			Writetoini(NULL,PLUGIN_NAME, (wchar_t*)s.c_str(), L"%s", sline.c_str());
 			bpcnt++;
 		}
 	}
 	//clean last one
-	s="BP_";
-	sprintf((char*)buffer,"%04u",bpcnt);
-	s.append((char*)buffer);
-	Pluginwritestringtoini(hinstModule(), (char*)s.c_str(), "");			
+	s=L"BP_";
+	wsprintf((wchar_t*)buffer,L"%04u",bpcnt);
+	s.append((wchar_t*)buffer);
+	Writetoini(NULL,PLUGIN_NAME, (wchar_t*)s.c_str(), L"");			
 	return true;
 }
 
-bool OllyLang::LoadBreakPoints(LPSTR fileName) {
+bool OllyLang::LoadBreakPoints(wstring fileName) {
 
-	string s;
-	char* sbuffer[MAX_PATH]={0};
-	Pluginreadstringfromini(hinstModule(), "BP_FILE", (char*)sbuffer, "");
-	s.assign((char*)sbuffer);
+	wstring s;
+	wchar_t sbuffer[MAX_PATH]={0};
+	Getfromini(NULL,PLUGIN_NAME, L"BP_FILE", L"%s", sbuffer);
+	s.assign((wchar_t*)sbuffer);
 
-	if (stricmp(fileName,s.c_str())!=0)
+	if (StrCmpIW(fileName.c_str(),s.c_str())!=0)
 		return false;
 
 	int i,bpcnt=0,p;
-	char* ibuffer[5]={0};
+	wchar_t ibuffer[5]={0};
 
 	t_wndprog_data *ppl;
 	do {
 		bpcnt++;
-		s="BP_";
-		sprintf((char*)ibuffer,"%04u",bpcnt);
-		s.append((char*)ibuffer);
-		Pluginreadstringfromini(hinstModule(), (char*)s.c_str(), (char*)sbuffer, "");		
-		s.assign((char*)sbuffer);
-		if (s!="") {
+		s=L"BP_";
+		wsprintf((wchar_t*)ibuffer,L"%04u",bpcnt);
+		s.append((wchar_t*)ibuffer);
+		//Pluginreadstringfromini(, (wchar_t*)s.c_str(), (wchar_t*)sbuffer, L"");	
+		Getfromini(NULL,PLUGIN_NAME, (wchar_t*)s.c_str(), L"%s", sbuffer);	
+		s.assign((wchar_t*)sbuffer);
+		if (s!=L"") {
 
-			if ((p=s.find(","))!=string::npos) {
-				sscanf(s.substr(0,p).c_str(),"%u",&i);
+			if ((p=s.find(L","))!=wstring::npos) {
+				swscanf(s.substr(0,p).c_str(),L"%u",&i);
 				s.erase(0,p+1);
-				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,i);
+				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.sorted,i);
 				if (ppl!=NULL) {
 					if (s.compare(ppl->command)==0)
 						ppl->pause=1; 
@@ -629,32 +629,32 @@ bool OllyLang::LoadBreakPoints(LPSTR fileName) {
 
 		}
 
-	} while (s!="");
+	} while (s.length());
 
 	return true;
 }
 
-bool OllyLang::LoadScript(LPSTR file)
+bool OllyLang::LoadScript(wstring file)
 {
 
-	SaveBreakPoints((char*)scriptpath.c_str());
+	SaveBreakPoints((wchar_t*)scriptpath.c_str());
 
 	script.clear();
 	labels.clear();
- 	clearProgLines(); 
+	clearProgLines(); 
 	Reset();
 
 	scriptpath = file;	
 	
 	addProgLine(0,scriptpath);
 
-	vector<string> unparsedScript = GetScriptFromFile(file);
+	vector<wstring> unparsedScript = GetScriptFromFile(file);
 	InsertScript(unparsedScript, 0);
 
 	// Find all labels
 	ParseLabels();
 
-	Pluginwritestringtoini(hinstModule(), "ScriptDir", file);
+	Writetoini(NULL,PLUGIN_NAME, L"ScriptDir", (wchar_t*) file.c_str());
 	mruAddFile(file);
 
 	pgr_scriptpos=GetFirstCodeLine(0)+1;
@@ -686,7 +686,7 @@ bool OllyLang::Step(int forceStep)
 	PFCOMMAND func;
 	LARGE_INTEGER i64;
 	int refresh=1;
-	char lastchar;
+	wchar_t lastchar;
 	bool jumped;
 	int old_pos;
 
@@ -711,10 +711,10 @@ bool OllyLang::Step(int forceStep)
 			return false;
 
 		// Get code line
-		string codeLine = trim(script[script_pos]);
+		wstring codeLine = w_trim(script[script_pos]);
 
 		pgr_scriptpos=script_pos+1;
-		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
+		cpuasm = Getcpudisasmdump();
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);
 
 		//HANDLE SCRIPT BREAKPOINTS
@@ -726,22 +726,21 @@ bool OllyLang::Step(int forceStep)
 		// Log line of code if that is enabled
 		if(enable_logging)
 		{
-			char buffer[4096] = {0};
-			strcpy(buffer, "--> ");
-			strcat(buffer, codeLine.c_str());
+			wchar_t buffer[4096] = {0};
+			wsprintf(buffer, L"--> %d", codeLine);
 			Addtolist(0, -1, buffer);
 		}
 
 		// Create command and arguments
-		string command = codeLine;
-		string args = "";
+		wstring command = codeLine;
+		wstring args = L"";
 		int (*pf)(int)=tolower; 
-		size_t pos = codeLine.find_first_of(" \t\r\n");
-		if(pos != string::npos)
+		size_t pos = codeLine.find_first_of(L" \t\r\n");
+		if(pos != wstring::npos)
 		{
-			command = trim(codeLine.substr(0, pos));
+			command = w_trim(codeLine.substr(0, pos));
 			transform(command.begin(), command.end(), command.begin(), pf);
-			args = trim(codeLine.substr(pos));
+			args = w_trim(codeLine.substr(pos));
 
 		} else {
 
@@ -758,7 +757,7 @@ bool OllyLang::Step(int forceStep)
 			func = commands[command];
 			old_pos = script_pos;
 
-			if (tickcount==0 && command=="tick") {
+			if (tickcount==0 && command==L"tick") {
 				//for first tick.
 				i64 = MyGetTickCount(tickcount_startup);
 				tickcount = i64.LowPart;
@@ -778,37 +777,37 @@ bool OllyLang::Step(int forceStep)
 		else 
 		{
 			// No such command
-			errorstr = "No such command: " + codeLine;
+			errorstr = L"No such command: " + codeLine;
 			Pause();
 			InvalidateProgWindow();
 		}
-		if (Getstatus() != STAT_RUNNING)
-			pgr_scriptpos=script_pos+1;
+//		if (Getstatus() != STAT_RUNNING)
+//			pgr_scriptpos=script_pos+1;
 		
 		// Error in processing, show error and die
 		if(!result)
 		{
-			string message = TEXT("Error on line ");
-			char buffer[32] = {0};
-			message.append(itoa(script_pos + 1, buffer, 10));
-			message.append(TEXT("\n"));
-			message.append(TEXT("Text: "));
+			wstring message = L"Error on line ";
+			wchar_t buffer[32] = {0};
+			message.append(_itow(script_pos + 1, buffer, 10));
+			message.append(L"\n");
+			message.append(L"Text: ");
 			message.append(script.at(script_pos));
-			message.append(TEXT("\n"));
+			message.append(L"\n");
 			setProgLineAttr(script_pos+1,PROG_ATTR_ERROR);
-			if(errorstr != TEXT(""))
+			if(errorstr != L"")
 			{
 				message += errorstr;
 			}
-			MessageBox(0, message.c_str(), TEXT("OllyScript error!"), MB_ICONERROR | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
-			errorstr = "";
+			MessageBox(0, message.c_str(), PLUGIN_NAME L" error", MB_ICONERROR | MB_OK | MB_TOPMOST | MB_SETFOREGROUND);
+			errorstr = L"";
 			script_pos++;
 			pgr_scriptpos=script_pos+1;
 			Pause();
 			InvalidateProgWindow();
 			return false;
 		} else {
-			setProgLineResult(script_pos+1,variables["$RESULT"]);
+			setProgLineResult(script_pos+1,variables[L"$RESULT"]);
 		}
 
 		if (script_state == SS_LOADED) {
@@ -838,10 +837,10 @@ bool OllyLang::Step(int forceStep)
 		}
 
 		//Highlight next instr. not if app running... or if stepping
-		if (Getstatus() != STAT_RUNNING || forceStep==1)
-			pgr_scriptpos=script_pos+1;
+//		if (Getstatus() != STAT_RUNNING || forceStep==1)
+//			pgr_scriptpos=script_pos+1;
 
-		cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
+		cpuasm = Getcpudisasmdump();
 		setProgLineEIP(pgr_scriptpos,cpuasm->sel0);			
 		
 		addHistoryStep(pgr_scriptpos);
@@ -874,14 +873,14 @@ bool OllyLang::ProcessAddonAction()
 		
 		block--;
 		if (block->free_at_eip == thr->reg.ip) {
-			HANDLE hDbgPrc = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+			HANDLE hDbgPrc = _process;
 			VirtualFreeEx(hDbgPrc, block->hmem, block->size, MEM_DECOMMIT);
 			
 			//DbgMsgHex((ulong)block->hmem,"VirtualFreeEx");
 
 			if (block->result_register) {
-				variables["$RESULT"] = thr->reg.r[block->reg_to_return];
-				setProgLineResult(block->script_pos+1,variables["$RESULT"].dw);
+				variables[L"$RESULT"] = thr->reg.r[block->reg_to_return];
+				setProgLineResult(block->script_pos+1,variables[L"$RESULT"].dw);
 			}
 
 			if (block->listmemory) todo.listmemory=true;
@@ -896,7 +895,7 @@ bool OllyLang::ProcessAddonAction()
 			break;
 	}
 
-	if (todo.listmemory) DoREFRESH(""); //Listmemory();	
+	if (todo.listmemory) DoREFRESH(L""); //Listmemory();	
 	if (todo.restore_registers) RestoreRegisters(true);
 	
 	return true;
@@ -907,9 +906,9 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 {
 	break_reason=reason;
 	
-		//debug hint
-		if(reason&&!PP_HWBREAK)
-		break_reason=reason;
+	//debug hint
+//	if(reason&&!PP_HWBREAK)
+//		break_reason=reason;
 
 	if(bInternalBP) {
 		//dont process temporary bp (exec/ende Go command)
@@ -922,8 +921,8 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 	}
 	else 
 	{
-		if (reason != PP_EXCEPTION) {
-			t_dump* cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
+//		if (reason != PP_EXCEPTION) {
+			t_dump* cpuasm = Getcpudisasmdump();
 			DWORD addr = cpuasm->sel0;
 			if(bpjumps.find(addr) != bpjumps.end())
 			{
@@ -943,7 +942,7 @@ bool OllyLang::OnBreakpoint(int reason, int details)
 				Selectandscroll(&wndProg,pgr_scriptpos,2);
 				InvalidateProgWindow();
 			}
-		}
+//		}
 	}
 
 	return false;
@@ -960,33 +959,33 @@ bool OllyLang::OnException(DWORD ExceptionCode)
 		return false;
 }
 
-int OllyLang::getStringOperatorPos(string &ops) {
+int OllyLang::getStringOperatorPos(wstring &ops) {
 	
-	string cache=ops;
-	string operators = "+";
+	wstring cache=ops;
+	wstring operators = L"+";
 	int b=0,e=0,p=0,c;
 
 	//hide [pointer operations]
-	while ( (p=cache.find_first_of("[",p)) != string::npos) {
-		if ( (e=cache.find_first_of("]",p)) != string::npos) {
+	while ( (p=cache.find_first_of(L"[",p)) != wstring::npos) {
+		if ( (e=cache.find_first_of(L"]",p)) != wstring::npos) {
 			for (c=p;c<=e;c++) cache[c] = 'X';
 		}
 	}
 	e=0;p=0;
 
 	//Search for operator(s) outside "quotes" 
-	while ( (b=cache.find_first_of("\"",b)) != string::npos) {
+	while ( (b=cache.find_first_of(L"\"",b)) != wstring::npos) {
 
 		//Check Before
-		if ((p=cache.find_first_of(operators),e) != string::npos) {
+		if ((p=cache.find_first_of(operators),e) != wstring::npos) {
 			if (p<b) return p;
 		}
 
-		if ( (e=cache.find_first_of("\"",b+1)) != string::npos) {
+		if ( (e=cache.find_first_of(L"\"",b+1)) != wstring::npos) {
 	
 			//Check between
-			if ((p=cache.find_first_of(operators,e+1)) != string::npos) {
-				if (p<cache.find_first_of("\"",e+1)) return p;
+			if ((p=cache.find_first_of(operators,e+1)) != wstring::npos) {
+				if (p<cache.find_first_of(L"\"",e+1)) return p;
 			}
 			b=e;
 		}
@@ -998,24 +997,24 @@ int OllyLang::getStringOperatorPos(string &ops) {
 
 }
 
-int OllyLang::getDWOperatorPos(string &ops) {
+int OllyLang::getDWOperatorPos(wstring &ops) {
 	
-	string operators = "+-*/&|^<>";
+	wstring operators = L"+-*/&|^<>";
 	int b=0,e=0,p;
 
 	//Search for operator(s) outside [pointers]
-	while ( (b=ops.find("[",b)) != string::npos) {
+	while ( (b=ops.find(L"[",b)) != wstring::npos) {
 
 		//Check Before
-		if ((p=ops.find_first_of(operators),e) != string::npos) {
+		if ((p=ops.find_first_of(operators),e) != wstring::npos) {
 			if (p<b) return p;
 		}
 
-		if ( (e=ops.find("]",b+1)) != string::npos) {
+		if ( (e=ops.find(L"]",b+1)) != wstring::npos) {
 	
 			//Check between
-			if ((p=ops.find_first_of(operators,e+1)) != string::npos) {
-				if (p<ops.find("[",e+1)) return p;
+			if ((p=ops.find_first_of(operators,e+1)) != wstring::npos) {
+				if (p<ops.find(L"[",e+1)) return p;
 			}
 			b=e;
 		}
@@ -1026,24 +1025,24 @@ int OllyLang::getDWOperatorPos(string &ops) {
 	return ops.find_first_of(operators,e);
 }
 
-int OllyLang::getFLTOperatorPos(string &ops) {
+int OllyLang::getFLTOperatorPos(wstring &ops) {
 	
-	string operators = "+-*/";
+	wstring operators = L"+-*/";
 	int b=0,e=0,p;
 
 	//Search for operator(s) outside [pointers]
-	while ( (b=ops.find("[",b)) != string::npos) {
+	while ( (b=ops.find(L"[",b)) != wstring::npos) {
 
 		//Check Before
-		if ((p=ops.find_first_of(operators),e) != string::npos) {
+		if ((p=ops.find_first_of(operators),e) != wstring::npos) {
 			if (p<b) return p;
 		}
 
-		if ( (e=ops.find("]",b+1)) != string::npos) {
+		if ( (e=ops.find(L"]",b+1)) != wstring::npos) {
 	
 			//Check between
-			if ((p=ops.find_first_of(operators,e+1)) != string::npos) {
-				if (p<ops.find("[",e+1)) return p;
+			if ((p=ops.find_first_of(operators,e+1)) != wstring::npos) {
+				if (p<ops.find(L"[",e+1)) return p;
 			}
 			b=e;
 		}
@@ -1054,10 +1053,10 @@ int OllyLang::getFLTOperatorPos(string &ops) {
 	return ops.find_first_of(operators,e);
 }
 
-bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool preferstr)
+bool OllyLang::CreateOperands(wstring &args, wstring ops[], uint len, bool preferstr)
 {
 
-	vector<string> v;
+	vector<wstring> v;
 	bool bResult = true;
 
 	if (len==1 || (split(v, args, ',') && v.size() == len))
@@ -1067,23 +1066,23 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 		int p;
 		DWORD dw,result=0;
 		long double flt=0, fltresult=0;
-		string str;
-		string svar,op,oper="";
+		wstring str;
+		wstring svar,op,oper=L"";
 
 		var vResult;
 
 		for(uint i = 0; i < len; i++) 
 		{
-			op = trim(v[i]);
+			op = w_trim(v[i]);
 			ops[i] = op;
 
-			if ((p=getFLTOperatorPos(op)) != string::npos) 
+			if ((p=getFLTOperatorPos(op)) != wstring::npos) 
 			{
 				do {
-					if (op.find_first_of("\"") != string::npos || preferstr)
+					if (op.find_first_of(L"\"") != wstring::npos || preferstr)
 						goto try_str_operation;
 					
-					svar=trim(op.substr(0,p));
+					svar=w_trim(op.substr(0,p));
 
 					var_logging=false;
 					if (!GetFLTOpValue(svar,flt)) 
@@ -1109,9 +1108,9 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 
 					op.erase(0,p+1);
 
-				} while ( (p=getFLTOperatorPos(op)) != string::npos);
+				} while ( (p=getFLTOperatorPos(op)) != wstring::npos);
 
-				svar=trim(op);
+				svar=w_trim(op);
 				var_logging=false;
 				if (!GetFLTOpValue(svar,flt)) 
 					//Convert integer to float (but not for first operand)
@@ -1129,8 +1128,8 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				else if (oper[0]=='/')
 					fltresult /= flt;
 
-				char value[128];
-				sprintf(value,"%lf",fltresult);
+				wchar_t value[128];
+				wsprintf(value,L"%lf",fltresult);
 
 				ops[i]=value;
 				while (true) 
@@ -1148,16 +1147,16 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				goto operation_ok;
 
 			} 
-			else if ( (p=getDWOperatorPos(op)) != string::npos)
+			else if ( (p=getDWOperatorPos(op)) != wstring::npos)
 			{	
 				do {
 			
 			try_dw_operation:
 
-					if (op.find_first_of("\"") != string::npos || preferstr)
+					if (op.find_first_of(L"\"") != wstring::npos || preferstr)
 						goto try_str_operation;
 					
-					svar=trim(op.substr(0,p));
+					svar=w_trim(op.substr(0,p));
 
 					var_logging=false;
 					if (!GetDWOpValue(svar,dw)) 
@@ -1189,9 +1188,9 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 
 					op.erase(0,p+1);
 
-				} while ( (p=getDWOperatorPos(op)) != string::npos);
+				} while ( (p=getDWOperatorPos(op)) != wstring::npos);
 
-				svar=trim(op);
+				svar=w_trim(op);
 				var_logging=false;
 				if (!GetDWOpValue(svar,dw)) 
 					goto operation_failed;
@@ -1215,8 +1214,8 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 				else if (oper[0]=='<')
 					result <<= dw;
 
-				char value[16];
-				itoa(result,value,16);
+				wchar_t value[16];
+				_itow(result,value,16);
 
 				ops[i]=value;
 
@@ -1230,11 +1229,11 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 			//STRING OPERATIONS
 			try_str_operation:
 				
-				oper="";
-				while ((p = getStringOperatorPos(op)) != string::npos) 
+				oper=L"";
+				while ((p = getStringOperatorPos(op)) != wstring::npos) 
 				{
 					
-					svar=trim(op.substr(0,p));
+					svar=w_trim(op.substr(0,p));
 					var_logging=false;
 					if (!GetSTROpValue(svar,str)) 
 						goto operation_failed;
@@ -1250,7 +1249,7 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 					op.erase(0,p+1);
 				} 
 
-				svar=trim(op);
+				svar=w_trim(op);
 
 				var_logging=false;
 				if (!GetSTROpValue(svar,str)) 
@@ -1263,7 +1262,7 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 					vResult += str;
 
 				if (!vResult.isbuf)
-					ops[i]="\""+vResult.str+"\"";
+					ops[i]=L"\"" +vResult.str+ L"\"";
 				else
 					ops[i]=vResult.str;
 
@@ -1292,9 +1291,9 @@ bool OllyLang::CreateOperands(string &args, string ops[], uint len, bool prefers
 	return false;
 }
 
-bool OllyLang::CreateOp(string &args, string ops[], uint len, bool preferstr)
+bool OllyLang::CreateOp(wstring &args, wstring ops[], uint len, bool preferstr)
 {
-	vector<string> v;
+	vector<wstring> v;
 	if (len==1 || (split(v, args, ',') && v.size() == len))
 	{
 		if (len==1) v.push_back(args);
@@ -1302,24 +1301,24 @@ bool OllyLang::CreateOp(string &args, string ops[], uint len, bool preferstr)
 		int p;
 		DWORD dw,result=0;
 		long double flt=0, fltresult=0;
-		string str,vResult="";
-		string op,oper="";
+		wstring str,vResult=L"";
+		wstring op,oper=L"";
 
 		for(uint i = 0; i < len; i++)
 		{
-			op = trim(v[i]);
+			op = w_trim(v[i]);
 			ops[i] = op;
 		}
 		return true;
 	}
-    return false;
+	return false;
 }
 
 bool OllyLang::ParseLabels()
 {
-	vector<string>::iterator iter;
+	vector<wstring>::iterator iter;
 	iter = script.begin();
-	string s;
+	wstring s;
 	int loc = 0;
 	t_wndprog_data *ppl;
 
@@ -1329,10 +1328,10 @@ bool OllyLang::ParseLabels()
 		if(s.length() > 0) {
 			if(s.at(s.length() - 1) == ':') {
 
-				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,loc+1);
+				ppl = (t_wndprog_data *) Getsortedbyselection(&wndProg.sorted,loc+1);
 				if (ppl->type != PROG_TYPE_COMMENT) {
 					ppl->type = PROG_TYPE_LABEL;
-					labels.insert(pair<string, int>(s.substr(0, s.length() - 1), loc));
+					labels.insert(pair<wstring, int>(s.substr(0, s.length() - 1), loc));
 				}
 			}
 		}
@@ -1343,10 +1342,10 @@ bool OllyLang::ParseLabels()
 	return false;
 }
 
-int OllyLang::SearchInScript(string text, ulong fromPos)
+int OllyLang::SearchInScript(wstring text, ulong fromPos)
 {
-	vector<string>::iterator iter;
-	string s;
+	vector<wstring>::iterator iter;
+	wstring s;
 	int loc = 0;
 	bool oneTime = true;
 
@@ -1362,7 +1361,7 @@ int OllyLang::SearchInScript(string text, ulong fromPos)
 			s = *iter;
 			transform(s.begin(), s.end(), s.begin(), pf);
 			if(s.length() > 0) {
-				if(s.find(text) != string::npos) {
+				if(s.find(text) != wstring::npos) {
 					return loc;
 				}
 			}
@@ -1402,7 +1401,7 @@ bool OllyLang::AddBPJump(int bpaddr,int labelpos)
 	return true;
 }
 
-bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
+bool OllyLang::GetANYOpValue(wstring op, wstring &value, bool hex8forExec)
 {
 	if(is_variable(op))
 	{
@@ -1415,12 +1414,12 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 		}
 		else if(variables[op].vt == DW)
 		{
-			char buffer[12] = {0};
+			wchar_t buffer[12] = {0};
 			if (hex8forExec)
 				//For Assemble Command (EXEC/ENDE) ie "0DEADBEEF"
-				sprintf(buffer, "%09X", variables[op].dw);
+				wsprintf(buffer, L"%09X", variables[op].dw);
 			else 
-				sprintf(buffer, "%X", variables[op].dw);
+				wsprintf(buffer, L"%X", variables[op].dw);
 			value = buffer;
 			goto values_ok;
 		}
@@ -1429,7 +1428,7 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 	if(is_hex(op))
 	{
 		if (hex8forExec)
-			value = "0"+op;
+			value = L"0"+op;
 		else
 			value = op;
 		return true;
@@ -1441,13 +1440,13 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 	}
 	else if(UnquoteString(op, '#', '#')) 
 	{
-		value = "#"+op+"#";
+		value = L"#"+op+L"#";
 		return true;
 	}
 	else if(is_dec(op))
 	{
 		op.erase(op.length()-1,1);
-		Int2Hex(strtoul(op.c_str(), 0, 10),value);
+		Int2Hex(wcstoul(op.c_str(), 0, 10),value);
 		return true;
 	}
 	else if(is_float(op))
@@ -1461,7 +1460,7 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 		DWORD addr = 0;
 		sub_operand=true;
 		if (!CreateOp(op,&op,1)) {
-			DbgMsg(0,"failed to create pointer suboperand "+op);
+			DbgMsg(0,L"failed to create pointer suboperand "+op);
 			sub_operand=false;
 			return false;
 		}
@@ -1472,19 +1471,19 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 			if (addr!=0) {
 
 				//Pointer Mark in Values column (open quote char '<<')
-				setProgLineValue(script_pos+1, (string) "\xAE");
+				setProgLineValue(script_pos+1, (wstring) L"\xAE");
 				
-				char buffer[STRING_READSIZE] = {0};
+				wchar_t buffer[STRING_READSIZE] = {0};
 				Readmemory(&buffer[0], addr, STRING_READSIZE, MM_SILENT);
 
-				if (strlen(buffer) >= STRING_READSIZE-1) 
+				if (wcslen(buffer) >= STRING_READSIZE-1) 
 				{
 					buffer[STRING_READSIZE-1] = 0;
 				}
 
 				value.assign(buffer);
 			} else 
-				value = "0";
+				value = L"0";
 
 			goto values_ok_str;
 		}
@@ -1495,11 +1494,11 @@ bool OllyLang::GetANYOpValue(string op, string &value, bool hex8forExec)
 		DWORD dw=0;
 		if (GetDWOpValue(op,dw)) 
 		{
-			char buffer[12] = {0};
+			wchar_t buffer[12] = {0};
 			if (hex8forExec)
-				sprintf(buffer, "%09X", dw);
+				wsprintf(buffer, L"%09X", dw);
 			else 
-				sprintf(buffer, "%X", dw);
+				wsprintf(buffer, L"%X", dw);
 			value = buffer;
 			goto values_ok;
 		}
@@ -1517,13 +1516,13 @@ values_ok_str:
 		if(val.isbuf) 
 			setProgLineValue(script_pos+1,value);
 		else
-			setProgLineValue(script_pos+1,"\""+value+"\"");
+			setProgLineValue(script_pos+1,L"\""+value+L"\"");
 	}
 	return true;
 
 }
 
-bool OllyLang::GetSTROpValue(string op, string &value, int size)
+bool OllyLang::GetSTROpValue(wstring op, wstring &value, int size)
 {
 //	if (size>0)
 //		DbgMsg(size,op);
@@ -1553,9 +1552,9 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 	else if(UnquoteString(op, '#', '#')) 
 	{
 		if ((size*2)<op.length() && (size != 0))
-			value = "#"+op.substr(0,size*2)+"#";
+			value = L"#"+op.substr(0,size*2)+L"#";
 		else
-			value = "#"+op+"#";
+			value = L"#"+op+L"#";
 		return true;
 	}
 	else if(UnquoteString(op, '[', ']'))
@@ -1565,7 +1564,7 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 
 		sub_operand=true;
 		if (!CreateOp(op,&op,1)) {
-			DbgMsg(0,"failed to create pointer suboperand "+op);
+			DbgMsg(0,L"failed to create pointer suboperand "+op);
 			sub_operand=false;
 			return false;
 		}
@@ -1575,25 +1574,25 @@ bool OllyLang::GetSTROpValue(string op, string &value, int size)
 		if(GetDWOpValue(op, addr)) {
 
 			//Pointer Mark in Values column (open quote char '<<')
-			setProgLineValue(script_pos+1, (string) "\xAE");
+			setProgLineValue(script_pos+1, (wstring) L"\xAE");
 
 			if (size>0) {
 				
-				char* buffer = new char[size+1];
+				wchar_t* buffer = new wchar_t[size+1];
 				Readmemory(buffer, addr, size, MM_SILENT);
 				buffer[size] = 0;
 				value.assign(buffer,size);
-				if (strlen(buffer) != size) {
+				if (wcslen(buffer) != size) {
 					var v=value;
-					value="#"+v.strbuffhex()+"#";
+					value=L"#"+v.strbuffhex()+L"#";
 				}
 				delete[] buffer;
 
 			} else {
-				char buffer[STRING_READSIZE] = {0};
+				wchar_t buffer[STRING_READSIZE] = {0};
 				Readmemory(buffer, addr, STRING_READSIZE, MM_SILENT);
 			
-				if (strlen(buffer) >= STRING_READSIZE-1) {
+				if (wcslen(buffer) >= STRING_READSIZE-1) {
 					buffer[STRING_READSIZE-1] = 0;
 				}
 				value = buffer;
@@ -1612,14 +1611,14 @@ values_ok2:
 		if(val.isbuf) 
 			setProgLineValue(script_pos+1,value);
 		else
-			setProgLineValue(script_pos+1,"\""+value+"\"");
+			setProgLineValue(script_pos+1,L"\""+value+L"\"");
 	}
 	return true;
 }
 
-int OllyLang::GetRegNr(string& name)
+int OllyLang::GetRegNr(wstring& name)
 {
-	string r16=name;
+	wstring r16=name;
 
 	//R16
 	if (r16.length()==3)
@@ -1628,54 +1627,54 @@ int OllyLang::GetRegNr(string& name)
 	//R8
 	if (r16[1] == 'l' || r16[1] == 'h')	r16[1]='x';
 
-	if(r16 == "ax")
+	if(r16 == L"ax")
 		return REG_EAX;
-	else if(r16 == "bx")
+	else if(r16 == L"bx")
 		return REG_EBX;
-	else if(r16 == "cx")
+	else if(r16 == L"cx")
 		return REG_ECX;
-	else if(r16 == "dx")
+	else if(r16 == L"dx")
 		return REG_EDX;
-	else if(r16 == "sp")
+	else if(r16 == L"sp")
 		return REG_ESP;
-	else if(r16 == "bp")
+	else if(r16 == L"bp")
 		return REG_EBP;
-	else if(r16 == "si")
+	else if(r16 == L"si")
 		return REG_ESI;
-	else if(r16 == "di")
+	else if(r16 == L"di")
 		return REG_EDI;
 	else 
 		return -1;
 }
 
-int OllyLang::GetSegNr(string& name)
+int OllyLang::GetSegNr(wstring& name)
 {
-	if(name == "es")
+	if(name == L"es")
 		return SEG_ES;
-	else if(name == "cs")
+	else if(name == L"cs")
 		return SEG_CS;
-	else if(name == "ss")
+	else if(name == L"ss")
 		return SEG_SS;
-	else if(name == "ds")
+	else if(name == L"ds")
 		return SEG_DS;
-	else if(name == "fs")
+	else if(name == L"fs")
 		return SEG_FS;
-	else if(name == "gs")
+	else if(name == L"gs")
 		return SEG_GS;
 	else 
 		return SEG_UNDEF;
 }
 
-bool OllyLang::GetBYTEOpValue(string op, BYTE &value)   //new add
+bool OllyLang::GetBYTEOpValue(wstring op, BYTE &value)   //new add
 {
 	if(is_hex(op))
 	{
-		op = "0" + op;
+		op = L"0" + op;
 		if (op.length() > 3) {
-			errorstr = "GetBYTEOpValue : Too Long";
+			errorstr = L"GetBYTEOpValue : Too Long";
 			return false;
 		}
-		value = strtoul(op.c_str(), 0, 16);
+		value = wcstoul(op.c_str(), 0, 16);
 		if (var_logging)
 			setProgLineValue(script_pos+1,value);
 		return true;
@@ -1683,7 +1682,7 @@ bool OllyLang::GetBYTEOpValue(string op, BYTE &value)   //new add
 	else if(is_variable(op))
 	{
 		if (variables[op].dw > 0xff){
-            errorstr = "GetBYTEOpValue : Too High";
+			errorstr = L"GetBYTEOpValue : Too High";
 			return false;
 			}
 		// We have a declared variable
@@ -1700,7 +1699,7 @@ bool OllyLang::GetBYTEOpValue(string op, BYTE &value)   //new add
   return false;
 }
 
-bool OllyLang::GetAddrOpValue(string op, DWORD &value)
+bool OllyLang::GetAddrOpValue(wstring op, DWORD &value)
 {
 		if(UnquoteString(op, '[', ']'))
 		{
@@ -1708,19 +1707,19 @@ bool OllyLang::GetAddrOpValue(string op, DWORD &value)
 			DWORD addr = 0;
 //			sub_operand=true;
 				if (!CreateOperands(op,&op,1)) {
-					DbgMsg(0,"GetAddrOpValue "+op);
+					DbgMsg(0,L"GetAddrOpValue "+op);
 					sub_operand=false;
 					return false;
 				}
 //			sub_operand=false;
-            value=strtoul(op.c_str(),0,16);
+			value=wcstoul(op.c_str(),0,16);
 			
 			return true;
 		}
-        return true;
+		return true;
 }
 
-bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
+bool OllyLang::GetDWOpValue(wstring op, DWORD &value, DWORD default_val)
 {
 	value=default_val;
 
@@ -1749,9 +1748,9 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 				setProgLineValue(script_pos+1,value);
 			return true;
 		}
-		else if(op == "eip")
+		else if(op == L"eip")
 		{
-			//cpuasm = (t_dump *)Plugingetvalue(VAL_CPUDASM);
+			//cpuasm = Getcpudisasmdump();
 			//value = cpuasm->sel0;
 			// It's EIP
 			value = pt->reg.ip;
@@ -1766,21 +1765,21 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 		eflags flags;
 		ZeroMemory(&flags, sizeof DWORD);
 		t_thread* pt = Findthread(Getcputhreadid());
-        flags.dwFlags = pt->reg.flags;
+		flags.dwFlags = pt->reg.flags;
 
-		if(stricmp(op.c_str(), "!af") == 0)
+		if(_wcsicmp(op.c_str(), L"!af") == 0)
 			value = flags.bitFlags.AF;
-		else if(stricmp(op.c_str(), "!cf") == 0)
+		else if(_wcsicmp(op.c_str(), L"!cf") == 0)
 			value = flags.bitFlags.CF;
-		else if(stricmp(op.c_str(), "!df") == 0)
+		else if(_wcsicmp(op.c_str(), L"!df") == 0)
 			value = flags.bitFlags.DF;
-		else if(stricmp(op.c_str(), "!of") == 0)
+		else if(_wcsicmp(op.c_str(), L"!of") == 0)
 			value = flags.bitFlags.OF;
-		else if(stricmp(op.c_str(), "!pf") == 0)
+		else if(_wcsicmp(op.c_str(), L"!pf") == 0)
 			value = flags.bitFlags.PF;
-		else if(stricmp(op.c_str(), "!sf") == 0)
+		else if(_wcsicmp(op.c_str(), L"!sf") == 0)
 			value = flags.bitFlags.SF;
-		else if(stricmp(op.c_str(), "!zf") == 0)
+		else if(_wcsicmp(op.c_str(), L"!zf") == 0)
 			value = flags.bitFlags.ZF;
 
 		if (var_logging)
@@ -1834,15 +1833,15 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 	else if(is_hex(op))
 	{
 		// We have a HEX constant
-//		op = "0" + op;
-		value = strtoul(op.c_str(), 0, 16);
+//		op = L"0" + op;
+		value = wcstoul(op.c_str(), 0, 16);
 		return true;
 	}
 	else if(is_dec(op))
 	{
 		// We have a DEC constant
 		op.erase(op.length()-1,1);
-		value = strtoul(op.c_str(), 0, 10);
+		value = wcstoul(op.c_str(), 0, 10);
 		return true;
 	}
 	else if(UnquoteString(op, '[', ']'))
@@ -1851,7 +1850,7 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 		DWORD addr = 0;
 		sub_operand=true;
 		if (!CreateOperands(op,&op,1)) {
-			DbgMsg(0,"failed to create pointer suboperand "+op);
+			DbgMsg(0,L"failed to create pointer suboperand "+op);
 			sub_operand=false;
 			return false;
 		}
@@ -1860,7 +1859,7 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 		if(GetDWOpValue(op, addr)) {
 
 			//Pointer Mark in Values column (open quote char '<<')
-			setProgLineValue(script_pos+1, (string) "\xAE");
+			setProgLineValue(script_pos+1, (wstring) L"\xAE");
 
 			Readmemory(&value, addr, 4, MM_SILENT);
 			if (var_logging)
@@ -1872,7 +1871,7 @@ bool OllyLang::GetDWOpValue(string op, DWORD &value, DWORD default_val)
 	return false;
 }
 
-bool OllyLang::GetFLTOpValue(string op, long double &value)
+bool OllyLang::GetFLTOpValue(wstring op, long double &value)
 {
 
 	if(is_float(op))
@@ -1908,7 +1907,7 @@ bool OllyLang::GetFLTOpValue(string op, long double &value)
 		DWORD addr = 0;
 		sub_operand=true;
 		if (!CreateOp(op,&op,1)) {
-			DbgMsg(0,"failed to create pointer suboperand "+op);
+			DbgMsg(0,L"failed to create pointer suboperand "+op);
 			sub_operand=false;
 			return false;
 		}
@@ -1917,7 +1916,7 @@ bool OllyLang::GetFLTOpValue(string op, long double &value)
 		if(GetDWOpValue(op, addr)) {
 
 			//Pointer Mark in Values column (open quote char '<<')
-			string openquote = "®";
+			wstring openquote = L"®";
 			setProgLineValue(script_pos+1, openquote);
 
 			Readmemory(&value, addr, 8, MM_SILENT);
@@ -1930,7 +1929,7 @@ bool OllyLang::GetFLTOpValue(string op, long double &value)
 	return false;
 }
 
-bool OllyLang::is_register(string s)
+bool OllyLang::is_register(wstring s)
 {
 	int (*pf)(int) = tolower; 
 	transform(s.begin(), s.end(), s.begin(), pf);
@@ -1941,7 +1940,7 @@ bool OllyLang::is_register(string s)
 	return false;
 }
 
-bool OllyLang::is_segment(string s)
+bool OllyLang::is_segment(wstring s)
 {
 	int (*pf)(int) = tolower; 
 	transform(s.begin(), s.end(), s.begin(), pf);
@@ -1952,11 +1951,12 @@ bool OllyLang::is_segment(string s)
 	return false;
 }
 
-bool OllyLang::is_floatreg(string s)
+bool OllyLang::is_floatreg(wstring s)
 {
 	int (*pf)(int) = tolower; 
 	transform(s.begin(), s.end(), s.begin(), pf);
 
+	//st(0) to st(7)
 	if(s.length()==5)
 		if (s[0]=='s' && s[1]=='t' && s[2]=='(' && s[4]==')') 
 			if (s[3] >= '0' && s[3] <= '7') 
@@ -1965,7 +1965,7 @@ bool OllyLang::is_floatreg(string s)
 	return false;
 }
 
-bool OllyLang::is_flag(string s)
+bool OllyLang::is_flag(wstring s)
 {
 	int (*pf)(int) = toupper; 
 	transform(s.begin(), s.end(), s.begin(), pf);
@@ -1975,18 +1975,18 @@ bool OllyLang::is_flag(string s)
 	return false;
 }
 
-bool OllyLang::is_variable(string &s)
+bool OllyLang::is_variable(wstring &s)
 {
 	if(variables.find(s) != variables.end())
 		return true;
 	return false;
 }
 
-string OllyLang::ResolveVarsForExec(string in, bool hex8forExec)
+wstring OllyLang::ResolveVarsForExec(wstring in, bool hex8forExec)
 {
-	string out, varname;
+	wstring out, varname;
 	bool in_var = false;
-	in = trim(in);
+	in = w_trim(in);
 
 	for(int i = 0; i < in.length(); i++)
 	{
@@ -1999,7 +1999,7 @@ string OllyLang::ResolveVarsForExec(string in, bool hex8forExec)
 			in_var = false;
 			GetANYOpValue(varname, varname, hex8forExec);
 			out += varname;
-			varname = "";
+			varname = L"";
 		}
 		else
 		{
@@ -2015,15 +2015,15 @@ string OllyLang::ResolveVarsForExec(string in, bool hex8forExec)
 
 void OllyLang::menuListLabels(HMENU mLabels,int cmdIndex) {
 
-	map<string, int>::iterator iter;
+	map<wstring, int>::iterator iter;
 	iter = labels.begin();
 	
 	vector<HMENU>::iterator imenu;
 
 	char buffer[32];
-	string str;
+	wstring str;
 
-	pair<string, int> p;
+	pair<wstring, int> p;
 	while(iter != labels.end())
 	{
 		p = *iter;
@@ -2039,17 +2039,17 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdFirst) {
 	//0x000-0x0FF > vars
 	//0x100-0xF00 > cmd flags
 
-	map<string, var>::iterator iter;
+	map<wstring, var>::iterator iter;
 	iter = variables.begin();
 	
 	vector<HMENU> Popups;
 	vector<HMENU>::iterator imenu;
 	HMENU menu;
 
-	char buffer[32];
-	string str;
+	wchar_t buffer[32];
+	wstring str;
 
-	pair<string, var> p;
+	pair<wstring, var> p;
 
 	int nIndex=0, cmdIndex=0;
 
@@ -2063,40 +2063,36 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdFirst) {
 		if (p.second.vt == STR) {
 
 			if (p.second.size < 50) {
-				AppendMenu(menu,MF_STRING,cmdIndex,("\""+p.second.strclean()+"\"").c_str());
-				AppendMenu(menu,MF_STRING,cmdIndex,("#"+p.second.strbuffhex()+"#").c_str());
+				AppendMenu(menu,MF_STRING,cmdIndex,(L"\""+p.second.strclean()+L"\"").c_str());
+				AppendMenu(menu,MF_STRING,cmdIndex,(L"#"+p.second.strbuffhex()+L"#").c_str());
 			} else {
-				AppendMenu(menu,MF_STRING,cmdIndex,("\""+p.second.strclean().substr(0,50)+"...").c_str());
-				AppendMenu(menu,MF_STRING,cmdIndex,("#"+p.second.strbuffhex().substr(0,50)+"...").c_str());
+				AppendMenu(menu,MF_STRING,cmdIndex,(L"\""+p.second.strclean().substr(0,50)+L"...").c_str());
+				AppendMenu(menu,MF_STRING,cmdIndex,(L"#"+p.second.strbuffhex().substr(0,50)+L"...").c_str());
 			}
-			strcpy(buffer,"Length: ");
-			itoa(p.second.size,&buffer[8],10);
-			strcat(buffer,".");
+			wsprintf(buffer,L"Length: %d.", p.second.size);
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
 
 		} else if (p.second.vt == FLT) {
 		
-			sprintf(buffer,"%.2f",p.second.flt);
+			wsprintf(buffer,L"%.2f",p.second.flt);
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
 		
 		} else {
 
-			strcpy(buffer,"0x");
-			itoa(p.second.dw,&buffer[2],16);
+			wsprintf(buffer,L"0x%x", p.second.dw);
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
-			itoa(p.second.dw,buffer,10);
-			strcat(buffer,".");
+			wsprintf(buffer,L"%d.", p.second.dw);
 			AppendMenu(menu,MF_STRING,cmdIndex,buffer);
 
 			if (p.second.dw != 0) {
-				AppendMenu(menu,MF_SEPARATOR,0,"-");
-				strcpy(buffer,"Follow in disassembler");
+				AppendMenu(menu,MF_SEPARATOR,0,L"-");
+				StrCpyW(buffer,L"Follow in disassembler");
 				AppendMenu(menu,MF_STRING,CMD_POPUP_FDISASM + cmdIndex, buffer);
-				strcpy(buffer,"Follow in dump");
+				StrCpyW(buffer,L"Follow in dump");
 				AppendMenu(menu,MF_STRING,CMD_POPUP_FDUMP   + cmdIndex, buffer);
-				strcpy(buffer,"Follow in stack");
+				StrCpyW(buffer,L"Follow in stack");
 				AppendMenu(menu,MF_STRING,CMD_POPUP_FSTACK  + cmdIndex, buffer);
-				strcpy(buffer,"Open memory dump");
+				StrCpyW(buffer,L"Open memory dump");
 				AppendMenu(menu,MF_STRING,CMD_POPUP_ODUMP   + cmdIndex, buffer);
 			}
 		}
@@ -2117,8 +2113,8 @@ void OllyLang::menuListVariables(HMENU mVars,int cmdFirst) {
 
 bool OllyLang::editVariable(int nVar) {
 
-	map<string, var>::iterator iter;
-	pair<string, var> p;
+	map<wstring, var>::iterator iter;
+	pair<wstring, var> p;
 	int n=0;
 	iter = variables.begin();
 
@@ -2127,7 +2123,8 @@ bool OllyLang::editVariable(int nVar) {
 
 			RECT Rect={0};
 			if (wndProg.hw)	GetWindowRect(wndProg.hw,&Rect);
-			
+
+/* ODBG2: missing Gethexstringxy, Getlongxy, Plugingetvalue(VAL_WINDOWFONT)
 			p = *iter;
 			if (p.second.vt == STR) {
 				
@@ -2137,15 +2134,16 @@ bool OllyLang::editVariable(int nVar) {
 				ZeroMemory(hexbuf.mask,TEXTLEN);
 				FillMemory(hexbuf.mask,hexbuf.n,0xFF);
 				memcpy(hexbuf.data,p.second.strbuff().c_str(),hexbuf.n);
+
 				int font = Plugingetvalue(VAL_WINDOWFONT);
 
 				if (Gethexstringxy("Edit variable...",&hexbuf, DIA_DEFHEX, font, 0, Rect.left,Rect.bottom)!=-1) {
-					string s;
-					s.assign((char*) hexbuf.data,hexbuf.n);
+					wstring s;
+					s.assign((wchar_t*) hexbuf.data,hexbuf.n);
 
 					if (variables[p.first].isbuf) {
 						var v = s;
-						variables[p.first] = "#"+v.strbuffhex()+"#";
+						variables[p.first] = L"#"+v.strbuffhex()+L"#";
 					} else {
 						variables[p.first] = s;
 					}
@@ -2163,6 +2161,7 @@ bool OllyLang::editVariable(int nVar) {
 			}
 			
 			return true;
+*/
 		}
 		iter++;
 		n++;
@@ -2172,8 +2171,8 @@ bool OllyLang::editVariable(int nVar) {
 
 bool OllyLang::followVariable(int nVar) {
 
-	map<string, var>::iterator iter;
-	pair<string, var> p;
+	map<wstring, var>::iterator iter;
+	pair<wstring, var> p;
 	int n=0;
 	iter = variables.begin();
 	ulong addr, base=0, size=0;
@@ -2187,13 +2186,13 @@ bool OllyLang::followVariable(int nVar) {
 				case 0: //do nothing
 						return false;
 				case CMD_POPUP_FDISASM:
-					if (addr) Setcpu(0,addr,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					if (addr) Setcpu(0,addr,0,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					break;
 				case CMD_POPUP_FDUMP:
-					if (addr) Setcpu(0,0,addr,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					if (addr) Setcpu(0,0,addr,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					break;
 				case CMD_POPUP_FSTACK:
-					if (addr) Setcpu(0,0,0,addr,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					if (addr) Setcpu(0,0,0,0,addr,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					break;
 				case CMD_POPUP_ODUMP:
 					if (addr==0) //do nothing
@@ -2203,7 +2202,7 @@ bool OllyLang::followVariable(int nVar) {
 						return false;
 					if (base==0) base=mem->base;
 					if (size==0) size=mem->size;
-					Createdumpwindow(NULL,base,size,addr,0x01081,NULL);
+					Createdumpwindow(NULL,base,size,NULL,0x01081,addr,NULL,NULL);
 					break;
 				default:
 					break;
@@ -2216,57 +2215,51 @@ bool OllyLang::followVariable(int nVar) {
 }
 
 void OllyLang::execCommand() {
-	char buffer[TEXTLEN]={0};
-	string codeLine;
+	wstring codeLine;
 	RECT Rect={0};
-	if (&wndProg.hw)	GetWindowRect(wndProg.hw,&Rect);
-	int font = Plugingetvalue(VAL_WINDOWFONT);
-	if (Gettextxy("Execute Script Command...",buffer, 0, 201, font, Rect.left,Rect.bottom)!=-1) {
+	if (&wndProg.hw) GetWindowRect(wndProg.hw,&Rect);
 
-		codeLine = buffer;
-	
+	wstring title = L"Execute Script Command...";
+	HWND hw = 0; //not modal but dialog need to be closed on plugin close.
+	HINSTANCE hinst = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
+	//wchar_t buffer[TEXTLEN]={0};
+	//if (Gettextxy("Execute Script Command...",buffer, 0, 201, font, Rect.left,Rect.bottom)!=-1) {
+	wchar_t* buffer = (wchar_t*)DialogBoxParamW(hinst, MAKEINTRESOURCE(IDD_INPUT), hw, (DLGPROC) InputDialogProc, (LPARAM)title.c_str());
+
+	if (buffer != NULL && wcslen(buffer) > 0) {
+		codeLine.assign(buffer);
+		delete[] buffer;
+
 		// Create command and arguments
-		string command = codeLine;
-		string args = "";
-		size_t pos = codeLine.find_first_of(" \t\r\n");
+		wstring command = codeLine;
+		wstring args = L"";
+		size_t pos = codeLine.find_first_of(L" \t\r\n");
 		if(pos != -1)
 		{
-			command = trim(codeLine.substr(0, pos));
+			command = w_trim(codeLine.substr(0, pos));
 			int (*pf)(int)=tolower; 
 			transform(command.begin(), command.end(), command.begin(), pf);
-			args = trim(codeLine.substr(pos));
+			//SetcaseW
+			args = w_trim(codeLine.substr(pos));
 		}
 
-		bool result = false;
-
-		// Find command and execute it
-		if(commands.find(command) != commands.end())
-		{			
-			// Command found, execute it
-			PFCOMMAND func = commands[command];
-			result = (this->*func)(args);
-		}
-		else 
-		{
-			// No such command
-			errorstr = "No such command: " + codeLine;
-		}
+		bool result = this->callCommand(command, args);
 
 		// Error in processing, show error and die
 		if(!result)
 		{
-			string message = "Error";
-			message.append("\n");
-			message.append("Text: ");
+			wstring message = L"Error";
+			message.append(L"\n");
+			message.append(L"Text: ");
 			message.append(codeLine);
-			message.append("\n");
-			if(errorstr != "")
+			message.append(L"\n");
+			if(!errorstr.empty())
 			{
 				message.append(errorstr);
-				message.append("\n");
+				message.append(L"\n");
 			}
-			MessageBox(hwmain, message.c_str(), TEXT("OllyScript error!"), MB_ICONERROR | MB_OK | MB_TOPMOST);
-			errorstr = "";
+			MessageBox(hwmain, message.c_str(), PLUGIN_NAME L" error", MB_ICONERROR | MB_OK | MB_TOPMOST);
+			errorstr = L"";
 		}
 	}
 }
@@ -2281,15 +2274,15 @@ bool OllyLang::jumpToLine(int number) {
 void OllyLang::DumpLabels()
 {
 	cerr << "_ LABELS _" << endl;
-	map<string, int>::iterator iter;
+	map<wstring, int>::iterator iter;
 	iter = labels.begin();
 
-	pair<string, int> p;
+	pair<wstring, int> p;
 	while(iter != labels.end())
 	{
 		p = *iter;
 
-		cerr << "Name: " << p.first << ", ";
+		cerr << "Name: " << w_wstrto(p.first) << ", ";
 		cerr << "Row: " << p.second << endl;
 		iter++;
 	}
@@ -2317,15 +2310,15 @@ void OllyLang::DumpBPJumps()
 void OllyLang::DumpVars()
 {
 	cerr << "_ VARS _" << endl;
-	map<string, var>::iterator iter;
+	map<wstring, var>::iterator iter;
 	iter = variables.begin();
 
-	pair<string, var> p;
+	pair<wstring, var> p;
 	while(iter != variables.end())
 	{
 		p = *iter;
 
-		cerr << "Name: " << p.first << ", ";
+		cerr << "Name: " << w_wstrto(p.first) << ", ";
 		cerr << "Value: " << hex << p.second.dw << endl;
 		iter++;
 	}
@@ -2335,60 +2328,60 @@ void OllyLang::DumpVars()
 void OllyLang::DumpScript()
 {
 	cerr << "_ SCRIPT _" << endl;
-	vector<string>::iterator iter;
+	vector<wstring>::iterator iter;
 	iter = script.begin();
 
 	while(iter != script.end())
 	{
-		cerr << "--> " << *iter << endl;
+		cerr << "--> " << w_wstrto(*iter) << endl;
 		iter++;
 	}
 	cerr << endl;
 }
 
-void OllyLang::DropVariable(string var)
+void OllyLang::DropVariable(wstring var)
 {
 	if (variables.find(var) != variables.end())
 		variables.erase(variables.find(var));
 }
 
 //Add zero char before dw values, ex: 0DEADBEEF (to be assembled) usefull if first char is letter
-string OllyLang::FormatAsmDwords(string asmLine)
+wstring OllyLang::FormatAsmDwords(wstring asmLine)
 {
 		// Create command and arguments
- 		string command = asmLine;
-		string arg, sSep, args = "";
-		size_t pos = asmLine.find_first_of(" \t\r\n");
+		wstring command = asmLine;
+		wstring arg, sSep, args = L"";
+		size_t pos = asmLine.find_first_of(L" \t\r\n");
 		DWORD nbArgs=0;
-		if(pos != string::npos)
+		if(pos != wstring::npos)
 		{
-			command = trim(asmLine.substr(0, pos));
-			args = trim(asmLine.substr(pos));
+			command = w_trim(asmLine.substr(0, pos));
+			args = w_trim(asmLine.substr(pos));
 
 		} else {
 			//no args
 			return asmLine;
 		}
 
-		command+=" ";
+		command+=L" ";
 
-		while ((pos = args.find_first_of("+,[")) != string::npos)
+		while ((pos = args.find_first_of(L"+,[")) != wstring::npos)
 		{
-			arg=trim(args.substr(0, pos));
+			arg=w_trim(args.substr(0, pos));
 			ForLastArg:
-			if (sSep == "[") {
-				if (arg.substr(arg.size()-1,1) == "]") {
+			if (sSep.empty()) {
+				if (arg.substr(arg.size()-1,1) == L"]") {
 					arg = arg.substr(0,arg.size()-1);
 					if (is_hex(arg) && arg.size()>0) {
-						if (arg.substr(0,1).find_first_of("abcdefABCDEF") != string::npos)
-							arg="0"+arg;
+						if (arg.substr(0,1).find_first_of(L"abcdefABCDEF") != wstring::npos)
+							arg=L"0"+arg;
 					}
-					arg = arg + "]";
+					arg = arg + L"]";
 				}
 			} else {
 				if (is_hex(arg) && arg.size()>0) {
-					if (arg.substr(0,1).find_first_of("abcdefABCDEF") != string::npos)
-						arg="0"+arg;
+					if (arg.substr(0,1).find_first_of(L"abcdefABCDEF") != wstring::npos)
+						arg=L"0"+arg;
 				}
 			}
 
@@ -2397,25 +2390,25 @@ string OllyLang::FormatAsmDwords(string asmLine)
 			command.append(arg);
 
 			nbArgs++;
-			if (args!="") {
+			if (! args.empty()) {
 				sSep=args.substr(pos,1);
 				args.erase(0,pos+1);
 			}
 		}
 
-		args=trim(args);
-		if (args!="") { 
+		args=w_trim(args);
+		if (! args.empty()) { 
 			arg=args;
-			args="";
+			args=L"";
 			goto ForLastArg;
 		}
 
-		return trim(command);
+		return w_trim(command);
 }
 
-DWORD OllyLang::AddProcessMemoryBloc(string data, int mode)
+DWORD OllyLang::AddProcessMemoryBloc(wstring data, int mode)
 {
-	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+	HANDLE hDebugee = _process;
 	DWORD pmem;
 
 	// Allocate memory for data
@@ -2426,7 +2419,7 @@ DWORD OllyLang::AddProcessMemoryBloc(string data, int mode)
 
 DWORD OllyLang::AddProcessMemoryBloc(int size, int mode)
 {
-	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+	HANDLE hDebugee = _process;
 	DWORD pmem;
 
 	// Allocate memory for data
@@ -2437,7 +2430,7 @@ DWORD OllyLang::AddProcessMemoryBloc(int size, int mode)
 
 bool OllyLang::DelProcessMemoryBloc(DWORD address)
 {
-	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+	HANDLE hDebugee = _process;
 
 	t_memory* tmem = Findmemory(address);
 
@@ -2449,25 +2442,25 @@ bool OllyLang::DelProcessMemoryBloc(DWORD address)
 	return false;
 }
 
-bool OllyLang::ExecuteASM(string command)
+bool OllyLang::ExecuteASM(wstring command)
 {
 	// Old eip
 	ulong eip;
 	// For Assemble API
-	t_asmmodel model;
-	char error[255] = {0};
-	char buffer[255] = {0};
+	uchar umodel[255] = {0};
+	wchar_t error[255] = {0};
+	wchar_t buffer[255] = {0};
 	// Bytes assembled
 	int len = 0, totallen = 0;
 	bool res = true;
 	// Temp storage
-	string tmp;
+	wstring tmp;
 
 	// Get process handle and save eip
 	t_thread* thr = Findthread(Getcputhreadid());
 	eip = thr->reg.ip;
 
-	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
+	HANDLE hDebugee = _process;
 
 	// Allocate memory for code
 	DWORD pmemexec = (DWORD) VirtualAllocEx(hDebugee, NULL, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
@@ -2475,32 +2468,32 @@ bool OllyLang::ExecuteASM(string command)
 	// Assemble and write code to memory (everything between EXEC and ENDE)
 
 	tmp = ResolveVarsForExec(command,true);
-	sprintf(buffer, tmp.c_str());
-	len = Assemble(buffer, pmemexec + totallen, &model, 0, 0, error);
+	wsprintf(buffer, tmp.c_str());
+	len = Assemble(buffer, pmemexec + totallen, umodel, 0, 0, error);
 	if (len < 0) {
-		errorstr = tmp+"\n"+error;
+		errorstr = tmp+L"\n"+error;
 		return false;
 	} else {
-		WriteProcessMemory(hDebugee, (LPVOID)(pmemexec + totallen), model.code, len, 0);
+		WriteProcessMemory(hDebugee, (LPVOID)(pmemexec + totallen), umodel, len, 0);
 		totallen += len;
 	}
 
 	// Assemble and write jump to original EIP
-	sprintf(buffer, "JMP 0%lX", eip);
-	len = Assemble(buffer, pmemexec + totallen, &model, 0, 0, error);
+	wsprintf(buffer, L"JMP 0%lX", eip);
+	len = Assemble(buffer, pmemexec + totallen, umodel, 0, 0, error);
 	if (len < 0) {
 		errorstr = error;
 	} else {
-		WriteProcessMemory(hDebugee, (LPVOID)(pmemexec + totallen), model.code, len, 0);
+		WriteProcessMemory(hDebugee, (LPVOID)(pmemexec + totallen), umodel, len, 0);
 	}
 
 	// Set new eip and run to the original one
 	thr->reg.ip = pmemexec;
-	thr->reg.modified = 1;
+	thr->reg.status = RV_MODIFIED;
 	thr->regvalid = 1;
-	Broadcast(WM_USER_CHREG, 0, 0);
-	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
-	//DbgMsgHex(pmemexec);
+	Redrawcpureg();
+	//Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
+	Broadcast(WM_USER_KEY, 0, 0);
 
 	// Free memory block after next ollyloop
 	t_dbgmemblock block={0};
@@ -2518,12 +2511,12 @@ bool OllyLang::ExecuteASM(string command)
 }
 
 
-bool OllyLang::isCommand(string cmd)
+bool OllyLang::isCommand(wstring cmd)
 {
 	return (commands.find(cmd) != commands.end());
 }
 
-bool OllyLang::callCommand(string cmd, string args)
+bool OllyLang::callCommand(wstring cmd, wstring args)
 {
 	if(commands.find(cmd) != commands.end())
 	{
@@ -2571,13 +2564,14 @@ bool OllyLang::freeMemBlocks()
 {
 	if (!tMemBlocks.empty()) {
 
-		HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
+		if (_process == NULL)
+			return false;
 
 		vector<t_dbgmemblock>::iterator block = tMemBlocks.end();
 		while (tMemBlocks.size() > 0) {
 			block--;
 			if (block->autoclean)
-				VirtualFreeEx(hDbgPrc,block->hmem,block->size,MEM_DECOMMIT);
+				VirtualFreeEx(_process,block->hmem,block->size,MEM_DECOMMIT);
 			tMemBlocks.pop_back();
 		}
 
@@ -2609,7 +2603,7 @@ bool OllyLang::SaveRegisters(bool stackToo)
 	reg_backup.eip = pt->reg.ip;
 
 	reg_backup.threadid = pt->reg.threadid;
-	reg_backup.loaded = script_pos;
+	reg_backup.loaded = script_pos || 1;
 
 	return true;
 }
@@ -2638,9 +2632,9 @@ bool OllyLang::RestoreRegisters(bool stackToo)
 
 	pt->reg.flags = reg_backup.dwFlags;
 
-	pt->reg.modified = 1;
+	pt->reg.status = RV_MODIFIED;
 	pt->regvalid = 1;
-	Broadcast(WM_USER_CHREG, 0, 0);
+	Redrawcpureg();
 
 	return true;
 }

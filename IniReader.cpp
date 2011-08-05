@@ -28,11 +28,11 @@
 // Used to retrieve a value give the section and key
 CString CIniReader::getKeyValue(CString strKey,CString strSection)
 {
-	char ac_Result[255];
+	wchar_t ac_Result[255];
  
 	// Get the info from the .ini file	
 	m_lRetValue = GetPrivateProfileString((LPCTSTR)strSection,(LPCTSTR)strKey,
-		"",ac_Result, 255, (LPCTSTR)m_strFileName);	
+		L"",ac_Result, 255, (LPCTSTR)m_strFileName);	
 
 	CString strResult(ac_Result);
 	return strResult;
@@ -50,11 +50,11 @@ long CIniReader::setKey(CString strValue, CString strKey, CString strSection)
 // Used to find out if a given section exists
 BOOL CIniReader::sectionExists(CString strSection)
 {
-	char ac_Result[100];	
+	wchar_t ac_Result[100];	
 	CString csAux;
 	// Get the info from the .ini file	
 	m_lRetValue = GetPrivateProfileString((LPCTSTR)strSection,NULL,
-		"",ac_Result, 90, (LPCTSTR)m_strFileName);
+		L"",ac_Result, 90, (LPCTSTR)m_strFileName);
 	// Return if we could retrieve any info from that section
 	return (m_lRetValue > 0);
 }
@@ -62,7 +62,7 @@ BOOL CIniReader::sectionExists(CString strSection)
 // Used to retrieve all of the  section names in the ini file
 CStringList* CIniReader::getSectionNames()  //returns collection of section names
 {
-	char ac_Result[2000];
+	wchar_t ac_Result[2000];
 	m_sectionList->RemoveAll();
 	
 	m_lRetValue = GetPrivateProfileSectionNames(ac_Result,2000,(LPCTSTR)m_strFileName);
@@ -73,10 +73,10 @@ CStringList* CIniReader::getSectionNames()  //returns collection of section name
 		if(ac_Result[i] != '\0') {
 			strSectionName = strSectionName + ac_Result[i];
 		} else {
-			if(strSectionName != "") {
+			if(strSectionName != L"") {
 				m_sectionList->InsertAfter(m_sectionList->GetTailPosition(),strSectionName);
 			}
-			strSectionName = "";
+			strSectionName = L"";
 		}
 	}
 
@@ -86,7 +86,7 @@ CStringList* CIniReader::getSectionNames()  //returns collection of section name
 // Used to retrieve all key/value pairs of a given section.  
 CStringList* CIniReader::getSectionData(CString strSection)  
 {
-	char ac_Result[2000];  //change size depending on needs
+	wchar_t ac_Result[2000];  //change size depending on needs
 	m_sectionDataList->RemoveAll();
 	m_lRetValue = GetPrivateProfileSection((LPCTSTR)strSection, ac_Result, 2000, (LPCTSTR)m_strFileName);
 
@@ -96,10 +96,10 @@ CStringList* CIniReader::getSectionData(CString strSection)
 		if(ac_Result[i] != '\0') {
 			strSectionData = strSectionData + ac_Result[i];
 		} else {
-			if(strSectionData != "") {
+			if(strSectionData != L"") {
 				m_sectionDataList->InsertAfter(m_sectionDataList->GetTailPosition(),strSectionData);
 			}
-			strSectionData = "";
+			strSectionData = L"";
 		}
 	}
 

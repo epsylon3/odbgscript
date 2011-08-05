@@ -10,7 +10,7 @@
 //static HWND      hwmain;               // Handle of main OllyDbg window
 
 // Temp storage
-char buff[65535] = {0};
+wchar_t buff[65535] = {0};
 
 // Script state
 int script_state = SS_NONE;
@@ -39,61 +39,57 @@ BOOL APIENTRY DllMain(HINSTANCE hi,DWORD reason,LPVOID reserved)
 }
 #endif
 
-// Report plugin name and return version of plugin interface.
-extc int _export cdecl ODBG_Plugindata(char shortname[32]) 
+// OllyDbg calls this obligatory function once during startup. I place all one-time initializations here.
+int ODBG_Plugininit(int ollydbgversion, HWND hw, ulong *features) 
 {
-	strcpy(shortname, "ODbgScript");
-	return PLUGIN_VERSION;
-}
-
-// OllyDbg calls this obligatory function once during startup. I place all
-// one-time initializations here. Parameter features is reserved for future
-// extentions, do not use it.
-extc int _export cdecl ODBG_Plugininit(int ollydbgversion, HWND hw, ulong *features) 
-{
-	HINSTANCE hinst;
 
 	if(ollydbgversion < PLUGIN_VERSION) {
-		MessageBox(hwndOllyDbg(), TEXT("Incompatible Ollydbg Version !"), TEXT("ODbgScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
+		HWND hw = _hwollymain;
+		MessageBox(hw, L"Incompatible Ollydbg Version !", PLUGIN_NAME, 
+			MB_OK | MB_ICONERROR | MB_TOPMOST);
 		return -1;
 	}
 
 	// Report plugin in the log window.
-	Addtolist(0, 0, "ODbgScript v%i.%i.%i " VERSIONCOMPILED ,VERSIONHI,VERSIONLO,VERSIONST);
-	Addtolist(0, -1, "  http://odbgscript.sf.net");
+	Addtolist(0, 0, PLUGIN_NAME L" v%i.%i.%i " VERSIONCOMPILED ,VERSIONHI,VERSIONLO,VERSIONST);
+	Addtolist(0, 0, L"  http://odbgscript.sf.net");
+
 	ollylang = new OllyLang();
 
-	if (Createsorteddata(&ollylang->wndProg.data,"ODbgScript Data", 
-		sizeof(t_wndprog_data),50, (SORTFUNC *)wndprog_sort_function,NULL)!=0)
-			return -1; 
+	if (Createsorteddata(
+			&ollylang->wndLog.sorted,          // Descriptor of sorted data
+			sizeof(t_wndlog_data),             // Size of single data item
+			20,                                // Initial number of allocated items
+			wndlog_sort_function,  // Sorting function
+			wndlog_dest_function,  // Data destructor
+			0)                                 // Simple data, no special options
+	!= 0)	return -1;
 
-	if (Createsorteddata(&ollylang->wndLog.data,"ODbgScript Log", 
-	sizeof(t_wndlog_data),20, (SORTFUNC *)wndlog_sort_function,NULL)!=0)
-		return -1;
+//2	if (Createsorteddata(&(ollylang->wndProg.sorted), sizeof(t_wndprog_data),50, 
+//2		wndprog_sort_function,wndprog_dest_function, 0) != 0)	return -1; 
 
-	hinst = hinstModule();
+//2	HINSTANCE hinst = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
 
-	if (Registerpluginclass(wndprogclass,NULL,hinst,wndprog_winproc)<0) {
-		return -1;
-	}
-	if (Registerpluginclass(wndlogclass,NULL,hinst,wndlog_winproc)<0) {
-		return -1;
-	}
-	if (Plugingetvalue(VAL_RESTOREWINDOWPOS)!=0 && Pluginreadintfromini(hinst,"Restore Script Log",0)!=0)
-		initLogWindow();
+//2	if (Registerpluginclass(wndprogclass,NULL,hinst,wndprog_winproc)<0) {
+//2		return -1;
+//2	}
+//2	if (Registerpluginclass(wndlogclass,NULL,hinst,wndlog_winproc)<0) {
+//2		return -1;
+//2	}
+//2 if (Plugingetvalue(VAL_RESTOREWINDOWPOS)!=0 && Pluginreadintfromini(hinst, L"Restore Script Log",0)!=0)
+//		initLogWindow();
 
-	if (Plugingetvalue(VAL_RESTOREWINDOWPOS)!=0 && Pluginreadintfromini(hinst,"Restore Script window",0)!=0)
-		initProgTable();
+//2 if (Plugingetvalue(VAL_RESTOREWINDOWPOS)!=0 && Pluginreadintfromini(hinst, L"Restore Script window",0)!=0)
+//		initProgTable();
 
 	return 0;
 }
 
 // This function is called each time OllyDbg passes main Windows loop. When
 // debugged application stops, b ring command line window in foreground.
-extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent) 
+void ODBG_Pluginmainloop(DEBUG_EVENT *debugevent) 
 {	
-	t_status status; 
-	status = Getstatus();
+	t_status status = Getstatus();
 	script_state = ollylang->script_state;
 	
     // module load event. kept for future use. http://www.openrce.org/articles/full_view/25
@@ -106,8 +102,10 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 	*/
 
 	if (debugevent && debugevent->dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT && debugevent->u.DebugString.nDebugStringLength>0
-		&& !IsBadCodePtr((FARPROC)debugevent->u.DebugString.lpDebugStringData))
-		MsgBox(debugevent->u.DebugString.lpDebugStringData,"");
+		&& !IsBadCodePtr((FARPROC)debugevent->u.DebugString.lpDebugStringData)) {
+		string msg = debugevent->u.DebugString.lpDebugStringData;
+		MsgBox(w_strtow(msg),L"");
+	}
 
 	// Check for breakpoint jumps
 	if(script_state == SS_RUNNING && debugevent && debugevent->dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
@@ -116,9 +114,9 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 		EXCEPTION_DEBUG_INFO edi = debugevent->u.Exception;
 		if(edi.ExceptionRecord.ExceptionCode != EXCEPTION_SINGLE_STEP)
 			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
-		else if(edi.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
+/*		else if(edi.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
 			ollylang->OnBreakpoint(PP_EXCEPTION,EXCEPTION_DEBUG_EVENT);
-/*		else	
+		else	
 			if(script_state == SS_RUNNING)
 			{
 				t_thread* t;
@@ -146,7 +144,8 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 			}
 			catch( ... )
 			{
-				MessageBox(hwndOllyDbg(), TEXT("An error occured in the plugin!\nPlease contact Epsylon3."), TEXT("ODbgScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
+				HWND hw = _hwollymain;
+				MessageBox(hw, L"An error occured in the plugin!", PLUGIN_NAME, MB_OK | MB_ICONERROR | MB_TOPMOST);
 			}
 		}
 
@@ -163,17 +162,18 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 		}
 		catch( ... )
 		{
-			MessageBox(hwndOllyDbg(), TEXT("An error occured in the plugin!\nPlease contact Epsylon3."), TEXT("ODbgScript"), MB_OK | MB_ICONERROR | MB_TOPMOST);
+			HWND hw = _hwollymain;
+			MessageBox(hw, L"An error occured in the plugin!", PLUGIN_NAME, MB_OK | MB_ICONERROR | MB_TOPMOST);
 			delete ollylang;
 		}
 
 	}
 
 	//Refocus script windows (ex: when using "Step")
-	if (    ollylang->wndProg.hw 
-		&& (status == STAT_STOPPED || status == STAT_EVENT)
+	if (ollylang->wndProg.hw
+		&& (status == STAT_FINISHED || status == STAT_IDLE)
 		&& (script_state != SS_RUNNING)
-		) 
+		)
 	{
 		if (focusonstop>0) { 
 //			InvalidateProgWindow();
@@ -185,7 +185,7 @@ extc void _export cdecl ODBG_Pluginmainloop(DEBUG_EVENT *debugevent)
 
 }
 
-extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_EVENT* debugevent)
+int ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_EVENT* debugevent)
 {
 	EXCEPTION_DEBUG_INFO edi;
 	if(debugevent)
@@ -201,17 +201,17 @@ extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_
 	{
 		switch(reasonex) 
 		{
-		case PP_INT3BREAK:
-		case PP_HWBREAK:
-		case PP_MEMBREAK:
-			ollylang->OnBreakpoint(reasonex,dummy);
-			break;
-		case PP_EXCEPTION:
-		case PP_ACCESS:
-		case PP_GUARDED:
-		case PP_SINGLESTEP | PP_BYPROGRAM:
-			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
-			break;
+//2		case PP_INT3BREAK:
+//2		case PP_HWBREAK:
+//2		case PP_MEMBREAK:
+//2			ollylang->OnBreakpoint(reasonex,dummy);
+//2			break;
+//2		case PP_EXCEPTION:
+//2		case PP_ACCESS:
+//2		case PP_GUARDED:
+//2		case PP_SINGLESTEP | PP_BYPROGRAM:
+//2			ollylang->OnException(edi.ExceptionRecord.ExceptionCode);
+//2			break;
 		}
 		if (ollylang->wndProg.hw) {
 			Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
@@ -222,38 +222,12 @@ extc int _export cdecl ODBG_Pausedex(int reasonex, int dummy, t_reg* reg, DEBUG_
 	return 0;
 }
 
-// Function adds items to main OllyDbg menu (origin=PM_MAIN).
-extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item) 
+// Function adds items to main OllyDbg menu (origin=PWM_MAIN).
+int ODBG_Pluginmenu(int origin, wchar_t data[4096], void *item)
 {
     t_dump *pd;
 
 	switch (origin) {
-		
-	case PM_MAIN:
-	//MRU Menu content, actions are 21..25
-		ZeroMemory(buff, sizeof(buff));
-		//strcpy(buff, "Run &Script{0 Open...|");
-		strcpy(buff, "0 Run &Script...|");
-		//mruGetMenu(&buff[strlen(buff)]);
-		strcpy(&buff[strlen(buff)],
-		//"}|"
-/*		"1 Abort"
-		",2 Pause"
-		",3 Resume"
-		",4 Step"
-		"|"
-*/		"30 Script &Window..."
-		",31 &Log Window..."
-		"|"
-		"20 &Help"
-		"|"
-		"10 &About"
-//		",11 TEST"
-//		",12 TEST2"
-		);
-
-		strcpy(data,buff);
-		return 1;
 
 	case PM_DISASM:
 	  pd=(t_dump *)item;
@@ -261,44 +235,46 @@ extc int _export cdecl ODBG_Pluginmenu(int origin, char data[4096], void *item)
           return 0; 
 
 		ZeroMemory(buff, sizeof(buff));
-		strcpy(buff, "# Run Scri&pt{0 Open...|");
-		mruGetCurrentMenu(&buff[strlen(buff)]);
- 		strcpy(&buff[strlen(buff)],
-			"}"
-			"Script &Functions...{"
-			"30  Script &Window\t"
-			",31  Script &Log\t"
-			"|"
-			",4 Step\t"
-			",2 Pause\tPAUSE"
-			",3 Resume\t"
-			",1 Abort\t"
-			"|"
-			",32 Edit Script..."
-			"}"
+		wcscpy(buff, L"# Run Scri&pt{0 Open...|");
+		mruGetCurrentMenu(&buff[wcslen(buff)]);
+ 		wcscpy(&buff[wcslen(buff)],
+			L"}"
+			L"Script &Functions...{"
+			L"30  Script &Window\t"
+			L",31  Script &Log\t"
+			L"|"
+			L",4 Step\t"
+			L",2 Pause\tPAUSE"
+			L",3 Resume\t"
+			L",1 Abort\t"
+			L"|"
+			L",32 Edit Script..."
+			L"}"
 
 		);
 		
-		strcpy(data,buff);
+		wcscpy(data,buff);
 		return 1;
 
 	}
 	return 0; // No pop-up menus in OllyDbg's windows
 }
 
-extc int _export cdecl ExecuteScript(const char* const filename)
+extc int _export cdecl ExecuteScript(const char* filename)
 {
-	ollylang->LoadScript((LPSTR)filename);
+	string file = filename;
+	ollylang->LoadScript(w_strtow(file));
 	ollylang->Step(0);
 	return 0;
 }
 
 // Needed by OllyscriptEditor
-extc HWND _export cdecl DebugScript(const char* const filename)
+extc HWND _export cdecl DebugScript(const char* filename)
 {
-	if (filename!="")
+	string file = filename;
+	if (file.length() > 0)
 	{
-		ollylang->LoadScript((LPSTR)filename);
+		ollylang->LoadScript(w_strtow(file));
 		ollylang->Pause();
 		script_state = ollylang->script_state;
 		initProgTable();
@@ -308,29 +284,17 @@ extc HWND _export cdecl DebugScript(const char* const filename)
 	return ollylang->wndProg.hw;
 }
 
-// Receives commands from windows menus.
-extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item) 
+// Old Pluginaction
+void ODBG_Pluginaction(int origin, int action, void *item) 
 {
-
-  switch (origin)
-  {
-	case PM_MAIN:
-	case PM_DISASM:
-		break;
-	default:
-		//Other windows ignored
-		return;
-  }
-
-  char s[256];
-  HINSTANCE hinst  = hinstModule();
-  HWND      hwmain = hwndOllyDbg();
+  HINSTANCE hinst  = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
+  HWND      hwmain = _hwollymain;
   OPENFILENAME ofn={0};
   switch (action) 
   {
 	case 0: // Run script
 		       // common dialog box structure
-		char szFile[260];       // buffer for file name
+		wchar_t szFile[260];       // buffer for file name
 		
 		// Initialize OPENFILENAME
 		//ZeroMemory(&ofn, sizeof(ofn));
@@ -343,13 +307,13 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		//
 		ofn.lpstrFile[0] = '\0';
 		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "Olly Scripts\0*.osc;*.txt\0All\0*.*\0";
+		ofn.lpstrFilter = L"Olly Scripts\0*.osc;*.txt\0All\0*.*\0";
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;
-		Pluginreadstringfromini(hinst, "ScriptDir", buff, 0);
+		Getfromini(NULL,PLUGIN_NAME, L"ScriptDir", L"%s", buff);
 		ofn.lpstrInitialDir = buff;
-		ofn.lpstrTitle = "Select Script";
+		ofn.lpstrTitle = L"Select Script";
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 		
 
@@ -368,8 +332,8 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		break;
 
 	case 1: // Abort
-		MessageBox(hwmain, TEXT("Script aborted!"), TEXT("ODbgScript"), MB_OK|MB_ICONEXCLAMATION );
-		ollylang->Reset(); 
+		MessageBox(hwmain, L"Script aborted!", PLUGIN_NAME, MB_OK|MB_ICONEXCLAMATION );
+		ollylang->Reset();
 		ollylang->Pause();
 		break;
 
@@ -392,26 +356,6 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		script_state = ollylang->script_state;
     	break;
 
-	case 10:
-		sprintf(s,"ODbgScript plugin v%i.%i.%i\n"
-			      "by Epsylon3@gmail.com\n\n"
-				  "From OllyScript written by SHaG\n"
-				  "PE dumper by R@dier\n"
-				  "Byte replacement algo by Hex\n\n"
-				  "http://odbgscript.sf.net/ \n\n"
-				  "Compiled %s %s \n"
-			       VERSIONCOMPILED "\n",
-			VERSIONHI,VERSIONLO,VERSIONST, __DATE__, __TIME__);
-		MessageBox(hwmain, s, TEXT("ODbgScript"), MB_OK|MB_ICONINFORMATION );
-		break;
-	case 20: 
-		{
-			string directory, helpfile;
-			getPluginDirectory(directory);
-			helpfile = directory + "\\ODbgScript.txt";			
-			ShellExecute(hwndOllyDbg(),"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
-		}
-		break;
 	case 21: // MRU List in CPU Window
 	case 22:
 	case 23:
@@ -423,11 +367,11 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 	case 29:
 		{
 			action-=20; 
-			char key[5]="NRU ";
+			wchar_t key[5]=L"NRU ";
 			key[3]=action+0x30;
 						
 			ZeroMemory(&buff, sizeof(buff));
-			Pluginreadstringfromini(hinst,key,buff,0);
+			Getfromini(NULL,PLUGIN_NAME, key, L"%s", buff);
 
 			// Load script
 			ollylang->LoadScript(buff);
@@ -435,9 +379,9 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 			mruAddFile(buff);
  
 			// Save script directory
-			char* buf2;
+			wchar_t* buf2;
 			GetFullPathName(buff,sizeof(buff),buff,&buf2); *buf2=0;			
-			Pluginwritestringtoini(hinst, "ScriptDir", buff);
+			Pluginwritestringtoini(hinst, L"ScriptDir", buff);
 
 			ollylang->Resume();
 			if (ollylang->wndProg.hw) {
@@ -459,7 +403,8 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		}
 	case 32: // Edit Script
 		{
-			ShellExecute(hwndOllyDbg(),"open",ollylang->scriptpath.c_str(),NULL,ollylang->currentdir.c_str(),SW_SHOWDEFAULT);
+			HWND hw = _hwollymain;
+			ShellExecute(hw,L"open",ollylang->scriptpath.c_str(),NULL,ollylang->currentdir.c_str(),SW_SHOWDEFAULT);
 			break;
 		}
 	case 11:
@@ -470,7 +415,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
 		}
 	case 12:
 		{
-//			Broadcast(WM_USER_CHALL, 0, 0);
+//			Broadcast(WM_USER_CHGALL, 0, 0);
 		}
 //			t_thread* thr = Findthread(Getcputhreadid());
 //			byte buffer[4];
@@ -515,7 +460,7 @@ extc void _export cdecl ODBG_Pluginaction(int origin, int action, void *item)
   }
 }
 
-extc int ODBG_Pluginshortcut(int origin,int ctrl,int alt,int shift,int key,void *item) {
+int ODBG_Pluginshortcut(int origin,int ctrl,int alt,int shift,int key,void *item) {
 
 	switch (origin) {
 	case PM_MAIN:
@@ -532,7 +477,7 @@ extc int ODBG_Pluginshortcut(int origin,int ctrl,int alt,int shift,int key,void 
 
 		break; 
 /*
-PM_MAIN	item is always NULL	Main window
+PWM_MAIN	item is always NULL	Main window
 PM_DUMP	(t_dump *)	Any Dump window
 PM_MODULES	(t_module *)	Modules window
 PM_MEMORY	(t_memory *)	Memory window
@@ -542,7 +487,7 @@ PM_REFERENCES	(t_ref *)	References window
 PM_RTRACE	(int *)	Run trace window
 PM_WATCHES	(1-based index)	Watches window
 PM_WINDOWS	(t_window *)	Windows window
-PM_DISASM	(t_dump *)	CPU Disassembler
+PWM_DISASM	(t_dump *)	CPU Disassembler
 PM_CPUDUMP	(t_dump *)	CPU Dump
 PM_CPUSTACK	(t_dump *)	CPU Stack
 PM_CPUREGS	(t_reg *)	CPU Registers
@@ -562,8 +507,8 @@ PM_CPUREGS	(t_reg *)	CPU Registers
 	default:
 			//if (key==VK_F8 && shift==0 && ctrl==0) {
 #ifdef _DEBUG
-			char* data = new char[256];
-			sprintf(data,"ODBG_Pluginshortcut %d %d",origin,key);
+			wchar_t* data = new wchar_t[256];
+			wsprintf(data,L"ODBG_Pluginshortcut %d %d",origin,key);
 			Addtolist(0, -1, data );
 			delete[] data;
 			return 0;
@@ -575,8 +520,11 @@ PM_CPUREGS	(t_reg *)	CPU Registers
 }
 
 // OllyDbg calls this optional function when user restarts debugged app
-extc void _export cdecl ODBG_Pluginreset()
+void ODBG_Pluginreset()
 {	
+	if (ollylang == NULL)
+		return;
+
 	//we keep the script state on restart (paused or not)
 	if (ollylang->script_state == SS_PAUSED) {
 		ollylang->Reset();
@@ -586,7 +534,7 @@ extc void _export cdecl ODBG_Pluginreset()
 		ollylang->Reset();
 }
 
-int ODBG_Plugincmd(int reason,t_reg *reg,char *cmd)
+int ODBG_Plugincmd(int reason,t_reg *reg,wchar_t *cmd)
 /*
 OllyDbg will call it each time the debugged application pauses on conditional logging breakpoint that specifies commands to be passed to plugins
 
@@ -595,15 +543,15 @@ reg - pointer to registers of thread that caused application to pause, may be NU
 cmd - null-terminated command to plugin.
 */
 {
-	if (reason!=PP_EVENT)
-		return 0;
+//2	if (reason!=PP_EVENT)
+//		return 0;
 
 	int p;
-	string scmd,args;
+	wstring scmd,args;
 	scmd.assign(cmd);
-	if ((p=scmd.find_first_of(" \t\r\n"))!=string::npos) {
-		args=trim(scmd.substr(p+1));
-		scmd=trim(scmd.substr(0,p));
+	if ((p=scmd.find_first_of(L" \t\r\n")) != wstring::npos) {
+		args=w_trim(scmd.substr(p+1));
+		scmd=w_trim(scmd.substr(0,p));
 	}
 	if (ollylang->isCommand(scmd)) {
 		ollylang->callCommand(scmd,args);
@@ -614,18 +562,18 @@ cmd - null-terminated command to plugin.
 }
 
 // OllyDbg calls this optional function when user wants to terminate OllyDbg.
-extc int _export cdecl ODBG_Pluginclose() 
+int ODBG_Pluginclose() 
 {
+	if (ollylang == NULL) return 0;
 
 	if (ollylang->hwndinput != 0) {
 		EndDialog(ollylang->hwndinput, 0);
 		ollylang->hwndinput=0;
 	}
 
-	ollylang->SaveBreakPoints((char*)ollylang->scriptpath.c_str());
-
-	Pluginwriteinttoini(hinstModule(),"Restore Script window",(ollylang->wndProg.hw!=NULL));
-	Pluginwriteinttoini(hinstModule(),"Restore Script Log",(ollylang->wndLog.hw!=NULL));
+	ollylang->SaveBreakPoints(ollylang->scriptpath);
+	Writetoini(NULL,PLUGIN_NAME, L"Restore Script window", L"%i", (ollylang->wndProg.hw!=NULL));
+	Writetoini(NULL,PLUGIN_NAME, L"Restore Script Log", L"%i", (ollylang->wndLog.hw!=NULL));
 	return 0;
 }
 
@@ -633,12 +581,279 @@ extc int _export cdecl ODBG_Pluginclose()
 // windows created by plugin are already destroyed (and received WM_DESTROY
 // messages). Function must free all internally allocated resources, like
 // window classes, files, memory and so on.
-extc void _export cdecl ODBG_Plugindestroy()
+void ODBG_Plugindestroy()
 {
 	delete ollylang;
-	Unregisterpluginclass(wndprogclass);
-	Unregisterpluginclass(wndlogclass);
+	//Unregisterpluginclass(wndprogclass);
+	//Unregisterpluginclass(wndlogclass);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// PLUGIN INITIALIZATION /////////////////////////////
+
+// Report plugin name and return version of plugin interface.
+extc int _export cdecl _ODBG2_Plugindata(char shortname[32]) 
+{
+	wstring name= PLUGIN_NAME;
+	strcpy(shortname, w_wstrto(name).c_str());
+	return PLUGIN_VERSION;
+}
+static int Mrunscript(t_table *pt,wchar_t *name,ulong index,int mode) {
+	switch (mode) { 
+	case MENU_VERIFY:
+		return MENU_NORMAL;                // Always available
+	case MENU_EXECUTE:
+		ODBG_Pluginaction(PM_MAIN, 0, NULL);
+		return MENU_NOREDRAW;
+	default:
+	  return MENU_ABSENT;
+	};
+};
+static int Mscriptwindow(t_table *pt,wchar_t *name,ulong index,int mode) {
+	switch (mode) { 
+	case MENU_VERIFY:
+		return MENU_NORMAL;                // Always available
+	case MENU_EXECUTE:
+		//ODBG_Pluginaction(PM_MAIN, 30, NULL);
+		initProgTable();
+		return MENU_NOREDRAW;
+	default:
+	  return MENU_ABSENT;
+	};
+};
+static int Mlogwindow(t_table *pt,wchar_t *name,ulong index,int mode) {
+	switch (mode) { 
+	case MENU_VERIFY:
+		return MENU_NORMAL;                // Always available
+	case MENU_EXECUTE:
+		//ODBG_Pluginaction(PM_MAIN, 31, NULL);
+		initLogWindow();
+		return MENU_NOREDRAW;
+	default:
+	  return MENU_ABSENT;
+	};
+};
+static int Mhelp(t_table *pt,wchar_t *name,ulong index,int mode) {
+  if (mode == MENU_VERIFY)
+    return MENU_NORMAL;                // Always available
+  else if (mode == MENU_EXECUTE) {
+		wstring directory, helpfile;
+		getPluginDirectory(directory);
+		helpfile = directory + L"\\ODbgScript.txt";
+		HWND hw = _hwollymain;
+		ShellExecute(hw,L"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
+  };
+  return MENU_ABSENT;
+};
+// Menu function of main menu, displays About dialog.
+static int Mabout(t_table *pt,wchar_t *name,ulong index,int mode) {
+	HWND hw = _hwollymain;
+
+	switch (mode) { 
+	case MENU_VERIFY:
+		return MENU_NORMAL;
+	case MENU_EXECUTE:
+		// Debuggee should continue execution while message box is displayed.
+		Resumeallthreads();
+		wchar_t s[256];
+		wsprintf(s,L"ODbgScript plugin v%i.%i.%i\n"
+			      L"by tpruvot@github\n\n"
+				  L"Based on OllyScript by SHaG\n"
+				  L"PE dumper by R@dier\n"
+				  L"Byte replacement algo by Hex\n\n"
+				  L"http://odbgscript.sf.net/ \n\n"
+				  L"Compiled %s %s \n"
+			       VERSIONCOMPILED L"\n",
+			VERSIONHI,VERSIONLO,VERSIONST, w_strtow(__DATE__).c_str(), w_strtow(__TIME__).c_str());
+
+		MessageBox(hw, s, PLUGIN_NAME, MB_OK|MB_ICONINFORMATION );
+
+		// Suspendallthreads() and Resumeallthreads() must be paired, even if they are called in inverse order!
+		Suspendallthreads();
+		return MENU_NOREDRAW;
+	default:
+	  return MENU_ABSENT;
+	};
+};
+
+// manual command
+static int Mcommand(t_table *pt,wchar_t *name,ulong index,int mode) {
+	HWND hw = _hwollymain;
+
+	switch (mode) {
+	case MENU_VERIFY:
+		return MENU_NORMAL;
+	case MENU_EXECUTE:
+		ollylang->execCommand();
+/*
+		ollylang->callCommand(L"mov",L"test, 0");
+		ollylang->callCommand(L"add",L"test, 50");
+		ollylang->callCommand(L"log",L"test");
+		ollylang->callCommand(L"log",L"\"-10 result:\"");
+		ollylang->callCommand(L"add",L"test, -10");
+		ollylang->callCommand(L"log",L"test");
+		ollylang->callCommand(L"mov",L"e, eip");
+		ollylang->callCommand(L"log",L"e");
+		ollylang->callCommand(L"bp",L"e");
+		ollylang->callCommand(L"bc",L"e");
+*/
+		return MENU_NOREDRAW;
+	default:
+	  return MENU_ABSENT;
+	};
+};
+
+// Plugin menu that will appear in the main OllyDbg menu. Note that this menu
+// must be static and must be kept for the whole duration of the debugging
+// session.
+static t_menu mainmenu[] = {
+
+  { L"&Run &Script...",
+       L"Open &Script window",
+       KK_DIRECT|KK_SHIFT|'R', Mrunscript, NULL, 0 },
+  { L"&Script Window",
+       L"Open &Script window",
+       KK_DIRECT|KK_SHIFT|'S', Mscriptwindow, NULL, 0 },
+  { L"&Log Window",
+       L"Open Script &Log window",
+	   KK_DIRECT|KK_SHIFT|'L', Mlogwindow, NULL, 0 },
+  { L"|&Command...",
+       L"Execute manual &command",
+       KK_DIRECT|KK_SHIFT|'C', Mcommand, NULL, 0 },
+  { L"|&Help",
+       L"&Help",
+       K_NONE, Mhelp, NULL, 0 },
+  { L"|About",
+       L"About ODBGScript",
+       K_NONE, Mabout, NULL, 0 },
+  { NULL, NULL, K_NONE, NULL, NULL, 0 }
+};
+
+extc _export t_menu* _ODBG2_Pluginmenu(wchar_t *type)
+{
+  if (wcscmp(type,PWM_MAIN)==0)
+    // Main menu.
+    return mainmenu;
+  else if (wcscmp(type,PWM_DISASM)==0)
+    // Disassembler pane of CPU window.
+    return mainmenu;
+
+  return NULL; // No menu
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// DUMP WINDOW HOOK ///////////////////////////////
+
+// Dump windows display contents of memory or file as bytes, characters,
+// integers, floats or disassembled commands. Plugins have the option to modify
+// the contents of the dump windows. If ODBG2_Plugindump() is present and some
+// dump window is being redrawn, this function is called first with column=
+// DF_FILLCACHE, addr set to the address of the first visible element in the
+// dump window and n to the estimated total size of the data displayed in the
+// window (n may be significantly higher than real data size for disassembly).
+// If plugin returns 0, there are no elements that will be modified by plugin
+// and it will receive no other calls. If necessary, plugin may cache some data
+// necessary later. OllyDbg guarantees that there are no calls to
+// ODBG2_Plugindump() from other dump windows till the final call with
+// DF_FREECACHE.
+// When OllyDbg draws table, there is one call for each table cell (line/column
+// pair). Parameters s (UNICODE), mask (DRAW_xxx) and select (extended DRAW_xxx
+// set) contain description of the generated contents of length n. Plugin may
+// modify it and return corrected length, or just return the original length.
+// When table is completed, ODBG2_Plugindump() receives final call with
+// column=DF_FREECACHE. This is the time to free resources allocated on
+// DF_FILLCACHE. Returned value is ignored.
+// Use this feature only if absolutely necessary, because it may strongly
+// impair the responsiveness of the OllyDbg. Always make it switchable with
+// default set to OFF!
+extc int _export _ODBG2_Plugindump(t_dump *pd,
+  wchar_t *s,uchar *mask,int n,int *select,ulong addr,int column) {
+  int i,j;
+  wchar_t w[TEXTLEN];
+
+  return n;
+}
+
+// ODBG_Pluginquery() is a "must" for valid OllyDbg plugin. First it must check
+// whether given OllyDbg version is correctly supported, and return 0 if not.
+// Then it should make one-time initializations and allocate resources. On
+// error, it must clean up and return 0. On success, if should fill plugin name
+// and plugin version (as UNICODE strings) and return version of expected
+// plugin interface. If OllyDbg decides that this plugin is not compatible, it
+// will call ODBG2_Plugindestroy() and unload plugin. Plugin name identifies it
+// in the Plugins menu. This name is max. 31 alphanumerical UNICODE characters
+// or spaces + terminating L'\0' long. To keep life easy for users, this name
+// should be descriptive and correlate with the name of DLL. This function
+// replaces ODBG_Plugindata() and ODBG_Plugininit() from the version 1.xx.
+extc int _export _ODBG2_Pluginquery(int ollydbgversion,
+	wchar_t pluginname[SHORTNAME],wchar_t pluginversion[SHORTNAME]) {
+	int restore;
+	// Check whether OllyDbg has compatible version. This plugin uses only the
+	// most basic functions, so this check is done pro forma, just to remind of
+	// this option.
+	if (ollydbgversion<201)
+		return 0;
+
+	ulong features = _cpufeatures;
+	HWND hw = _hwollymain;
+	ODBG_Plugininit(ollydbgversion, hw, &features);
+
+	// Report name and version to OllyDbg.
+	wcscpy(pluginname,PLUGIN_NAME);
+	wsprintf(pluginversion,L"%d.%d.%d", VERSIONHI,VERSIONLO,VERSIONST);
+	return PLUGIN_VERSION;
+};
+
+// Function is called when user opens new or restarts current application.
+// Plugin should reset internal variables and data structures to initial state.
+extc void _export _ODBG2_Pluginreset(void) {
+	ODBG_Pluginreset();
+};
+
+// If you define ODBG2_Pluginmainloop, this function will be called each time
+// from the main Windows loop in OllyDbg. If there is some (real) debug event
+// from the debugged application, debugevent points to it, otherwise it's NULL.
+// If fast command emulation is active, it does not receive all (emulated)
+// exceptions, use ODBG2_Pluginexception() instead. Do not declare this
+// function unnecessarily, as this may negatively influence the overall speed!
+extc void _export _ODBG2_Pluginmainloop(DEBUG_EVENT *debugevent) {
+	ODBG_Pluginmainloop(debugevent);
+};
+
+extc void _export _ODBG2_Pluginexception(t_reg *preg) {
+	ODBG_Pluginmainloop(NULL);
+};
+
+// Optional entry, called each time OllyDbg analyses some module and analysis
+// is finished. Plugin can make additional analysis steps. Debugged application
+// is paused for the time of processing. Bookmark plugin, of course, does not
+// analyse code. If you don't need this feature, remove ODBG2_Pluginanalyse()
+// from the plugin code.
+extc void _export _ODBG2_Pluginanalyse(t_module *pmod) {
+    ODBG_Pluginmainloop(NULL);
+};
+////////////////////////////////////////////////////////////////////////////////
+
+
+// OllyDbg calls this optional function when user wants to terminate OllyDbg.
+// All MDI windows created by plugins still exist. Function must return 0 if
+// it is safe to terminate. Any non-zero return will stop closing sequence. Do
+// not misuse this possibility! Always inform user about the reasons why
+// termination is not good and ask for his decision! Attention, don't make any
+// unrecoverable actions for the case that some other plugin will decide that
+// OllyDbg should continue running.
+extc int _export _ODBG2_Pluginclose(void) {
+  return ODBG_Pluginclose();
+};
+
+// OllyDbg calls this optional function once on exit. At this moment, all MDI
+// windows created by plugin are already destroyed (and received WM_DESTROY
+// messages). Function must free all internally allocated resources, like
+// window classes, files, memory etc.
+extc void _export _ODBG2_Plugindestroy(void) {
+	ODBG_Plugindestroy();
+};
 
 
 #include "Dialogs.cpp"

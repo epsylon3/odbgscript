@@ -1,4 +1,4 @@
-cd "D:\VC\MyProjects\ODbgScript"
+cd "Z:\#GIT\odbgscript"
 
 move Release\ODbgScript.dll .\
 move Release\msvcrt.dll .\

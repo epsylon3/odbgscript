@@ -5,7 +5,7 @@ var::var()
 	vt = EMP;
 	dw = 0;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = 0;
 	isbuf = false;
 }
@@ -20,13 +20,13 @@ var::var(const var& rhs)
 	isbuf = rhs.isbuf;
 }
 
-var::var(string& rhs)
+var::var(wstring& rhs)
 {
 	vt = STR;
 	dw = 0;
 	flt = 0;
 	str  = rhs;
-	string s=rhs;
+	wstring s=rhs;
 	if (UnquoteString(s,'#','#')) {
 		size = s.length()/2;
 		int (*pf)(int) = toupper; 
@@ -43,7 +43,7 @@ var::var(ulong rhs)
 	vt = DW;
 	dw = rhs;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 }
@@ -53,7 +53,7 @@ var::var(int rhs)
 	vt = DW;
 	dw = (ulong)rhs;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 }
@@ -63,7 +63,7 @@ var::var(long double rhs)
 	vt = FLT;
 	flt = rhs;
 	dw = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 }
@@ -80,13 +80,13 @@ var& var::operator=(const var& rhs)
 	return *this;
 }
 
-var& var::operator=(const string& rhs)
+var& var::operator=(const wstring& rhs)
 {
 	vt = STR;
 	dw = 0;
 	flt = 0;
 	str = rhs;
-	string s=rhs;
+	wstring s=rhs;
 	if (UnquoteString(s,'#','#')) {
 		size = s.length()/2;
 		int (*pf)(int) = toupper; 
@@ -104,7 +104,7 @@ var& var::operator=(const ulong& rhs)
 	vt = DW;
 	dw = rhs;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 	return *this;
@@ -115,7 +115,7 @@ var& var::operator=(const int& rhs)
 	vt = DW;
 	dw = (ulong)rhs;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 	return *this;
@@ -126,7 +126,7 @@ var& var::operator=(unsigned short& rhs)
 	vt = DW;
 	dw = rhs;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 	return *this;
@@ -137,7 +137,7 @@ var& var::operator=(unsigned char& rhs)
 	vt = DW;
 	dw = rhs;
 	flt = 0;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 	return *this;
@@ -148,7 +148,7 @@ var& var::operator=(const long double& rhs)
 	vt = FLT;
 	dw = 0;
 	flt = (long double)rhs;
-	str = "";
+	str = L"";
 	size = sizeof(rhs);
 	isbuf = false;
 	return *this;
@@ -161,22 +161,22 @@ var& var::operator+=(const var& rhs)
 	else if(rhs.vt == FLT)
 		*this+=rhs.flt;
 	else if(rhs.vt == STR) {
-		//operator+=(const string& rhs)
+		//operator+=(const wstring& rhs)
 		*this+=rhs.str;
 	}
 	return *this;
 }
 
-var& var::operator+=(const string& rhs)
+var& var::operator+=(const wstring& rhs)
 {
-	string s;
+	wstring s;
 	if(vt == STR) {
-		string s=rhs;
+		wstring s=rhs;
 		if (UnquoteString(s,'#','#')) {
 			if (!isbuf) {
 				//String + buf Hex Buffer to String ok
 				size_t len=s.length()/2;
-				char* buf = (char*)malloc(len+1);
+				wchar_t* buf = (wchar_t*)malloc(len*2+1);
 				Str2Rgch(s,buf,len+1);
 				s.assign(buf,len);
 				str  += s;
@@ -184,7 +184,7 @@ var& var::operator+=(const string& rhs)
 				free(buf);
 			} else { 
 				// Buffer + Buffer
-				str = "#"+str.substr(1,str.length()-2)+s+"#";
+				str = L"#"+str.substr(1,str.length()-2)+s+L"#";
 				size += s.length()/2;
 			}
 		} else {
@@ -194,25 +194,25 @@ var& var::operator+=(const string& rhs)
 				size += rhs.length();
 			} else {
 				//buf + str
-				string Hex;
+				wstring Hex;
 				Str2Hex(s,Hex,s.length());
-				str = "#"+str.substr(1,str.length()-2)+Hex+"#";
+				str = L"#"+str.substr(1,str.length()-2)+Hex+L"#";
 				size += s.length();
 			}
 		}
 
 	} else if(vt == DW) {
-		var v=(string)rhs;
+		var v=(wstring)rhs;
 
-		char dwbuf[12];
+		wchar_t dwbuf[12];
 		if (v.isbuf) {
 			//ulong + BUFFER >> CONCATE HEX
 			s = strbuffhex();
-			sprintf(dwbuf, "%08X",dw);
-			*this = "#"+((string)dwbuf)+s+"#";
+			wsprintf(dwbuf, L"%08X",dw);
+			*this = L"#"+((wstring)dwbuf)+s+L"#";
 		} else {
-			//ulong + STRING >> CONCATE ultoa+str
-			s = strupr(ultoa(dw, dwbuf, 16));
+			//ulong + STRING >> CONCATE _ultow+str
+			s = _wcsupr(_ultow(dw, dwbuf, 16));
 			*this = s+v.str;
 		}
 	}
@@ -227,16 +227,16 @@ var& var::operator+=(const ulong& rhs)
 	else if(vt == FLT)
 		flt += rhs;
 	else if(vt == STR) {
-		string s;
-		char dwbuf[12];
+		wstring s;
+		wchar_t dwbuf[12];
 		if (isbuf) {
 			//Concate Num ulong to a buffer (4 octets)
 			s = strbuffhex();
-			sprintf(dwbuf, "%08X",rev(rhs));
-			*this = "#"+s+dwbuf+"#";
+			wsprintf(dwbuf, L"%08X",rev(rhs));
+			*this = L"#" + s + dwbuf + L"#";
 		} else {
 			//Add Number to a String
-			s = strupr(ultoa(rhs, dwbuf, 16));
+			s = _wcsupr(_ultow(rhs, dwbuf, 16));
 			str += s;
 			size += s.length();
 		}
@@ -287,18 +287,18 @@ int var::compare(const var& rhs) const
 		if (isbuf == rhs.isbuf)
 			return str.compare(rhs.str);
 		else {
-			string Hex;
+			wstring Hex;
 			if (isbuf) {
 				//Buffer / String
-				string s=str;
+				wstring s=str;
 				UnquoteString(s,'#','#');
-				Str2Hex((string)rhs.str,Hex,rhs.size);
+				Str2Hex((wstring)rhs.str,Hex,rhs.size);
 				return s.compare(Hex);
 			} else { 
 				//String / Buffer
-				string s=rhs.str;
+				wstring s=rhs.str;
 				UnquoteString(s,'#','#');
-				Str2Hex((string)str,Hex,size);
+				Str2Hex((wstring)str,Hex,size);
 				return Hex.compare(s);
 			}
 		}
@@ -306,7 +306,7 @@ int var::compare(const var& rhs) const
 	return 0;
 }
 
-int var::compare(const string& rhs) const
+int var::compare(const wstring& rhs) const
 {
 	var tmp;
 	tmp.vt = STR;
@@ -332,30 +332,30 @@ int var::compare(const long double& rhs) const
 	return compare(tmp);
 }
 
-string var::strclean(void) 
+wstring var::strclean(void) 
 {
 	return CleanString(strbuff());
 }
 
-string var::strbuffhex(void) 
+wstring var::strbuffhex(void) 
 {
 	if (isbuf)
 		//#001122# to "001122"
 		return str.substr(1,str.length()-2);
 	else {
-		string s;
+		wstring s;
 		Str2Hex(str,s,size);
 		return s;
 	}
 }
 
-string var::strbuff(void) 
+wstring var::strbuff(void) 
 {
 	if (isbuf) {
 		//#303132# to "012"
-		string s=strbuffhex();
-		string tmp=s.substr(0,size);
-		Str2Rgch(s,(char*)tmp.c_str(),size);
+		wstring s=strbuffhex();
+		wstring tmp=s.substr(0,size);
+		Str2Rgch(s,(wchar_t*)tmp.c_str(),size);
 		s=tmp;
 		return s;
 	} else
@@ -375,7 +375,7 @@ void var::resize(ulong newsize)
 	else if (vt==STR){
 		if (size > newsize) {
 			if (isbuf) {
-				*this = "#"+strbuff().substr(0,newsize)+"#";
+				*this = L"#"+strbuff().substr(0,newsize)+L"#";
 			} else {
 				*this = strbuff().substr(0,newsize);
 			}

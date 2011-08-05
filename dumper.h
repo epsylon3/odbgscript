@@ -1,8 +1,8 @@
 DWORD strCurEIP; 
-char  szFileName[MAX_PATH]={0},szFile[MAX_PATH]={0},szWorkPath[MAX_PATH]={0};
+wchar_t  szFileName[MAX_PATH]={0},szFile[MAX_PATH]={0},szWorkPath[MAX_PATH]={0};
 BOOL  FixSect = true;
-char  buf[TEXTLEN];
-#define PNAME   "Scripted PE Dumper"
+wchar_t  buf[TEXTLEN];
+#define PNAME   L"Scripted PE Dumper"
 
 typedef struct {
 	WORD  woNumOfSect;

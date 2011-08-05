@@ -1,8 +1,4 @@
 #include "StdAfx.h"
-//#include <cstring>
-
-HINSTANCE hinst=0;                // DLL instance
-HWND      hwmain=0;               // Handle of main OllyDbg window
 
 #include "mru.cpp"
 #include "dumper.h"
@@ -11,25 +7,13 @@ HWND      hwmain=0;               // Handle of main OllyDbg window
 // HELPER FUNCTIONS
 // -------------------------------------------------------------------------------
 
-HWND hwndOllyDbg() {
-	if (!hwmain)
-	  hwmain = (HWND)Plugingetvalue(VAL_HWMAIN);
-	return hwmain;
-}
-
-HINSTANCE hinstModule() {
-	if (!hinst)
-	  hinst = (HINSTANCE)GetModuleHandle("ODbgScript.dll");
-	return hinst;
-}
-
-DWORD getPluginDirectory(string &directory) {
+DWORD getPluginDirectory(wstring &directory) {
 	DWORD result;
-	HINSTANCE hinst = hinstModule();
-	char * p;
-	char buffer[TEXTLEN]={0};
-	result = GetModuleFileName(hinst,buffer,TEXTLEN);
-	p = strrchr(buffer,'\\');
+	HINSTANCE hinst = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
+	wchar_t * p;
+	wchar_t buffer[TEXTLEN]={0};
+	result = GetModuleFileNameW(hinst,buffer,TEXTLEN);
+	p = wcsrchr(buffer,'\\');
 	if (p) {
 		*p = '\0';
 		directory.assign(buffer);
@@ -38,56 +22,61 @@ DWORD getPluginDirectory(string &directory) {
 		return 0;
 }
 
-void MsgBox(string sMsg, string sTitle)
+void MsgBox(wstring sMsg, wstring sTitle)
 {
-	MessageBox(hwndOllyDbg(),sMsg.c_str(),sTitle.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);
+	HWND hw = _hwollymain;
+	MessageBox(hw,sMsg.c_str(),sTitle.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);
 }
 
-void DbgMsg(int n,char* title)
+void DbgMsg(int n,wchar_t* title)
 {
 #ifdef _DEBUG
-	char data[32];
-	_itoa( n, data, 10 );
-	MessageBox(hwndOllyDbg(),data,title,MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);
+	wchar_t data[32];
+	HWND hw = _hwollymain;
+	wsprintf(data, L"%d", n);
+	MessageBox(hw,data,title,MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST|MB_SETFOREGROUND);
 #endif
 }
 
-void DbgMsg(int n,string title) 
+void DbgMsg(int n,wstring title) 
 {
 #ifdef _DEBUG
-	char data[32];
-	_itoa( n, data, 10 );
-	MessageBox(hwndOllyDbg(),data,title.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
+	wchar_t data[32];
+	HWND hw = _hwollymain;
+	wsprintf(data, L"%d", n);
+	MessageBox(hw,data,title.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
 #endif
 }
 
-void DbgMsgHex(int n,char* title) 
+void DbgMsgHex(int n,wchar_t* title) 
 {
 #ifdef _DEBUG
-	char data[32];
-	_itoa( n, data, 16 );
-	MessageBox(hwndOllyDbg(),data,title,MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
+	wchar_t data[32];
+	HWND hw = _hwollymain;
+	_itow( n, data, 16 );
+	MessageBox(hw,data,title,MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
 #endif
 }
 
-void DbgMsgHex(int n,string title) 
+void DbgMsgHex(int n,wstring title) 
 {
 #ifdef _DEBUG
-	char data[32];
-	_itoa( n, data, 16 );
-	MessageBox(hwndOllyDbg(),data,title.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
+	wchar_t data[32];
+	HWND hw = _hwollymain;
+	_itow( n, data, 16 );
+	MessageBox(hw,data,title.c_str(),MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST);
 #endif
 }
 
-string ToLower(string in)
+wstring ToLower(wstring in)
 {
-	in = trim(in);
+	in = w_trim(in);
 	int (*pf)(int)=tolower; 
 	transform(in.begin(), in.end(), in.begin(), pf);
 	return in;
 }
 
-int searchx(char *SearchBuff, int BuffSize, char *SearchString, int StringLen, char wc)
+int searchx(char *SearchBuff, int BuffSize, char *SearchString, int StringLen, wchar_t wc)
 {
 	int i,j;
 
@@ -106,19 +95,7 @@ int searchx(char *SearchBuff, int BuffSize, char *SearchString, int StringLen, c
 	return -1;
 }
 
-string trim(const string& s) // Thanks to A. Focht for this one
-{
-	string::size_type left = s.find_first_not_of(" \t\f\n\r");
-	if( left == string::npos ) 
-	{
-		return string();
-	} 
-
-	string::size_type right = s.find_last_not_of(" \t\f\n\r");
-	return s.substr( left, right-left+1 );
-}
-
-bool split(vector<string> &vec, const string &str, const char delim)  
+bool split(vector<wstring> &vec, const wstring &str, const wchar_t delim)  
 {
 	vector<int> pos;
 	bool inQuotes = false;
@@ -145,13 +122,13 @@ bool split(vector<string> &vec, const string &str, const char delim)
 	while(iter != pos.end())
 	{
 		end = *iter;
-		vec.push_back(trim(str.substr(start, end - start)));
+		vec.push_back(w_trim(str.substr(start, end - start)));
 		start = end + 1;
 		iter++;
 	} 
 
 	if(start != str.size())
-		vec.push_back(trim(str.substr(start)));
+		vec.push_back(w_trim(str.substr(start)));
 
 	return true;
 }
@@ -176,15 +153,15 @@ DWORD rev(DWORD dw) {
 	return dw;
 }
 
-bool is_hex(string& s)
+bool is_hex(wstring& s)
 {
-    if(s.find_first_not_of("0123456789abcdefABCDEF-")!=string::npos)
+    if(s.find_first_not_of(L"0123456789abcdefABCDEF-") != wstring::npos)
 		return false;
 
 	return true;
 }
 
-bool is_dec(string &s) 
+bool is_dec(wstring &s) 
 {
 	int len=s.length();
 
@@ -202,10 +179,10 @@ bool is_dec(string &s)
 	return true;
 }
 
-bool is_float(string &s) 
+bool is_float(wstring &s) 
 {
 	int p=s.find('.');
-	if (p == string::npos || p == s.length()-1)
+	if (p == wstring::npos || p == s.length()-1)
 		return false;
 
 	for(uint i = 0; i < s.length()-1; i++)
@@ -216,13 +193,13 @@ bool is_float(string &s)
 	return true;
 }
 
-void ReplaceString(string &s, char* what, char* with) 
+void ReplaceString(wstring &s, wchar_t* what, wchar_t* with) 
 { 
 	int p=0;
-	int li=strlen(with);
-	int la=strlen(what);
+	int li=wcslen(with);
+	int la=wcslen(what);
 	p=s.find(what,p);
-	while (p!=string::npos) 
+	while (p!=wstring::npos) 
 	{
 		s.erase(p,la);
 		s.insert(p,with);
@@ -231,21 +208,21 @@ void ReplaceString(string &s, char* what, char* with)
 } 
 
 //Remove characters in string for display
-string CleanString(string &s)
+wstring CleanString(wstring &s)
 {
-	string str=s;
+	wstring str=s;
 	size_t p;
 	for (p=0; p<s.length(); p++)
 		if (str[p]==0)
 			str[p]=' ';
-	//while ((p = str_display.find_first_of("\0")) != string::npos)
+	//while ((p = str_display.find_first_of("\0")) != wstring::npos)
 	//	str_display[p]=' ';
 	return str;
 }
 
-string Str2Unicode(char* s,ulong len) 
+wstring Str2Unicode(char* s,ulong len) 
 {
-	string sOut;
+	wstring sOut;
 	sOut.resize(len*2);
     for(ulong i=0;i<len;i++) 
     { 
@@ -254,26 +231,26 @@ string Str2Unicode(char* s,ulong len)
 	return sOut;
 }
 
-string Str2Unicode(string &s)
+wstring Str2Unicode(string &s)
 {
-	string sOut;
+	wstring sOut;
 	ulong len=s.size();
 	sOut.resize(len*2);
     for(ulong i=0;i<len;i++) 
     { 
-        sOut[i*2] = s[i]; 
+        sOut[i] = (wchar_t) s[i]; 
     }
 	return sOut;
 }
 
-bool is_hexwild(string& s)
+bool is_hexwild(wstring& s)
 {
-	string s2=s;
-	ReplaceString(s2,"?","");
+	wstring s2=s;
+	ReplaceString(s2,L"?",L"");
 	return is_hex(s2);
 }
 
-bool UnquoteString(string &s, char cstart, char cend)
+bool UnquoteString(wstring &s, wchar_t cstart, wchar_t cend)
 {
 	//using namespace regex;
 	if(s.length() == 0)
@@ -284,7 +261,7 @@ bool UnquoteString(string &s, char cstart, char cend)
 		s = s.substr(1, s.length() - 2);
 		if (cstart=='"') 
 		{ 
-			ReplaceString(s,"\\r\\n","\r\n");
+			ReplaceString(s,L"\\r\\n",L"\r\n");
 		}
 		return true;
 	}
@@ -292,55 +269,55 @@ bool UnquoteString(string &s, char cstart, char cend)
 		return false;
 }
 
-int Str2Hex(string &s, string &dst) 
+int Str2Hex(wstring &s, wstring &dst) 
 {
 	return Str2Hex(s,dst,s.length());
 }
 
-int Str2Hex(string &s, string &dst, ulong size) 
+int Str2Hex(wstring &s, wstring &dst, ulong size) 
 {
 	uint i = 0;
-	char c[3]={0};
-	dst="";
+	wchar_t c[3]={0};
+	dst=L"";
 	dst.resize(size*2);
-	char * p = (char*)dst.c_str();
+	wchar_t * p = (wchar_t*)dst.c_str();
 	while(i < size)
 	{
-		sprintf(p+(i*2),"%02X",s.at(i));
+		wsprintf(p+(i*2),L"%02X",s.at(i));
 		//dst.append(c);
 		i++;
 	}
 	return i;
 }
 
-int Int2Hex(DWORD dw, string &dst) 
+int Int2Hex(DWORD dw, wstring &dst) 
 {
-	char buffer [10];
-	dw = sprintf(buffer,"%X",dw);
+	wchar_t buffer [10];
+	dw = wsprintf(buffer,L"%X",dw);
 	dst = buffer; 
 	return dw;
 }
 
-int Str2Rgch(string &s, char *arr, uint size)
+int Str2Rgch(wstring &s, wchar_t *arr, uint size)
 {
 	uint i = 0;
 	ZeroMemory(arr, size);
 	while(i < s.length() / 2)
 	{
-		arr[i] = (BYTE) strtoul(s.substr(i * 2, 2).c_str(), 0, 16);
+		arr[i] = (BYTE) wcstoul(s.substr(i * 2, 2).c_str(), 0, 16);
 		i++;
 	}
 	return i;
 }
 
-int Str2RgchWithWC(string &s, char* arr, uint size, char wc)
+int Str2RgchWithWC(wstring &s, wchar_t* arr, uint size, wchar_t wc)
 {
 	uint i = 0;
 	ZeroMemory(arr, size);
 	while(i < s.length() / 2)
 	{
 		if(s[i*2] != '?')
-			arr[i] = (BYTE) strtoul(s.substr(i * 2, 2).c_str(), 0, 16);
+			arr[i] = (BYTE) wcstoul(s.substr(i * 2, 2).c_str(), 0, 16);
 		else
 			arr[i] = wc;
 		i++;
@@ -348,14 +325,14 @@ int Str2RgchWithWC(string &s, char* arr, uint size, char wc)
 	return i;
 }
 
-long double strtof(string &s)
+long double strtof(wstring &s)
 {
 	long double result=0;
-	sscanf(s.c_str(),"%lf",&result);
+	swscanf(s.c_str(),L"%lf",&result);
 	return result;
 }
 
-char GetWildcard(string &s)
+char GetWildcard(wstring &s)
 {
 	vector<BYTE> stringchars;
 	int i = 0;
@@ -364,7 +341,7 @@ char GetWildcard(string &s)
 	{
 		char current = (char)s[i*2];
 		if(current != '?')
-			stringchars.push_back((BYTE) strtoul(s.substr(i * 2, 2).c_str(), 0, 16));
+			stringchars.push_back((BYTE) wcstoul(s.substr(i * 2, 2).c_str(), 0, 16));
 		i++;
 	}
 
@@ -390,12 +367,12 @@ bool RgchContains(char* container, uint containerlen, char* containee, uint cont
 	return true;
 }
 
-bool GetWildcardBytePositions(string bytestring, vector<int>* wildcardpos)
+bool GetWildcardBytePositions(wstring bytestring, vector<int>* wildcardpos)
 {
 	int ix = 0;
 	do 
 	{
-		ix = bytestring.find("??", ix);
+		ix = bytestring.find(L"??", ix);
 		if(ix != -1)
 		{
 			wildcardpos->push_back(((int)ix / 2));
@@ -409,7 +386,7 @@ bool GetWildcardBytePositions(string bytestring, vector<int>* wildcardpos)
 	return true;
 }
 
-bool SaveDump(string fileName, DWORD ep)
+bool SaveDump(wstring fileName, DWORD ep)
 {
 	strCurEIP = ep;
 	//OPENFILENAME ofn;
@@ -424,18 +401,18 @@ bool SaveDump(string fileName, DWORD ep)
 	dwSize = PEFileInfo.dwSizeOfImage;
 	hHeap = HeapCreate(HEAP_NO_SERIALIZE,1,0);
 	lpDumpData = (LPBYTE)HeapAlloc(hHeap,HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY,dwSize);
-	dwSize = Readmemory(lpDumpData,dwFrom,dwSize,MM_RESTORE);
+	dwSize = Readmemory(lpDumpData,dwFrom,dwSize,MM_REPORT); //MM_RESTORE in v1.1
 	idosh = (PIMAGE_DOS_HEADER)lpDumpData;
 	if(idosh->e_magic != IMAGE_DOS_SIGNATURE) 
 	{
-		MessageBox(0, "DUMP: Bad DOS Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
+		MessageBoxW(0, L"DUMP: Bad DOS Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
 		HeapFree(hHeap,HEAP_NO_SERIALIZE,lpDumpData);
 		return false;
 	}
 	ipeh = (PIMAGE_NT_HEADERS)(lpDumpData + idosh->e_lfanew);
 	if(ipeh->Signature != IMAGE_NT_SIGNATURE) 
 	{
-		MessageBox(0, "DUMP: Bad PE Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
+		MessageBoxW(0, L"DUMP: Bad PE Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
 		HeapFree(hHeap,HEAP_NO_SERIALIZE,lpDumpData);
 		return false;
 	}
@@ -458,7 +435,7 @@ bool SaveDump(string fileName, DWORD ep)
 		}
 	}
 
-	strcpy( szFileName, fileName.c_str() );
+	wcscpy( szFileName, fileName.c_str() );
 	hFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hFile != INVALID_HANDLE_VALUE) 
 	{
@@ -470,6 +447,7 @@ bool SaveDump(string fileName, DWORD ep)
 	return true;
 }
 
+/*ODBG2 : TODO...
 bool GetPEInfo(DWORD ep)
 {
 	unsigned int i;
@@ -478,20 +456,20 @@ bool GetPEInfo(DWORD ep)
 	PIMAGE_NT_HEADERS ipeh;
 	PIMAGE_SECTION_HEADER isech;
 	LPBYTE fbuf;
-	HWND hwmain=hwndOllyDbg();
+	HWND hwmain=_hwollymain;
 	DWORD dwFsiz,dwRsiz;
 	strCurEIP = ep;
-	DbgePath = (LPTSTR)Plugingetvalue(VAL_EXEFILENAME);
-	DbgeName = (LPTSTR)strrchr(DbgePath,'\\');
+	DbgePath = _executable;
+	DbgeName = (LPTSTR)wcsrchr(DbgePath,'\\');
 	memset(szWorkPath,0,sizeof(szWorkPath));
-	strncpy(szWorkPath,DbgePath,(DbgeName-DbgePath));
+	wcsncpy(szWorkPath,DbgePath,(DbgeName-DbgePath));
 	DbgeName++;
    
 	//Read Debuggee
 	hFile = CreateFile(DbgePath,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 	if(hFile == INVALID_HANDLE_VALUE) 
 	{
-		MessageBox(hwmain,"DUMP: Can\'t Access File",PNAME,MB_OK);
+		MessageBox(hwmain,L"DUMP: Can\'t Access File",PNAME,MB_OK);
 		return false;
 	}
 	dwFsiz = GetFileSize(hFile,NULL);
@@ -499,7 +477,7 @@ bool GetPEInfo(DWORD ep)
 	fbuf = (LPBYTE)HeapAlloc(hHeap, 0, dwFsiz);
 	if(ReadFile(hFile,fbuf,dwFsiz,&dwRsiz,NULL) == 0) 
 	{
-		MessageBox(hwmain,"DUMP: Can\'t Read File ",PNAME,MB_OK);
+		MessageBox(hwmain,L"DUMP: Can\'t Read File ",PNAME,MB_OK);
 		CloseHandle(hFile);
 		HeapFree(hHeap,HEAP_NO_SERIALIZE,fbuf);
 		return false;
@@ -508,14 +486,14 @@ bool GetPEInfo(DWORD ep)
 	idosh = (PIMAGE_DOS_HEADER)fbuf;
 	if(idosh->e_magic != IMAGE_DOS_SIGNATURE) 
 	{
-		MessageBox(hwmain,"DUMP: Bad DOS Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(hwmain,L"DUMP: Bad DOS Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
 		HeapFree(hHeap,HEAP_NO_SERIALIZE,fbuf);
 		return false;
 	}
 	ipeh = (PIMAGE_NT_HEADERS)(fbuf + idosh->e_lfanew);
 	if(ipeh->Signature != IMAGE_NT_SIGNATURE) 
 	{
-		MessageBox(hwmain,"DUMP: Bad PE Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(hwmain,L"DUMP: Bad PE Signature!!",PNAME,MB_OK | MB_ICONEXCLAMATION);
 		HeapFree(hHeap,HEAP_NO_SERIALIZE,fbuf);
 		return false;
 	}
@@ -539,7 +517,7 @@ bool GetPEInfo(DWORD ep)
 	HeapFree(hHeap,HEAP_NO_SERIALIZE,fbuf);
 	return true;
 }
-
+*/
 BOOL CALLBACK EnumThreadWndProc(HWND hwnd,LPARAM lParam) 
 {
 	memcpy((void*)lParam,&hwnd,4);
@@ -548,12 +526,12 @@ BOOL CALLBACK EnumThreadWndProc(HWND hwnd,LPARAM lParam)
 	return 1; 
 }
 
-HWND FindHandle(DWORD dwThreadId, string wdwClass, long x, long y) 
+HWND FindHandle(DWORD dwThreadId, wstring wdwClass, long x, long y) 
 {
 
 	int size,cnt=0;
-	string str;
-	char buffer[256]={0};
+	wstring str;
+	wchar_t buffer[256]={0};
 	HWND handle;
 	EnumThreadWindows(dwThreadId,EnumThreadWndProc,(LPARAM) &handle);
 	do {
@@ -570,7 +548,7 @@ HWND FindHandle(DWORD dwThreadId, string wdwClass, long x, long y)
 	handle = ChildWindowFromPoint(handle,Point);
 	if (handle!=NULL) { 
  		GetClassName(handle,buffer,256); 
-		if (StrCmpNI(buffer,wdwClass.c_str(),wdwClass.length())==0) {
+		if (StrCmpNIW(buffer,wdwClass.c_str(),wdwClass.length())==0) {
 			return handle;
 		}
 	}	
@@ -590,7 +568,7 @@ DWORD resizeDW(DWORD dw, DWORD size) {
 	return dw;
 }
 
-void resizeSTR(string &str, DWORD size) 
+void resizeSTR(wstring &str, DWORD size) 
 {
 	if (size>0 && size<str.length())
 		str = str.substr(0,size);
@@ -607,55 +585,21 @@ bool ESPRun(void)
     EIP = pt->reg.ip;
 	ESP = pt->reg.r[4];
 
-/*
-    char code[2]={0};
-	char pushad=0x60;
-	char pushaf=0x9c;
-	uint pushwf=0x669c;
-
-   	Readmemory(code,EIP,1,MM_RESTORE);
-	t_status st =  Getstatus();
-	
-	try
-	{
-		while(code[0] != pushad)
-		{
-
-          int er=Go(cpuid, 0, STEP_IN, 1, 1);
-		  st =  Getstatus();
-		  Suspendprocess(cpuid);
-		  t_thread *pt = Findthread(cpuid);
-		  EIP = pt->reg.ip;
-		  Readmemory(code,EIP,1,MM_RESTORE);
-		  Runsinglethread(cpuid);
-		  st =  Getstatus();
-		}
-	}
-
-	catch (...)
-	{
-		cout <<"error";
-		exit(100);
-	}
-
-
-    ESP2 = pt->reg.r[4];
-	DWORD tmpesp =ESP2 - 8;
-*/
 	ESP=ESP-0x04;
-	Sethardwarebreakpoint(ESP, 1, HB_WRITE);
+
+//2.Sethardwarebreakpoint(ESP, 1, HB_WRITE);
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F9); 
 
     return true;
 }
 
-string StrLastError(void) 
+wstring StrLastError(void) 
 { 
     LPVOID lpMsgBuf;
     LPVOID lpDisplayBuf;
     DWORD dw = GetLastError();
 	
-	string sError;
+	wstring sError;
 
     FormatMessage(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
@@ -666,11 +610,11 @@ string StrLastError(void)
         (LPTSTR) &lpMsgBuf,
         0, NULL );
 	
-	sError=(char *)lpMsgBuf;
+	sError=(wchar_t *)lpMsgBuf;
 
 	int len=sError.length();
 	if (len>2)
-		if (sError.substr(len-3,2)=="\r\n")
+		if (sError.substr(len-3,2)==L"\r\n")
 			sError.erase(len-3,2);
 	
     LocalFree(lpMsgBuf);
@@ -704,12 +648,12 @@ LARGE_INTEGER MyGetTickCount(ULONGLONG timeref, bool bUseTickCount)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Thanks Pedram Amini for this function (From Olly BP Manager).
 //
-BOOL get_filename_from_handle (HANDLE h_file, char *target_filename)
+BOOL get_filename_from_handle (HANDLE h_file, wchar_t *target_filename)
 {
     HANDLE h_filemap;
     DWORD  file_size_hi = 0;
-    char   filename[MAX_PATH + 1];
-    char   *stripped;
+    wchar_t filename[MAX_PATH + 1];
+    wchar_t *stripped;
     void   *mem;
 
     HMODULE h_psapi=NULL;
@@ -718,7 +662,7 @@ BOOL get_filename_from_handle (HANDLE h_file, char *target_filename)
     //dynamically resolve function pointer.
     //if (!pGetMappedFileName) {
 		// resolve function pointers.
-		if ((h_psapi = LoadLibraryEx("psapi.dll",NULL,LOAD_WITH_ALTERED_SEARCH_PATH)) != NULL)
+		if ((h_psapi = LoadLibraryExW(L"psapi.dll",NULL,LOAD_WITH_ALTERED_SEARCH_PATH)) != NULL)
 			pGetMappedFileName = (lpfGetMappedFileName)  GetProcAddress(h_psapi, "GetMappedFileNameA");
 	
 		if (!pGetMappedFileName) 
@@ -746,8 +690,8 @@ BOOL get_filename_from_handle (HANDLE h_file, char *target_filename)
         return FALSE;
 
     // strip the device path and copy the name to the target buffer.
-    stripped = strrchr(filename, '\\');
-    strncpy(target_filename, stripped + 1, 256);
+    stripped = wcsrchr(filename, '\\');
+    wcsncpy(target_filename, stripped + 1, 256);
 
     // cleanup.
     UnmapViewOfFile(mem);
@@ -756,9 +700,9 @@ BOOL get_filename_from_handle (HANDLE h_file, char *target_filename)
     return TRUE;
 }
 
-BOOL str_filename_from_handle (HANDLE h_file, string &target_filename)
+BOOL str_filename_from_handle (HANDLE h_file, wstring &target_filename)
 {
-	char strbuf[256];
+	wchar_t strbuf[256];
 	bool result;
 	result=get_filename_from_handle(h_file,strbuf);
 	target_filename.assign(strbuf);
@@ -766,7 +710,7 @@ BOOL str_filename_from_handle (HANDLE h_file, string &target_filename)
 }
 
 /* need ntdll.h, http://www.koders.com/c/fid189758E75BE39CF44E8BE174A7E0CC4605194FDE.aspx
-BOOL str_filename_from_handle2 (HANDLE h_file, string &target_filename)
+BOOL str_filename_from_handle2 (HANDLE h_file, wstring &target_filename)
 {
     UNICODE_STRING AdjustedName;
     UNICODE_STRING FullDosName;
@@ -821,20 +765,93 @@ BOOL str_filename_from_handle2 (HANDLE h_file, string &target_filename)
 }
 */
 
-HWND GetODBGWindow(string &title, string &classname) {
+HWND GetODBGWindow(wstring &title, wstring &classname) {
 
 	HWND main, hwnd=0;
-	main = (HWND) Plugingetvalue(VAL_HWCLIENT);
+	main = _hwclient; //(HWND) Plugingetvalue(VAL_HWCLIENT);
 	hwnd = FindWindowEx(main,NULL,classname.c_str(),title.c_str());
 
 	return hwnd;
 }
 
-HWND GetODBGWindow(char * title, char * classname) {
+HWND GetODBGWindow(wchar_t * title, wchar_t * classname) {
 
 	HWND main, hwnd=0;
-	main = (HWND) Plugingetvalue(VAL_HWCLIENT);
+	main = _hwclient; //(HWND) Plugingetvalue(VAL_HWCLIENT);
 	hwnd = FindWindowEx(main,NULL,classname,title);
 
 	return hwnd;
+}
+
+// -------------------------------------------------------------------------------
+// UNICODE FUNCTIONS
+// -------------------------------------------------------------------------------
+
+wstring w_trim(const wstring& s)
+{
+	wstring::size_type left = s.find_first_not_of(L" \t\f\n\r");
+	if( left == wstring::npos ) 
+	{
+		return wstring();
+	} 
+
+	wstring::size_type right = s.find_last_not_of(L" \t\f\n\r");
+	return s.substr( left, right-left+1 );
+}
+
+wstring w_strtow(string str) {
+	wstring wstr(str.length(), L' ');
+	std::copy(str.begin(), str.end(), wstr.begin());
+	return wstr;
+}
+
+string w_wstrto(wstring wstr) {
+	string str(wstr.length(), ' ');
+	std::copy(wstr.begin(), wstr.end(), str.begin());
+	return str;
+}
+
+// -------------------------------------------------------------------------------
+// ODBG 1.1 COMPAT
+// -------------------------------------------------------------------------------
+
+
+void Selectandscroll(t_table* t, int index, int mode) {
+	Settableselection(t, index);
+}
+/*
+stdapi (int)     Movetableselection(t_table *pt,int n);
+stdapi (int)     Settableselection(t_table *pt,int selected);
+stdapi (void)    Updatetable(t_table *pt,int force);
+stdapi (void)    Delayedtableredraw(t_table *pt);
+*/
+
+//Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'E');
+
+void Sendshortcut(ulong win,ulong addr,int msg,int ctrl,int shift,int vkcode) {
+	//WM_SYSKEYDOWN
+	LPARAM lp=0;
+	HWND hw = _hwollymain;
+	switch (win) {
+		case PM_MAIN:
+			SendMessageA(hw,(DWORD) msg,(WPARAM) vkcode, lp);
+			break;
+		case PM_DISASM:
+			hw = Getcpudisasmtable()->hw;
+			SendMessageA(hw,(DWORD) msg,(WPARAM) vkcode, lp);
+			break;
+		default:
+			SendMessageA(hw,(DWORD) msg,(WPARAM) vkcode, lp);
+			break;
+	}
+}
+
+void Sendshortcut(wstring win,ulong addr,int msg,int ctrl,int shift,int vkcode) {
+	ulong w=PM_MAIN;
+	if (win == PWM_DISASM) {
+		w=PM_DISASM;
+	} else if (win == PWM_DUMP) {
+		w=PM_DUMP;
+	}
+	Sendshortcut(w,addr,msg,ctrl,shift,vkcode);
 }

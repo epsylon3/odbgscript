@@ -1,8 +1,12 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "version.h"
-#include "plugin.h"
 #include "resource.h"
+
+#ifndef _UNICODE //for ressource compilation
+#  define _UNICODE
+#endif
+#include "plugin201.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////

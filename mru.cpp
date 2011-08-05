@@ -1,26 +1,27 @@
 //NOTE : OllyDBG Main Menu is Static... so we need to store MRU for next OllyDbg start
 
-void mruAddFile(char* szFilePath) {
+void mruAddFile(wstring filePath) {
 	
-	char buf[4096] = {0};
+	wchar_t buf[4096] = {0};
 
 	int n;
-	char key[5];
-	strcpy(key,"NRU ");
-
-	HINSTANCE h=hinstModule();
+	wchar_t key[5];
+	StrCpyW(key,L"NRU ");
 
 	for(n=1; n<=9; n++) { 
 		key[3]=n + 0x30; //ASCII n
 		ZeroMemory(&buf, sizeof(buf));
-		Pluginreadstringfromini(h,key,buf,0);
-		if (strcmp(buf,szFilePath)==0) {
+		Getfromini(NULL,PLUGIN_NAME, key, L"%s", buf);
+		if (wcscmp(buf,filePath.c_str())==0) {
 			//Move File to first MRU
 			key[3]='1';
-			Pluginreadstringfromini(h,key,buf,0);
-			Pluginwritestringtoini(h,key,szFilePath);
+			//Pluginreadstringfromini(h,key,buf,0);
+			Getfromini(NULL,PLUGIN_NAME, key, L"%s", buf);
+			//Pluginwritestringtoini(h,key,szFilePath);
+			Writetoini(NULL,PLUGIN_NAME, key, L"%s", (wchar_t*) filePath.c_str() );
 			key[3]=n + 0x30;
-			Pluginwritestringtoini(h,key,buf);
+			//Pluginwritestringtoini(h,key,buf);
+			Writetoini(NULL,PLUGIN_NAME, key, L"%s", buf);
 			return;
 		}
 	}
@@ -28,15 +29,18 @@ void mruAddFile(char* szFilePath) {
 		//Add File then Move others
 		key[3]=n+0x30;
 		ZeroMemory(&buf, sizeof(buf));
-		Pluginreadstringfromini(h,key,buf,0);
-		if (strlen(buf)) {
+		//Pluginreadstringfromini(h,key,buf,0);
+		Getfromini(NULL,PLUGIN_NAME, key, L"%s", buf);
+		if (wcslen(buf)) {
 			key[3]=n+1+0x30;
-			Pluginwritestringtoini(h,key,buf);
+			//Pluginwritestringtoini(h,key,buf);
+			Writetoini(NULL,PLUGIN_NAME, key, L"%s", buf);
 		}
 	}
 	
 	key[3]='1';
-	Pluginwritestringtoini(h, key, szFilePath);
+	//Pluginwritestringtoini(h, key, szFilePath);
+	Writetoini(NULL,PLUGIN_NAME, key, L"%s", (wchar_t*) filePath.c_str() );
 
 }
 
@@ -50,8 +54,6 @@ int  mruGetMenu(char* buf) {
 	int p=0;
 	int c,v;
 	string path;
-
-	HINSTANCE h=hinstModule();
 	
 	strcpy(key,"NRU ");
 	strcpy(key2,"MRU ");
@@ -61,8 +63,8 @@ int  mruGetMenu(char* buf) {
 		key2[3]=key[3];
 
 		ZeroMemory(&buf2, sizeof(buf2));
-		Pluginreadstringfromini(h,key,buf2,0);
-		Pluginwritestringtoini(h,key2, buf2);
+		Getfromini(NULL,PLUGIN_NAME, key, L"%s", buf2)
+		Pluginwritestringtoini(0,key2, buf2);
 		if (strlen(buf2)) {
 			if (PathFileExists(buf2)) {
 				buf[p]=0x32;   p++;
@@ -94,24 +96,22 @@ int  mruGetMenu(char* buf) {
 */
 
 //ON DISASM WINDOW, ITS CALLED ON CONTEXT MENU
-int mruGetCurrentMenu(char* buf) {
+int mruGetCurrentMenu(wchar_t* buf) {
 
-	char buf2[4096] = {0};
-	char key[5];
+	wchar_t buf2[4096] = {0};
+	wchar_t key[5];
 	int p=0;
 	int c,v;
-	string path;
+	wstring path;
 
-	HINSTANCE h=hinstModule();
-	
-	strcpy(key,"NRU ");
+	wcscpy(key,L"NRU ");
 
  	for(int n=1; n<=9; n++) {
 		key[3]=n+0x30; //ASCII n
 
 		ZeroMemory(&buf2, sizeof(buf2));
-		Pluginreadstringfromini(h,key,buf2,0);
-		if (strlen(buf2)) {
+		Getfromini(NULL,PLUGIN_NAME, key, L"%s", buf2);
+		if (wcslen(buf2)) {
 			if (PathFileExists(buf2)) {
 				buf[p]=0x32;   p++;
 				buf[p]=key[3]; p++;
@@ -120,17 +120,17 @@ int mruGetCurrentMenu(char* buf) {
 				path=buf2;
 				c=path.rfind('\\') + 1;
 
-				while ( (v = strchr(&buf2[c],',')-&buf2[c]) > 0) {
+				while ( (v = wcschr(&buf2[c],',')-&buf2[c]) > 0) {
 					buf2[c+v]='.';
 				}
-				while ( (v = strchr(&buf2[c],'{')-&buf2[c]) > 0) {
+				while ( (v = wcschr(&buf2[c],'{')-&buf2[c]) > 0) {
 					buf2[c+v]='[';
 				}
-				while ( (v = strchr(&buf2[c],'}')-&buf2[c]) > 0) {
+				while ( (v = wcschr(&buf2[c],'}')-&buf2[c]) > 0) {
 					buf2[c+v]=']';
 				}
 
-				strcpy(&buf[p],&buf2[c]); p+=strlen(&buf2[c]);
+				StrCpyW(&buf[p],&buf2[c]); p+=wcslen(&buf2[c]);
 				buf[p]=',';p++; 
 			}
 		}
@@ -143,21 +143,19 @@ int mruGetCurrentMenu(char* buf) {
 
 int mruGetCurrentMenu(HMENU mmru,int cmdIndex) {
 
-	char buf2[4096] = {0};
-	char key[5];	
+	wchar_t buf2[4096] = {0};
+	wchar_t key[5];	
 	int c,v;
-	string path;
+	wstring path;
 
-	HINSTANCE h=hinstModule();
-	
-	strcpy(key,"NRU ");
+	wcscpy(key,L"NRU ");
 
  	for(int n=1; n<=9; n++) {
 		key[3]=n+0x30; //ASCII n
 
 		ZeroMemory(&buf2, sizeof(buf2));
-		Pluginreadstringfromini(h,key,buf2,0);
-		if (strlen(buf2)) {
+		Getfromini(NULL,PLUGIN_NAME, key, L"%s", buf2);
+		if (wcslen(buf2)) {
 			if (PathFileExists(buf2)) {
 				path=buf2;
 				c=path.rfind('\\') + 1;
@@ -172,7 +170,7 @@ int mruGetCurrentMenu(HMENU mmru,int cmdIndex) {
 
 int mruCmdMenu(HMENU mmru,int cmdIndex) {
 
-	AppendMenu(mmru,MF_STRING,cmdIndex+1,"ESP定律");
+	AppendMenu(mmru,MF_STRING,cmdIndex+1,L"ESP定律");
 	return 1;
 }
 

@@ -7,22 +7,25 @@ typedef struct t_wndlog_data {
 	unsigned long	size;             // Size occupied by element in address space
 	unsigned long	type;             // Type of data element, TY_xxx
 	unsigned long	eip;
-	char     message[LOG_MSG_LEN];
+	wchar_t  message[LOG_MSG_LEN];
 
 } t_logwnd_data; 
 
-LRESULT CALLBACK wndlog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp);
+//LRESULT CALLBACK wndlog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp);
+long wndlog_func(t_table *pt,HWND hw,UINT msg,WPARAM wp,LPARAM lp);
 
 void initLogWindow();
 
-int wndlog_sort_function(const t_sortheader *p1,const t_sortheader *p2,const int sort);
-int wndlog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int column);
+DESTFUNC wndlog_dest_function;
+SORTFUNC wndlog_sort_function;
+DRAWFUNC wndlog_get_text;
+TABFUNC  wndlog_func;
 
-int add2log(string & command);
-int add2log(char * command);
+int add2log(wstring & command);
+int add2log(wchar_t * command);
 
-int add2logMasked(char* message,char* mask);
+int add2logMasked(wchar_t* message,wchar_t* mask);
 
 void clearLogLines();
 
-int SearchInLog(string text,ulong fromPos);
+int SearchInLog(wstring text,ulong fromPos);

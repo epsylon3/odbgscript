@@ -1,44 +1,44 @@
 #include <math.h>
 
-bool CompareChar(const char src, char* cmp)
+bool CompareChar(const wchar_t src, wchar_t* cmp)
 {
-	if(strstr(cmp, "??")) // ??
+	if(wcsstr(cmp, L"??")) // ??
 		return true;
 
-	if(strstr(cmp, "?") == cmp) // ?6
+	if(wcsstr(cmp, L"?") == cmp) // ?6
 	{
-		char low = src % 0x10;
-		char val = (char)strtoul(cmp + 1, 0, 16);
+		wchar_t low = src % 0x10;
+		wchar_t val = (wchar_t)wcstoul(cmp + 1, 0, 16);
 		if(val == low)
 			return true;
 		return false;
 	}
-	else if(strstr(cmp, "?") == cmp + 1) // 5?
+	else if(wcsstr(cmp, L"?") == cmp + 1) // 5?
 	{
 		cmp[1] = 0;
-		char high = (src - src % 0x10) / 0x10;
-		char val = (char)strtoul(cmp, 0, 16);
+		wchar_t high = (src - src % 0x10) / 0x10;
+		wchar_t val = (wchar_t)wcstoul(cmp, 0, 16);
 		if(val == high)
 			return true;
 		return false;
 	}
 	else // 56
 	{
-		char high = (src - src % 0x10) / 0x10;
-		char low = src % 0x10;
-		char val2 = (char)strtoul(cmp + 1, 0, 16);
+		wchar_t high = (src - src % 0x10) / 0x10;
+		wchar_t low = src % 0x10;
+		wchar_t val2 = (wchar_t)wcstoul(cmp + 1, 0, 16);
 		cmp[1] = 0;
-		char val1 = (char)strtoul(cmp, 0, 16);
+		wchar_t val1 = (wchar_t)wcstoul(cmp, 0, 16);
 		if(high == val1 && low == val2)
 			return true;
 		return false;
 	}
 }
 
-int FindWithWildcards(const char* source, const char* findstring, size_t len)
+int FindWithWildcards(const wchar_t* source, const wchar_t* findstring, size_t len)
 {
-	char cmp[3] = {0};
-	int findlen = ceil(((double)strlen(findstring) / 2));
+	wchar_t cmp[3] = {0};
+	int findlen = ceil(((double)wcslen(findstring) / 2));
 	if(len < findlen)
 		return -1;
 
@@ -46,7 +46,7 @@ int FindWithWildcards(const char* source, const char* findstring, size_t len)
 	{
 		for(int j = 0; j < findlen; j++)
 		{
-			strncpy(cmp, findstring + j * 2, 2);
+			wcsncpy(cmp, findstring + j * 2, 2);
 			if(!CompareChar(source[i+j], cmp))
 				break;
 			else if(j == (findlen - 1))
@@ -56,18 +56,18 @@ int FindWithWildcards(const char* source, const char* findstring, size_t len)
 	return -1;
 }
 
-char * HexString2BinArray(const char * s)
+wchar_t * HexString2BinArray(const wchar_t * s)
 {
-	char HexBuf[3];
-	char * result=new char[(strlen(s) /2)+1];
+	wchar_t HexBuf[3];
+	wchar_t * result=new wchar_t[(wcslen(s) /2)+1];
 	result[0]=0;
 
 	int i=0;
-	while (strlen(s))
+	while (wcslen(s))
 	{
-		strncpy(HexBuf,s,2);
+		wcsncpy(HexBuf,s,2);
 		HexBuf[2]=0;
-		result[i]=(char)strtoul(HexBuf,0,16);
+		result[i]=(wchar_t)wcstoul(HexBuf,0,16);
 		i++;
 		s+=2;
 	}
@@ -76,9 +76,9 @@ char * HexString2BinArray(const char * s)
 	return result;
 }
 
-char WildSymbolToChar(const char* x)
+wchar_t WildSymbolToChar(const wchar_t* x)
 {
-	char n;
+	wchar_t n;
 
 	if (x[0]=='?')
 		n=x[1];
@@ -102,28 +102,28 @@ char WildSymbolToChar(const char* x)
 
 	return n;
 }
-char HexString2BinChar(const char *s)
+char HexString2BinChar(const wchar_t *s)
 {
-	char HexBuf[3];
-	strncpy(HexBuf,s,2);
+	wchar_t HexBuf[3];
+	wcsncpy(HexBuf,s,2);
 	HexBuf[2]=0;
-	return (char)strtoul(HexBuf,0,16);	
+	return (wchar_t)wcstoul(HexBuf,0,16);	
 }
 
-bool Replace(char * s, const char * searchstr, const char * replstring, size_t length)
+bool Replace(wchar_t * s, const wchar_t * searchstr, const wchar_t * replstring, size_t length)
 {
-	char * ps=s;
+	wchar_t * ps=s;
 	bool WasReplaced=false;
-	if (strlen(searchstr)!=strlen(replstring))
-		throw("Search string and replace strings should be of equal length");
+	if (wcslen(searchstr)!=wcslen(replstring))
+		throw(L"Search string and replace strings should be of equal length");
 
-	if (strlen(searchstr)%2)
-		throw("Bad search string");
+	if (wcslen(searchstr)%2)
+		throw(L"Bad search string");
 
-	if ((strlen(searchstr)/2)>length)
-		throw("The size of data is too small");
+	if ((wcslen(searchstr)/2)>length)
+		throw(L"The size of data is too small");
 
-	size_t ReplaceLength=strlen(replstring)/2;
+	size_t ReplaceLength=wcslen(replstring)/2;
 
 	size_t offs=0;
 
@@ -132,15 +132,15 @@ bool Replace(char * s, const char * searchstr, const char * replstring, size_t l
 	unsigned j=0;
 
 	//Wildcard Search
-	while (i<strlen(replstring))
+	while (i<wcslen(replstring))
 	{
-		if (strncmp("??",&searchstr[i],2)) // if searchstr[i] != "??"
+		if (wcsncmp(L"??",&searchstr[i],2)) // if searchstr[i] != "??"
 		{
 			if ((searchstr[i]=='?') || (searchstr[i+1]=='?'))
 			{
-				unsigned char mask=0;
+				wchar_t mask=0;
 
-				char maskbuf[3];
+				wchar_t maskbuf[3];
 
 				if (searchstr[i]=='?')
 				{
@@ -162,7 +162,7 @@ bool Replace(char * s, const char * searchstr, const char * replstring, size_t l
 				}
 
 
-				if ((char)(s[j]&mask)-(char)strtoul(maskbuf,0,16))
+				if ((wchar_t)(s[j]&mask)-(wchar_t)wcstoul(maskbuf,0,16))
 					equal=false;
 
 				if (!equal)
@@ -189,16 +189,16 @@ bool Replace(char * s, const char * searchstr, const char * replstring, size_t l
 	//Wildcard Replacment
 	if (equal)
 	{
-		if (!strstr(replstring,"?")) // no wildcards
+		if (!wcsstr(replstring,L"?")) // no wildcards
 		{
-			char * replacestring;
+			wchar_t * replacestring;
 			try
 			{
 				replacestring=HexString2BinArray(replstring);
 			}
 			catch (...)
 			{
-				throw("Bad replace string");
+				throw(L"Bad replace string");
 			}
 			memcpy(s,replacestring,ReplaceLength);
 			delete replacestring;
@@ -206,7 +206,7 @@ bool Replace(char * s, const char * searchstr, const char * replstring, size_t l
 		else //replace by wildcard
 			for (i=0;i<ReplaceLength;i++)
 			{
-				if (strncmp("??",&replstring[i*2],2)) // if searchstr[i] != "??"
+				if (wcsncmp(L"??",&replstring[i*2],2)) // if searchstr[i] != "??"
 				{
 					if ((replstring[i*2]=='?') || (replstring[i*2+1]=='?'))
 					{
@@ -225,9 +225,9 @@ bool Replace(char * s, const char * searchstr, const char * replstring, size_t l
 	return WasReplaced;
 }
 
-char * Byte2Hex(char b)
+wchar_t * Byte2Hex(wchar_t b)
 {
-	char * buf=new char[3];
-	sprintf(buf,"%02X",(unsigned char)b);
+	wchar_t * buf=new wchar_t[3];
+	wsprintf(buf,L"%02X",(wchar_t)b);
 	return buf;
 }

@@ -1,12 +1,12 @@
 
 INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char* buffer;
+	wchar_t* buffer;
 	
 	switch(uMsg) 
 	{ 
 	case WM_INITDIALOG:
-		SetDlgItemText(hwndDlg, IDC_TITLE, (LPCSTR) lParam);
+		SetDlgItemTextW(hwndDlg, IDC_TITLE, (LPCWSTR) lParam);
 		SetWindowPos(hwndDlg,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
 		ollylang->hwndinput=hwndDlg;
 		return TRUE;
@@ -17,7 +17,7 @@ INT_PTR CALLBACK InputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		switch (LOWORD(wParam)) 
 		{ 
 		case IDOK:
-			buffer=new char[256];
+			buffer=new wchar_t[256];
 			if(GetDlgItemText(hwndDlg, IDC_INPUT, buffer, 256))
 			{
 				ollylang->hwndinput=0;

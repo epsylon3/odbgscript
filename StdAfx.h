@@ -9,11 +9,17 @@
 #pragma warning (disable : 4786)
 #endif
 
+#ifndef _UNICODE
+#define UNICODE
+#define _UNICODE
+#endif
+
 //remove SEH missing warning
 #pragma warning (disable : 4530)
 
 // Insert your headers here
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+#define _AFX_NO_DEBUG_CRT       // Dont use debug version of crt
 
 #include <iostream>
 
@@ -40,7 +46,7 @@ using namespace std;
 
 
 #include "var.h"
-#include "plugin.h"
+#include "plugin201.h"
 
 #include "HelperFunctions.h"
 #include "IniReader.h"

@@ -1,6 +1,6 @@
 -------------------------------
-ODbgScript english plugin by E3
-site : http://odbgscript.sf.net
+ODbgScript original plugin
+http://github.com/odbgscript
 -------------------------------
 
 1. About OllyScript and ODbgScript
@@ -37,6 +37,9 @@ using this plugin you can write a script once and for all.
 2. Status
 ----------------------------
 
+v2.0
+ODbgScript for OllyDBG 2, project moved to github
+
 v1.54
 ODbgScript has a new site and SVN system : http://odbgscript.sf.net
 
@@ -55,6 +58,9 @@ Get Trace Addr
 
 2.1 What's new?
 ---------------
+2.0
++ OllyDBG 2 branch, project moved to github
+
 1.83
 + Added Support for segment registers ES,CS,SS,DS,FS,GS (readonly and lower priority than vars)
 
@@ -300,7 +306,7 @@ MRU "Bug" not modified
   I've made two MRU lists for a good reason, olly doesn't refresh Main Menu
 Inline operators are still working in this branch of OdbgScript
 Weird ESP Menu not added (i dont know what it is) 
-ADD doesn't supports dw+string itoa concatenation
+ADD doesn't supports dw+string _itow concatenation
 
 1.50.3 (8 May 2007)
 * 4-bytes alignment and speed optimization (thanks Human)
@@ -1411,7 +1417,7 @@ Example:
 INIR key, def
 -------------
 Read ODBGScript Key value in ollydbg.ini
-def(ault) value determines type (string or dword)
+def(ault) value determines type (wstring or dword)
 Example :
 	inir "key", ""
 	inir "key", 0
@@ -1429,8 +1435,8 @@ ITOA n [, base=16.]
 Convert an integer to string
 Returns the string in the reserved $RESULT variable
 Example:
-	itoa F
-	itoa 10., 10.
+	_itow F
+	_itow 10., 10.
 
 JA label (JG)
 --------

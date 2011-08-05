@@ -1,36 +1,41 @@
-#include <string.h>
+
 // Temp storage
-char buffer[65535] = {0};
+wchar_t buffer[32000] = {0};
+
+#define V_RES   L"$RESULT"
+#define V_RES_1 L"$RESULT_1"
+#define V_RES_2 L"$RESULT_2"
 
 // -------------------------------------------------------------------------------
 // COMMANDS
 // -------------------------------------------------------------------------------
-bool OllyLang::DoADD(string args)
+bool OllyLang::DoADD(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
+    wchar_t wbuf[32] = {0};
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
 	ulong dw1, dw2 ;
-	string str1, str2;
+	wstring str1, str2;
 
 	if (GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
 		// "0" to force hexa constant
-		args = ops[0] + ",0" + ultoa(dw1 + dw2, buffer, 16); 
+		args = ops[0] + L",0" + _ultow(dw1 + dw2, wbuf, 16); 
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	else if (GetSTROpValue(ops[0], str1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		//concate string with ultoa or buffer with hex value
+		//concate wstring with _ultow or buffer with hex value
 		var v1=str1, v2=dw2;
 		v1+=v2;
 
-		args = ops[0] + ", \"" + v1.str +"\"";
+		args = ops[0] + L", \"" + v1.str + L"\"";
 		nIgnoreNextValuesHist++;
 	    return DoMOV(args);
 	}
@@ -41,7 +46,7 @@ bool OllyLang::DoADD(string args)
 		var v1=str1, v2=str2;
 		v1+=v2;
 
-		args = ops[0] + ", " + "\"" + v1.str + "\"";
+		args = ops[0] + L", " + L"\"" + v1.str + L"\"";
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -52,23 +57,23 @@ bool OllyLang::DoADD(string args)
 		var v1=str1, v2=str2;
 		v1+=v2;
 
-		args = ops[0] + ", " + "\"" + v1.str + "\"";
+		args = ops[0] + L", " + L"\"" + v1.str + L"\"";
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoAI(string args)
+bool OllyLang::DoAI(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F7); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoALLOC(string args)
+bool OllyLang::DoALLOC(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -77,9 +82,9 @@ bool OllyLang::DoALLOC(string args)
 	if(GetDWOpValue(ops[0], size))
 	{
 
-		HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
+		HANDLE hDbgPrc = _process;
 		addr = (DWORD) VirtualAllocEx(hDbgPrc,NULL,size,MEM_RESERVE|MEM_COMMIT,PAGE_EXECUTE_READWRITE);
-		variables["$RESULT"] = addr;
+		variables[V_RES] = addr;
 		//Refresh Memory Window
 		Listmemory();
 		require_ollyloop=1;
@@ -90,9 +95,9 @@ bool OllyLang::DoALLOC(string args)
 	return false;
 }
 
-bool OllyLang::DoANA(string args)
+bool OllyLang::DoANA(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -101,16 +106,19 @@ bool OllyLang::DoANA(string args)
 
 	if(GetDWOpValue(ops[0], dw))
 	{
-		Analysecode(Findmodule(dw));
+//2.		Analysecode(Findmodule(dw));
+//2.		Broadcast(K_ANALYSE)
+		
 		require_ollyloop = 1;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoAND(string args)
+bool OllyLang::DoAND(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
+	wchar_t wbuf[32];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -119,28 +127,28 @@ bool OllyLang::DoAND(string args)
 	if (GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", 0" + ultoa(dw1 & dw2, buffer, 16);
+		args = ops[0] + L", 0" + _ultow(dw1 & dw2, wbuf, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoAO(string args)
+bool OllyLang::DoAO(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F8); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoASK(string args)
+bool OllyLang::DoASK(wstring args)
 {
-	string ops[1];
-	string title;
+	wstring ops[1];
+	wstring title;
 
 	//Reset $RESULT, (when dialog closed)
-	variables["$RESULT"] = 0;
-	variables["$RESULT_1"] = 0;
+	variables[V_RES] = 0;
+	variables[V_RES_1] = 0;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -151,22 +159,23 @@ bool OllyLang::DoASK(string args)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 
 		HWND hw = 0; //not modal but dialog need to be closed on plugin close.
-		char* returned_buffer = (char*)DialogBoxParam(hinstModule(), MAKEINTRESOURCE(IDD_INPUT), hw, (DLGPROC) InputDialogProc, (LPARAM)title.c_str());
-		if ((BYTE)returned_buffer != NULL)
+		HINSTANCE hinst = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
+		wchar_t* returned_buffer = (wchar_t*)DialogBoxParamW(hinst, MAKEINTRESOURCE(IDD_INPUT), hw, (DLGPROC) InputDialogProc, (LPARAM)title.c_str());
+		if (returned_buffer != NULL)
 		{
-			string returned = returned_buffer;
-			delete[256] returned_buffer;
+			wstring returned = returned_buffer;
+			delete[] returned_buffer;
 			
 			if(is_hex(returned)) 
 			{
-				variables["$RESULT"] = strtoul(returned.c_str(), 0, 16);
-				variables["$RESULT_1"] = (int) (returned.length() / 2);            //size
+				variables[V_RES] = wcstoul(returned.c_str(), 0, 16);
+				variables[V_RES_1] = (int) (returned.length() / 2);            //size
 			}
 			else 
 			{
-				UnquoteString(returned, '"', '"'); // To Accept input like "FFF" (forces string)
-				variables["$RESULT"] = returned.c_str();
-				variables["$RESULT_1"] = (int) returned.length();
+				UnquoteString(returned, '"', '"'); // To Accept input like "FFF" (forces wstring)
+				variables[V_RES] = returned.c_str();
+				variables[V_RES_1] = (int) returned.length();
 			}
 		}
 		else
@@ -178,17 +187,18 @@ bool OllyLang::DoASK(string args)
 	return false;
 } 
 
-bool OllyLang::DoASM(string args)
+bool OllyLang::DoASM(wstring args)
 {
-	string ops[3],cmd;
+	wstring ops[3],cmd;
 	ulong addr, attempt=0;
 
 	if(!CreateOperands(args, ops, 3))
 		if(!CreateOperands(args, ops, 2))
 			return false;
 
-	t_asmmodel model={0};
-	char error[255] = {0};
+	t_asmmod model={0};
+	uchar umodel[255] = {0};
+	wchar_t error[255] = {0};
 	int len = 0;
 
 	if(GetDWOpValue(ops[0], addr) 
@@ -197,8 +207,8 @@ bool OllyLang::DoASM(string args)
 		cmd=FormatAsmDwords(cmd);
 
 		GetDWOpValue(ops[2], attempt);
-
-		if((len = Assemble((char*) cmd.c_str(), addr, &model, attempt, 3, error)) <= 0)
+//2. TO DEBUG
+		if((len = Assemble((wchar_t*) cmd.c_str(), addr, umodel, attempt, 3, error)) <= 0)
 		{
 			errorstr = error;
 			return false;
@@ -206,8 +216,8 @@ bool OllyLang::DoASM(string args)
 		else
 		{ 
 			Writememory(model.code, addr, len, MM_SILENT|MM_DELANAL);
-			Broadcast(WM_USER_CHALL, 0, 0);
-			variables["$RESULT"] = len;
+			Broadcast(WM_USER_CHGALL, 0, 0);
+			variables[V_RES] = len;
 			require_ollyloop = 1;
 			return true;
 		}
@@ -216,17 +226,19 @@ bool OllyLang::DoASM(string args)
 	return false;
 }
 
-bool OllyLang::DoASMTXT(string args)
+bool OllyLang::DoASMTXT(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if (!CreateOp(args, ops, 2))
 	   return false;
 
 	FILE *fp = NULL;
-    t_asmmodel model={0};
-	string asmfile;
-    char opcode[4096]={0},error[256]={0};
+    t_asmmod model={0};
+	wstring asmfile;
+    uchar opcode[4096]={0};
+    uchar umodel[4096]={0};
+	wchar_t error[256]={0};
 	long len = 0,line = 0;
 	ulong addr, p, lens = 0,attempt = 0;
 
@@ -234,26 +246,28 @@ bool OllyLang::DoASMTXT(string args)
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1],asmfile))
 	{
-		if(fopen(asmfile.c_str(), "rb")){
+		if(fopen(w_wstrto(asmfile).c_str(), "rb")){
 			
-			string asmline,asmdoc;
-			std::ifstream fin;
+			wstring asmline,asmdoc;
+			std::wifstream fin;
 			(asmfile.c_str(), ios::in);
-			fin.open(asmfile.c_str());
+			fin.open(w_wstrto(asmfile).c_str());
 
 			p = (ulong) opcode;
 			while(getline(fin, asmline))
 			{
 				line++;
 				asmline=FormatAsmDwords(asmline);
-				len=Assemble((char*) asmline.c_str(), addr+lens, &model, attempt, 3, error);                     
+//2. TO DEBUG
+				len=Assemble((wchar_t*) asmline.c_str(), addr+lens, umodel, attempt, 3, error);
+				memcpy(&model.code,umodel,len);
 				memcpy((void*) (p + lens),&model.code,len);
 				lens += len;
 			} 
 			Writememory(opcode, addr, lens, MM_DELANAL);
-			Broadcast(WM_USER_CHALL, 0, 0);
-			variables["$RESULT"] = lens;
-			variables["$RESULT_1"] = line;
+			Broadcast(WM_USER_CHGALL, 0, 0);
+			variables[V_RES]   = lens;
+			variables[V_RES_1] = line;
 			require_ollyloop = 1;
 			fin.close();
 		}	
@@ -262,34 +276,34 @@ bool OllyLang::DoASMTXT(string args)
 	return false;
 }
 
-bool OllyLang::DoATOI(string args)
+bool OllyLang::DoATOI(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if (!CreateOperands(args, ops, 2)) 
 	{
-		ops[1] = "10"; //10h=(16.) : Default Hexa number
+		ops[1] = L"10"; //10h=(16.) : Default Hexa number
 		if (!CreateOperands(args, ops, 1))
 			return false;
 	}
 
-	string str;
+	wstring str;
 	ulong base, dw;
 
 	if(GetSTROpValue(ops[0], str) 
 		&& GetDWOpValue(ops[1], base) )
 	{
-		variables["$RESULT"] = strtoul(str.c_str(),0,base);
+		variables[V_RES] = wcstoul(str.c_str(),0,base);
 		return true;
 	}
 	return false;
 }
-
-bool OllyLang::DoBACKUP(string args)
+/*
+bool OllyLang::DoBACKUP(wstring args)
 {
 	if (DoOPENDUMP(args)) {
 
-		HWND wnd = (HWND) variables["$RESULT"].dw;
+		HWND wnd = (HWND) variables[V_RES].dw;
 		t_dump * dump = dumpWindows[wnd];
 
 		if (dump) {
@@ -301,13 +315,13 @@ bool OllyLang::DoBACKUP(string args)
 
 	return false;
 }
-
-bool OllyLang::DoBC(string args)
+*/
+bool OllyLang::DoBC(wstring args)
 {
-	if (args=="")
+	if (args.empty())
 		return DoBCA(args);
 
-	string ops[1];
+	wstring ops[1];
 
 	if (!CreateOperands(args, ops, 1))
 		return false;
@@ -315,8 +329,19 @@ bool OllyLang::DoBC(string args)
 	ulong dw;
 	if (GetDWOpValue(ops[0], dw))
 	{
-		Deletebreakpoints(dw, dw + 1, true);
-		Broadcast(WM_USER_CHALL, 0, 0);
+		t_table *bptable;
+		t_bpoint *bpoint;
+		
+		bptable=(t_table*) &_bpoint;
+		if (bptable==NULL)
+			return false;
+		for (int b=bptable->sorted.n-1; b>=0;b--) {
+			bpoint=(t_bpoint *)Getsortedbyselection(&(bptable->sorted),b);
+			if (bpoint!=NULL && bpoint->addr == dw) {
+				Deletesorteddata(&(bptable->sorted),bpoint->addr,0);
+			}
+		}
+		Broadcast(WM_USER_CHGALL, 0, 0);
 		require_ollyloop = 1;
 		return true;
 	}
@@ -324,39 +349,45 @@ bool OllyLang::DoBC(string args)
 }
 
 //clear all loaded breakpoints
-bool OllyLang::DoBCA(string args)
+bool OllyLang::DoBCA(wstring args)
 {
-	t_table *bptable;
-	t_bpoint *bpoint;
-	bptable=(t_table *)Plugingetvalue(VAL_BREAKPOINTS);
-	if (bptable!=NULL) 
-	{
-		for (int b=bptable->data.n-1; b>=0;b--) {
-			bpoint=(t_bpoint *)Getsortedbyselection(&(bptable->data),b);
-			if (bpoint!=NULL) {
-				Deletesorteddata(&(bptable->data),bpoint->addr);
-			}
-		}
-	}
-	Broadcast(WM_USER_CHALL, 0, 0);
+	t_table*  bptable=(t_table*) &_bpoint;
+	if (bptable==NULL)
+		return false;
+
+	Deletesorteddatarange(&(bptable->sorted),0,0xFFFFFFFF);
+	Updatetable(bptable, 0);
+
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoBD(string args)
+bool OllyLang::DoBD(wstring args)
 {
-	if (args=="")
+	if (args.empty())
 		return DoBDA(args);
 
-	string ops[1];
+	wstring ops[1];
 	if (!CreateOperands(args, ops, 1))
 		return false;
 
 	ulong dw;
 	if(GetDWOpValue(ops[0], dw))
 	{
-		Setbreakpoint(dw, TY_DISABLED, 0);
-		Broadcast(WM_USER_CHALL, 0, 0);
+		//Setbreakpoint(dw, TY_DISABLED, 0);
+		t_bpoint upd_bpoint, *bpoint;
+		t_table* bptable=(t_table*) &_bpoint;
+		if (bptable==NULL)
+			return false;
+		for (int b=bptable->sorted.n-1; b>=0;b--) {
+			bpoint=(t_bpoint *)Getsortedbyindex(&(bptable->sorted),b);
+			if (bpoint!=NULL && bpoint->addr == dw) {
+				memcpy(&upd_bpoint,bpoint,sizeof(t_bpoint));
+				upd_bpoint.type = BP_DISABLED;
+				Addsorteddata(&(bptable->sorted),&upd_bpoint);
+			}
+		}
+		Updatetable(bptable, 0);
 		require_ollyloop = 1;
 		return true;
 	}
@@ -364,27 +395,29 @@ bool OllyLang::DoBD(string args)
 }
 
 //disable all loaded breakpoints
-bool OllyLang::DoBDA(string args)
+bool OllyLang::DoBDA(wstring args)
 {
-	t_table *bptable;
-	t_bpoint *bpoint;
-	bptable=(t_table *)Plugingetvalue(VAL_BREAKPOINTS);
-	if (bptable!=NULL) {
-		for (int b=bptable->data.n-1; b>=0;b--) {
-			bpoint=(t_bpoint *)Getsortedbyselection(&(bptable->data),b);
-			if (bpoint!=NULL) {
-			  Setbreakpoint(bpoint->addr, TY_DISABLED, bpoint->cmd);
-			}
+	t_bpoint upd_bpoint, *bpoint;
+	t_table* bptable=(t_table*) &_bpoint;
+	if (bptable==NULL)
+		return false;
+	for (int b=bptable->sorted.n-1; b>=0;b--) {
+		bpoint=(t_bpoint *)Getsortedbyselection(&(bptable->sorted),b);
+		if (bpoint!=NULL) {
+			memcpy(&upd_bpoint,bpoint,sizeof(t_bpoint));
+			upd_bpoint.type = BP_DISABLED;
+			Addsorteddata(&(bptable->sorted),&upd_bpoint);
 		}
 	}
-	Broadcast(WM_USER_CHALL, 0, 0);
+	Updatetable(bptable, 0);
 	require_ollyloop = 1;
+
 	return true;
 }
 
-bool OllyLang::DoBEGINSEARCH(string args)
+bool OllyLang::DoBEGINSEARCH(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong start;
 
 	if (!CreateOperands(args, ops, 1))
@@ -396,13 +429,13 @@ bool OllyLang::DoBEGINSEARCH(string args)
 	t_memory* tm;
 	t_table* tt;
 
-	tt=(t_table*) Plugingetvalue(VAL_MEMORY);
+	tt=(t_table*) &_memory;
 	if (tt==NULL)
 		return false;
 
 	if (start==0) {
 		//get first mem block addr.
-		tm=(t_memory*) Getsortedbyselection(&tt->data, 0);
+		tm=(t_memory*) Getsortedbyselection(&tt->sorted, 0);
 		if (tm==NULL)
 			return false;
 		start=tm->base;
@@ -415,7 +448,7 @@ bool OllyLang::DoBEGINSEARCH(string args)
 
 	//Last Memory Bloc
 
-	tm=(t_memory*) Getsortedbyselection(&tt->data, tt->data.n-1);
+	tm=(t_memory*) Getsortedbyselection(&tt->sorted, tt->sorted.n-1);
 	if (tm==NULL)
 		return false;
  
@@ -423,24 +456,24 @@ bool OllyLang::DoBEGINSEARCH(string args)
 
 	search_buffer = new unsigned char[fullsize];
 	fullsize = Readmemory(search_buffer,start,fullsize,MM_SILENT);
-	Havecopyofmemory(search_buffer,start,fullsize);
+//2	Havecopyofmemory(search_buffer,start,fullsize);
 	//Havecopyofmemory(search_buffer,tm->base,tm->size);
 	return true;
 }
 
-bool OllyLang::DoENDSEARCH(string args)
+bool OllyLang::DoENDSEARCH(wstring args)
 {
 	if (search_buffer!=NULL) {
-		Havecopyofmemory(NULL,0,0);
+//2		Havecopyofmemory(NULL,0,0);
 		delete [] search_buffer;
 		search_buffer=NULL;
 	}
 	return true;
 }
 
-bool OllyLang::DoBP(string args)
+bool OllyLang::DoBP(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if (!CreateOperands(args, ops, 1))
 		return false;
@@ -448,54 +481,65 @@ bool OllyLang::DoBP(string args)
 	ulong dw;
 	if(GetDWOpValue(ops[0], dw))
 	{
-		Setbreakpoint(dw, TY_ACTIVE, 0);
-		Broadcast(WM_USER_CHALL, 0, 0);
+		//Setbreakpoint(dw, TY_ACTIVE, 0);
+		t_table* bptable=(t_table*) &_bpoint;
+		if (bptable != NULL) {
+			t_bpoint bpoint={0};
+			bpoint.addr = dw;
+			bpoint.size = 1;
+			bpoint.type = BP_MANUAL+TY_NEW;
+			Addsorteddata(&bptable->sorted, &bpoint);
+		}
+		Redrawcpudisasm();
+		//Broadcast(WM_USER_CHGALL, 0, 0);//PWM_BPOINT
 		require_ollyloop = 1;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoBPCND(string args)
+/*
+bool OllyLang::DoBPCND(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
 	ulong addr = 0;
-	string condition;
+	wstring condition;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], condition))
 	{
-		char* buffer = new char[condition.length() + 1];
-		strcpy(buffer, condition.c_str());
-		Setbreakpoint(addr, TY_ACTIVE, 0);
+		wchar_t* buffer = new wchar_t[condition.length() + 1];
+		StrCpyW(buffer, condition.c_str());
+		//Setbreakpoint(addr, TY_ACTIVE, 0);
+		Membreakpoint(0, addr,0, 0,0, 0, BP_COND);
 		Insertname(addr, NM_BREAK, buffer);
 		Deletenamerange(addr, addr + 1, NM_BREAKEXPL);
 		Deletenamerange(addr, addr + 1, NM_BREAKEXPR);
-		Broadcast(WM_USER_CHALL,0,0);
+		Broadcast(WM_USER_CHGALL,0,0);
 		delete buffer;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoBPD(string args)
+bool OllyLang::DoBPD(wstring args)
 {
-  	string ops[1];
+  	wstring ops[1];
 
 	if (!CreateOp(args, ops, 1))
 		return false;
 
-	return DoBPX(ops[0] + ", 1");
+	return DoBPX(ops[0] + L", 1");
 
 }
 
 //Set On Breakpoint Goto Script Label (addr, label)
-bool OllyLang::DoBPGOTO(string args)
+bool OllyLang::DoBPGOTO(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -511,7 +555,7 @@ bool OllyLang::DoBPGOTO(string args)
 	return false;
 }
 
-bool OllyLang::DoBPHWCA(string args)
+bool OllyLang::DoBPHWCA(wstring args)
 {
 	int i = 0;
 	while(i < 4)
@@ -524,12 +568,12 @@ bool OllyLang::DoBPHWCA(string args)
 	return true;
 }
 
-bool OllyLang::DoBPHWC(string args)
+bool OllyLang::DoBPHWC(wstring args)
 {
-	if (args=="")
+	if (args.empty())
 		return DoBPHWCA(args);
 
-	string ops[1];
+	wstring ops[1];
 
 	if (!CreateOperands(args, ops, 1))
 		return false;
@@ -544,27 +588,27 @@ bool OllyLang::DoBPHWC(string args)
 	return false;
 }
 
-bool OllyLang::DoBPHWS(string args)
+bool OllyLang::DoBPHWS(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2)){
 		if(!CreateOperands(args, ops, 1))
 			return false;
-		else ops[1]="\"x\"";
+		else ops[1]=L"\"x\"";
 	}
 
 	ulong dw1;
-	string str1;
+	wstring str1;
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetSTROpValue(ops[1], str1))
 	{
 		int type;
-		if(str1 == "r")
+		if(str1 == L"r")
 			type = HB_ACCESS;
-		else if(str1 == "w")
+		else if(str1 == L"w")
 			type = HB_WRITE;
-		else if(str1 == "x")
+		else if(str1 == L"x")
 			type = HB_CODE;
 		else
 			return false;
@@ -576,63 +620,65 @@ bool OllyLang::DoBPHWS(string args)
 	return false;
 }
 
-bool OllyLang::DoBPL(string args)
+bool OllyLang::DoBPL(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
 	ulong addr = 0;
-	string expression;
+	wstring expression;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], expression))
 	{
-		sprintf(buffer, "%c%s", 0x45/*COND_NOBREAK | COND_LOGALWAYS | COND_ARGALWAYS | COND_FILLING*/, expression.c_str());
-		Setbreakpoint(addr, TY_ACTIVE, 0);
+		sprintf(buffer, "%c%s", 0x45, expression.c_str()); // 0x45 = COND_NOBREAK | COND_LOGALWAYS | COND_ARGALWAYS | COND_FILLING
+		//Setbreakpoint(addr, TY_ACTIVE, 0);
+		Membreakpoint(0, addr,0, 0,0, 0, BP_LOG);
 		Deletenamerange(addr, addr + 1, NM_BREAK);
 		Deletenamerange(addr, addr + 1, NM_BREAKEXPL);
 		Insertname(addr, NM_BREAKEXPR, buffer);
-		Broadcast(WM_USER_CHALL,0,0);
+		Broadcast(WM_USER_CHGALL,0,0);
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoBPLCND(string args)
+bool OllyLang::DoBPLCND(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3))
 		return false;
 
 	ulong addr = 0;
-	string expression, condition;
+	wstring expression, condition;
 	if (GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], expression) 
 		&& GetSTROpValue(ops[2], condition))
 	{
-		Setbreakpoint(addr, TY_ACTIVE, 0);
+		//Setbreakpoint(addr, TY_ACTIVE, 0);
+		Membreakpoint(0, addr,0, 0,0, 0, BP_CONDLOG);
 		Deletenamerange(addr, addr + 1, NM_BREAKEXPL);
 		sprintf(buffer, "%s", condition.c_str());
 		Insertname(addr, NM_BREAK, buffer);
 		sprintf(buffer, "%c%s", 0x43, expression.c_str());
 		Insertname(addr, NM_BREAKEXPR, buffer);
-		Broadcast(WM_USER_CHALL,0,0);
+		Broadcast(WM_USER_CHGALL,0,0);
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoBPMC(string args)
+bool OllyLang::DoBPMC(wstring args)
 {
 	Setmembreakpoint(0, 0, 0);
 	return true;
 }
 
-bool OllyLang::DoBPRM(string args)
+bool OllyLang::DoBPRM(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -647,9 +693,9 @@ bool OllyLang::DoBPRM(string args)
 	return false;
 }
 
-bool OllyLang::DoBPWM(string args)
+bool OllyLang::DoBPWM(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -666,15 +712,15 @@ bool OllyLang::DoBPWM(string args)
 
 //Breakpoint on DLL Calls in current module
 //ex: BPX "GetModuleHandleA"
-bool OllyLang::DoBPX(string args)
+bool OllyLang::DoBPX(wstring args)
 {
 
-    string ops[2];
+    wstring ops[2];
 	int i;
 	int bpnmb=0;
 	ulong del=0;
-	string callname;
-	string module;
+	wstring callname;
+	wstring module;
 	bool closeWindow=false;
  
 	if(CreateOp(args, ops, 2))
@@ -693,18 +739,18 @@ bool OllyLang::DoBPX(string args)
   
 		char findname[TEXTLEN]={0};
 		
-		variables["$RESULT"]=0;
+		variables[V_RES]=0;
 
 		if(callname.length()==0) 
 		{
-			errorstr="Function name missed";
+			errorstr=L"Function name missed";
 			return false;
 		}
 		
-		if (callname.find(".") != string::npos)
+		if (callname.find(L".") != wstring::npos)
 		{
-			module = callname.substr(0, callname.find("."));
-			callname = callname.substr(callname.find(".")+1);
+			module = callname.substr(0, callname.find(L"."));
+			callname = callname.substr(callname.find(L".")+1);
 		}
 
 		reftable=(t_table *)Plugingetvalue(VAL_REFERENCES);
@@ -713,39 +759,40 @@ bool OllyLang::DoBPX(string args)
 		if(reftable->hw == 0)
 			closeWindow = true;
 
-		Findalldllcalls((t_dump *)Plugingetvalue(VAL_CPUDASM),0,"Intermodular calls");
+		Findalldllcalls(Getcpudisasmdump(),0,L"Intermodular calls");
 		reftable=(t_table *)Plugingetvalue(VAL_REFERENCES);
 
-		if(reftable==NULL || reftable->data.n==0)
+		if(reftable==NULL || reftable->sorted.n==0)
 		{
-			errorstr="No references";
+			errorstr=L"No references";
 			return false;
 		}
 
-		if(reftable->data.itemsize<sizeof(t_ref))
+		if(reftable->sorted.itemsize < sizeof(t_ref))
 		{
-			errorstr="Old version of OllyDbg";
+			errorstr=L"Old version of OllyDbg";
 			return false;
 		}
 
-		for(i=0; i<reftable->data.n; i++) 
+		for(i=0; i<reftable->sorted.n; i++)
 		{
 			// The safest way: size of t_ref may change in the future!
-			pref=(t_ref *)((char *)reftable->data.data+reftable->data.itemsize*i);
+			pref=(t_ref *)((char *)reftable->sorted.data + reftable->sorted.itemsize*i);
 
-			if(Findlabel(pref->dest,findname)==0) 
-			{// Unnamed destination
+			if(Findlabel(pref->dest,findname)==0)
+			{   // Unnamed destination
 				continue;
 			}
    
-			if(stricmp(callname.c_str(),findname)!=0) 
-			{      // Different function
+			if(_wcsicmp(callname.c_str(),findname)!=0)
+			{   // Different function
 				continue;
 			} 
 
 			if(!del) 
-			{                     // Set breakpoint
-				Setbreakpoint(pref->addr,TY_ACTIVE,0);
+			{	// Set breakpoint
+				//Setbreakpoint(pref->addr,TY_ACTIVE,0);
+				Membreakpoint(0, pref->addr,0, 0,0, 0, BP_MANUAL);
 				Deletenamerange(pref->addr,pref->addr+1,NM_BREAK);
 				Deletenamerange(pref->addr,pref->addr+1,NM_BREAKEXPL);
 				Deletenamerange(pref->addr,pref->addr+1,NM_BREAKEXPR);
@@ -753,24 +800,24 @@ bool OllyLang::DoBPX(string args)
 			}
 			else 
 			{
-				 Deletebreakpoints(pref->addr,pref->addr+1,true);
+				 Deletebreakpoints(pref->addr,pref->addr + 1,true);
 				 bpnmb++;
 			}
 		}
-        variables["$RESULT"]=bpnmb;
+        variables[V_RES]=bpnmb;
 
 		if (closeWindow && reftable->hw != 0) 
 			DestroyWindow(reftable->hw);
 
-        Broadcast(WM_USER_CHALL,0,0);
+        Broadcast(WM_USER_CHGALL,0,0);
         return true;
 	}
    return false;
 }
 
-bool OllyLang::DoBUF(string args)
+bool OllyLang::DoBUF(wstring args)
 {
-	string op[1];
+	wstring op[1];
 
 	if(!CreateOp(args, op, 1))
 		return false;
@@ -779,13 +826,13 @@ bool OllyLang::DoBUF(string args)
 		if (variables[op[0]].vt == STR) {
 
 			if (!variables[op[0]].isbuf)
-				variables[op[0]] = "#"+variables[op[0]].strbuffhex()+"#";
+				variables[op[0]] = L"#"+variables[op[0]].strbuffhex()+L"#";
 
 			return true;
 
 		} else if (variables[op[0]].vt == DW) {
 
-			var v; v="##";
+			var v; v=L"##";
 			v+=variables[op[0]].dw;
 			variables[op[0]]=v;
 
@@ -796,12 +843,12 @@ bool OllyLang::DoBUF(string args)
 	return false;
 }
 
-bool OllyLang::DoCALL(string args)
+bool OllyLang::DoCALL(wstring args)
 {
-	string ops[1];
-	string str = args;
+	wstring ops[1];
+	wstring str = args;
 	
-	if (args=="") return false;
+	if (args.empty()) return false;
 
 	str = args;
 	if(CreateOperands(args, ops, 1)) {
@@ -809,135 +856,135 @@ bool OllyLang::DoCALL(string args)
 			str = args;
 	}
 
-	if (str=="") return false;
+	if (str.empty()) return false;
 
 	if (labels.find(str)!=labels.end()) 
 	{
 		calls.push_back(script_pos);
 		return DoJMP(args);
 	}
-	errorstr="Label not found";
+	errorstr=L"Label not found";
 	return false;
 }
 
-bool OllyLang::DoCLOSE(string args)
+bool OllyLang::DoCLOSE(wstring args)
 {
 
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
 	HWND hwnd = 0;
-	string str;
+	wstring str;
 	bool bOk = false;
 
 	t_table * tbl = NULL;
 	t_dump * dmp = NULL;
 
-	if( GetSTROpValue("\""+ops[0]+"\"", str) )
+	if( GetSTROpValue(L"\""+ops[0]+L"\"", str) )
 	{
 		transform(str.begin(), str.end(), str.begin(), toupper);
 		
-		if(str == "SCRIPT")
+		if(str == L"SCRIPT")
 		{ 			
 			hwnd = wndProg.hw;
 			bOk = true;
 		}
-		else if(str == "SCRIPTLOG")
+		else if(str == L"SCRIPTLOG")
 		{ 
 			hwnd = wndLog.hw;
 			bOk = true;
 		}
-		else if(str == "MODULES")
+		else if(str == L"MODULES")
 		{ 
 			tbl = (t_table *) Plugingetvalue(VAL_MODULES);
 			hwnd = tbl->hw;
 		}
-		else if(str == "MEMORY")
+		else if(str == L"MEMORY")
 		{
-			tbl = (t_table *) Plugingetvalue(VAL_MEMORY);
+			tbl = _memory;
 			hwnd = tbl->hw;
 		}
-		else if(str == "THREADS")
+		else if(str == L"THREADS")
 		{
 			tbl = (t_table *) Plugingetvalue(VAL_THREADS);
 			hwnd = tbl->hw;
 		}
-		else if(str == "BREAKPOINTS")
+		else if(str == L"BREAKPOINTS")
 		{
-			tbl = (t_table *) Plugingetvalue(VAL_BREAKPOINTS);
+			tbl = _bpoint;
 			hwnd = tbl->hw;
 		}
-		else if(str == "REFERENCES")
+		else if(str == L"REFERENCES")
 		{
 			tbl = (t_table *) Plugingetvalue(VAL_REFERENCES);
 			hwnd = tbl->hw;
 		}
-		else if(str == "SOURCELIST")
+		else if(str == L"SOURCELIST")
 		{
 			tbl = (t_table *) Plugingetvalue(VAL_SOURCELIST);
 			hwnd = tbl->hw;
 		}
-		else if(str == "WATCHES")
+		else if(str == L"WATCHES")
 		{
 			tbl = (t_table *) Plugingetvalue(VAL_WATCHES);
 			hwnd = tbl->hw;
 		}
-		else if(str == "PATCHES")
+		else if(str == L"PATCHES")
 		{
 			tbl = (t_table *) Plugingetvalue(VAL_PATCHES);
 			hwnd = tbl->hw;
 		}
-		else if(str == "CPU")
+		else if(str == L"CPU")
 		{
-			dmp = (t_dump *) Plugingetvalue(VAL_CPUDASM);
+			dmp = Getcpudisasmdump();
 			hwnd = dmp->table.hw;
 			if (hwnd != 0) hwnd = GetParent(hwnd);
 		}
-		else if(str == "RUNTRACE")
+		else if(str == L"RUNTRACE")
 		{						
-			hwnd = GetODBGWindow(NULL,"ARTRACE");
+			hwnd = GetODBGWindow(NULL,L"ARTRACE");
 			bOk = true;
 		}
-		else if(str == "WINDOWS")
+		else if(str == L"WINDOWS")
 		{
-			hwnd = GetODBGWindow(NULL,"AWINDOWS");
+			hwnd = GetODBGWindow(NULL,L"AWINDOWS");
 			bOk = true;
 		}
-		else if(str == "CALLSTACK")
+		else if(str == L"CALLSTACK")
 		{
-			hwnd = GetODBGWindow(NULL,"ACALLSTK");
+			hwnd = GetODBGWindow(NULL,L"ACALLSTK");
 			bOk = true;
 		}
-		else if(str == "LOG")
+		else if(str == L"LOG")
 		{
-			hwnd = GetODBGWindow(NULL,"ALIST");
+			hwnd = GetODBGWindow(NULL,L"ALIST");
 			bOk = true;
 		}
-		else if(str == "TEXT")
+		else if(str == L"TEXT")
 		{
-			hwnd = GetODBGWindow(NULL,"ASHOWTEXT");
+			hwnd = GetODBGWindow(NULL,L"ASHOWTEXT");
 			bOk = true;
 		}
-		else if(str == "FILE")
+		else if(str == L"FILE")
 		{
-			hwnd = GetODBGWindow(NULL,"ADUMPFILE");
+			hwnd = GetODBGWindow(NULL,L"ADUMPFILE");
 			bOk = true;
 		}
-		else if(str == "HANDLES")
+		else if(str == L"HANDLES")
 		{
-			hwnd = GetODBGWindow(NULL,"AHANDLES");
+			hwnd = GetODBGWindow(NULL,L"AHANDLES");
 			bOk = true;
 		}
-		else if(str == "SEH")
+		else if(str == L"SEH")
 		{
-			hwnd = GetODBGWindow(NULL,"ASEH");
+			hwnd = GetODBGWindow(NULL,L"ASEH");
 			bOk = true;
 		}
-		else if(str == "SOURCE")
+		else if(str == L"SOURCE")
 		{
-			hwnd = GetODBGWindow(NULL,"ASOURCE");
+			hwnd = GetODBGWindow(NULL,L"ASOURCE");
 			bOk = true;
 		}
 
@@ -955,15 +1002,15 @@ bool OllyLang::DoCLOSE(string args)
 		}
 	}
 
-	errorstr = "Bad operand";
+	errorstr = L"Bad operand";
 	return false;
 }
 
-bool OllyLang::DoCMP(string args)
+bool OllyLang::DoCMP(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong dw1=0, dw2=0, size=0;
-	string s1, s2;
+	wstring s1, s2;
 
 	if(!CreateOperands(args, ops, 3)) {
 		if(!CreateOperands(args, ops, 2))
@@ -1030,49 +1077,49 @@ bool OllyLang::DoCMP(string args)
 	return false;
 }
 
-bool OllyLang::DoCMT(string args)
+bool OllyLang::DoCMT(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	string cmt;
+	wstring cmt;
 	ulong addr;
 
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetSTROpValue(ops[1], cmt))
 	{
-		if(cmt != "")
+		if(!cmt.empty())
 		{
             char cmtt[1024]={0};
 			strcpy(cmtt, cmt.c_str());
 			Insertname(addr, NM_COMMENT, cmtt);
-			Broadcast(WM_USER_CHALL, 0, 0);
+			Broadcast(WM_USER_CHGALL, 0, 0);
 		}
 		else
 		{
 			Deletenamerange(addr, addr + 1, NM_COMMENT);
-			Broadcast(WM_USER_CHALL, 0, 0);
+			Broadcast(WM_USER_CHGALL, 0, 0);
 		}
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoCOB(string args)
+bool OllyLang::DoCOB(wstring args)
 {
 	EOB_row = -1;
 	return true;
 }
 
-bool OllyLang::DoCOE(string args)
+bool OllyLang::DoCOE(wstring args)
 {
 	EOE_row = -1;
 	return true;
 }
 
-bool OllyLang::DoCRET(string args)
+bool OllyLang::DoCRET(wstring args)
 {
 	if (calls.size() > 0) {
 		calls.clear();
@@ -1080,7 +1127,7 @@ bool OllyLang::DoCRET(string args)
 	return true;
 }
 
-bool OllyLang::DoDBH(string args)
+bool OllyLang::DoDBH(wstring args)
 {
 	t_thread* thr = Findthread(Getcputhreadid());
 	BYTE buf[4];
@@ -1094,7 +1141,7 @@ bool OllyLang::DoDBH(string args)
 	return true;   
 }
 
-bool OllyLang::DoDBS(string args)
+bool OllyLang::DoDBS(wstring args)
 {
 	t_thread* thr = Findthread(Getcputhreadid());
 	BYTE buffer[4];
@@ -1108,9 +1155,9 @@ bool OllyLang::DoDBS(string args)
 	return true;   
 }
 
-bool OllyLang::DoDEC(string args)
+bool OllyLang::DoDEC(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -1118,9 +1165,9 @@ bool OllyLang::DoDEC(string args)
 	return DoSUB(ops[0] + ", 1");
 }
 
-bool OllyLang::DoDIV(string args)
+bool OllyLang::DoDIV(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -1130,10 +1177,10 @@ bool OllyLang::DoDIV(string args)
 	{
 		if(dw2==0)
 		{
-			errorstr = "Division by 0";
+			errorstr = L"Division by 0";
 			return false;
 		}
-		args = ops[0] + ", 0" + ultoa(dw1 / dw2, buffer, 16);
+		args = ops[0] + ", 0" + _ultow(dw1 / dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -1143,25 +1190,25 @@ bool OllyLang::DoDIV(string args)
 
 
 
-bool OllyLang::DoDM(string args)
+bool OllyLang::DoDM(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	if(!CreateOperands(args, ops, 3))
 		return false;
 
-    char spath[MAX_PATH];
-    strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-    string path = spath;
+    wchar_t spath[MAX_PATH];
+    wcscpy(spath, _executable);
+    wstring path = spath;
 
     path = path.substr(0, path.rfind('\\') + 1);
 	
 	ulong addr, size;
-	string filename;
+	wstring filename;
 	if (GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size) 
 		&& GetSTROpValue(ops[2], filename))
 	{
-        if (filename.find(":\\") != string::npos)
+        if (filename.find(L":\\") != wstring::npos)
 			path = filename;
 		else
 			path += filename;
@@ -1176,12 +1223,12 @@ bool OllyLang::DoDM(string args)
 				fout << membuf[i];
 			fout.close();
 			delete [] membuf;
-            variables["$RESULT"] = memlen;
+            variables[V_RES] = memlen;
 			return true;
 		}
 		else
 		{
-			errorstr = "Couldn't create file!";
+			errorstr = L"Couldn't create file!";
 			delete [] membuf;
 			return false;
 		}
@@ -1189,20 +1236,20 @@ bool OllyLang::DoDM(string args)
 	return false;
 }
 
-bool OllyLang::DoDMA(string args)
+bool OllyLang::DoDMA(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	if(!CreateOperands(args, ops, 3))
 		return false;
 
-    char spath[MAX_PATH];
-    strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-    string path = spath;
+    wchar_t spath[MAX_PATH];
+    wcscpy(spath, _executable);
+    wstring path = spath;
 
     path = path.substr(0, path.rfind('\\') + 1);
 
 	ulong addr, size;
-	string filename;
+	wstring filename;
 	if(GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size) 
 		&& GetSTROpValue(ops[2], filename))
@@ -1210,7 +1257,7 @@ bool OllyLang::DoDMA(string args)
 		char* membuf = new char[size];
 		int memlen = Readmemory(membuf, addr, size, MM_RESILENT);
 
-        if (filename.find(":\\") != string::npos)
+        if (filename.find(L":\\") != wstring::npos)
 			path = filename;
 		else
 			path += filename;
@@ -1222,12 +1269,12 @@ bool OllyLang::DoDMA(string args)
 				fout << membuf[i];
 			fout.close();
 			delete [] membuf;
-            variables["$RESULT"] = memlen;
+            variables[V_RES] = memlen;
 			return true;
 		}
 		else
 		{
-			errorstr = "Couldn't create file!";
+			errorstr = L"Couldn't create file!";
 			delete [] membuf;
 			return false;
 		}
@@ -1235,25 +1282,25 @@ bool OllyLang::DoDMA(string args)
 	return false;
 }
 
-bool OllyLang::DoDPE(string args)
+bool OllyLang::DoDPE(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-    char spath[MAX_PATH];
-    strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-    string path = spath;
+    wchar_t spath[MAX_PATH];
+    wcscpy(spath, _executable);
+    wstring path = spath;
 
     path = path.substr(0, path.rfind('\\') + 1);
 
-	string filename;
+	wstring filename;
 	ulong ep;
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetDWOpValue(ops[1], ep))
 	{
-        if (filename.find(":\\") != string::npos)
+        if (filename.find(L":\\") != wstring::npos)
 			path = filename;
 		else
 			path += filename;
@@ -1267,31 +1314,31 @@ bool OllyLang::DoDPE(string args)
 	return false;
 }
 
-bool OllyLang::DoELSE(string args)
+bool OllyLang::DoELSE(wstring args)
 {
 	int pos = script_pos;
 	int condlevel=0;
 	//goto endif
 	while(ToLower(script[pos]) != "endif" || condlevel > 0) {
-		if (ToLower(script[pos]) == "endif") {
+		if (ToLower(script[pos]) == L"endif") {
 			condlevel--;
 		}
-		if (ToLower(script[pos]).substr(0,2) == "if") {
+		if (ToLower(script[pos]).substr(0,2) == L"if") {
 			condlevel++;
 		}
 		pos++;
 		if (pos>script.size()) {
 			DoENDIF("");
-			errorstr = "ELSE needs ENDIF command !";
+			errorstr = L"ELSE needs ENDIF command !";
 			return false;
 		}
 	}
 	script_pos = pos-1;
-	setProgLineResult(pos,variables["$RESULT"]);
+	setProgLineResult(pos,variables[V_RES]);
 	return true;
 }
 
-bool OllyLang::DoENDE(string args)
+bool OllyLang::DoENDE(wstring args)
 {
 	// Free memory
 	if (pmemforexec!=NULL)
@@ -1300,43 +1347,43 @@ bool OllyLang::DoENDE(string args)
 	return true;
 }
 
-bool OllyLang::DoENDIF(string args)
+bool OllyLang::DoENDIF(wstring args)
 {
 	if (conditions.size() > 0) {
 		conditions.pop_back();
 	}
 	return true;
 }
-
-bool OllyLang::DoERUN(string args)
+*/
+bool OllyLang::DoERUN(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F9); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoESTI(string args)
+bool OllyLang::DoESTI(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F7); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoESTEP(string args)
+bool OllyLang::DoESTEP(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 0, 1, VK_F8); 
 	require_ollyloop = 1;
 	return true;
 }
-
-bool OllyLang::DoEOB(string args)
+/*
+bool OllyLang::DoEOB(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	if(ops[0] == "") // Go interactive
+	if(ops[0] == L"") // Go interactive
 		EOB_row = -1;
 	else if(labels.find(ops[0]) != labels.end()) // Set label to go to
 		EOB_row = labels[ops[0]];
@@ -1345,14 +1392,14 @@ bool OllyLang::DoEOB(string args)
 	return true;
 }
 
-bool OllyLang::DoEOE(string args)
+bool OllyLang::DoEOE(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	if(ops[0] == "") // Go interactive
+	if(ops[0] == L"") // Go interactive
 		EOE_row = -1;
 	else if(labels.find(ops[0]) != labels.end()) // Set label to go to
 		EOE_row = labels[ops[0]];
@@ -1361,37 +1408,37 @@ bool OllyLang::DoEOE(string args)
 	return true;
 }
 
-bool OllyLang::DoEVAL(string args)
+bool OllyLang::DoEVAL(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if (!CreateOperands(args, ops, 1))
 		return false;
 
-	string to_eval;
+	wstring to_eval;
 
 	if (GetSTROpValue(ops[0], to_eval))
 	{
-		string res = ResolveVarsForExec(to_eval,false);
-		variables["$RESULT"] = res;
+		wstring res = ResolveVarsForExec(to_eval,false);
+		variables[V_RES] = res;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoEXEC(string args)
+bool OllyLang::DoEXEC(wstring args)
 {
 	// Old eip
 	ulong eip;
 	// For Assemble API
-	t_asmmodel model;
+	t_asmmod model;
 	char error[255] = {0};
 	char buffer[255] = {0};
 	// Bytes assembled
 	int len = 0, totallen = 0;
 	bool res = true;
 	// Temp storage
-	string tmp;
+	wstring tmp;
 
 	// Get process handle and save eip
 	HANDLE hDebugee = (HANDLE)Plugingetvalue(VAL_HPROCESS);
@@ -1403,7 +1450,7 @@ bool OllyLang::DoEXEC(string args)
 
 	// Pass EXECs
 	script_pos++;
-	setProgLineResult(script_pos,variables["$RESULT"]);
+	setProgLineResult(script_pos,variables[V_RES]);
 
 	// Assemble and write code to memory (everything between EXEC and ENDE)
 	while(ToLower(script[script_pos]) != "ende")
@@ -1420,10 +1467,10 @@ bool OllyLang::DoEXEC(string args)
 		}
 		script_pos++;
 		setProgLineEIP(script_pos,eip);
-		setProgLineResult(script_pos,variables["$RESULT"]);
+		setProgLineResult(script_pos,variables[V_RES]);
 		if (script_pos>script.size()) {
 			DoENDE("");
-			errorstr = "EXEC needs ENDE command !";
+			errorstr = L"EXEC needs ENDE command !";
 			return false;
 		}
 	}
@@ -1443,13 +1490,13 @@ bool OllyLang::DoEXEC(string args)
 
 	// Set new eip and run to the original one
 	thr->reg.ip = (ulong)pmemforexec;
-	thr->reg.modified = 1;
+	thr->reg.status = RV_MODIFIED;
 	thr->regvalid = 1;
 
 	// tell to odbgscript to ignore next breakpoint
 	bInternalBP=true;
 
-	Broadcast(WM_USER_CHREG, 0, 0);
+	Redrawcpureg();
 	Go(Getcputhreadid(), eip, STEP_RUN, 0, 1);
 	
 	t_dbgmemblock block={0};
@@ -1466,9 +1513,9 @@ bool OllyLang::DoEXEC(string args)
 	return true;
 }
 
-bool OllyLang::DoFILL(string args)
+bool OllyLang::DoFILL(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3))
 		return false;
@@ -1480,21 +1527,18 @@ bool OllyLang::DoFILL(string args)
 	{
 		BYTE* buffer = new BYTE[len];
 		FillMemory(buffer,len,val);
-/*		BYTE b = 0 + val;
-		for(ulong i = 0; i < len; i++)
-			buffer[i] = b;*/
 		Writememory(buffer, start, len, MM_SILENT);
 		delete []buffer;
-		Broadcast(WM_USER_CHALL, 0, 0);
+		Broadcast(WM_USER_CHGALL, 0, 0);
 		require_ollyloop = 1;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoFIND(string args)
+bool OllyLang::DoFIND(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong maxsize=0;
 	if(CreateOp(args, ops, 3)){
 		GetDWOpValue(ops[2], maxsize);
@@ -1503,29 +1547,29 @@ bool OllyLang::DoFIND(string args)
 		return false;
 
 	ulong addr,dw;
-	string data=ops[1];
-	string finddata=ops[1];
+	wstring data=ops[1];
+	wstring finddata=ops[1];
 
 	if(UnquoteString(ops[1], '#', '#')) 
 	{
 		if(ops[1].length() % 2 != 0)
 		{
-			errorstr = "Hex string must have an even number of characters!";
+			errorstr = L"Hex wstring must have an even number of characters!";
 			return false;
 		}
 		finddata=ops[1];
 	}
 	else if (UnquoteString(ops[1], '"', '"'))
 	{
-	   string wilddata;
+	   wstring wilddata;
 	   wilddata=ops[1];
        Str2Hex(ops[1],finddata);
 	   ReplaceString(finddata,"3f","??");
 	}
 	else if(GetDWOpValue(ops[1], dw) && !is_variable(ops[1])) 
 	{
-		itoa(rev(dw),buffer,16);
-		string data1=buffer;
+		_itow(rev(dw),buffer,16);
+		wstring data1=buffer;
 		transform( data1.begin(),data1.end(), data1.begin(),(int(*)(int)) toupper );
 		while(data1.length() < data.length())
 			data1.insert(0,"0");
@@ -1547,8 +1591,8 @@ bool OllyLang::DoFIND(string args)
 		}
         else if(GetDWOpValue(ops[1], dw))
 		{
-			itoa(rev(dw),buffer,16);
-			string data1=buffer;
+			_itow(rev(dw),buffer,16);
+			wstring data1=buffer;
 			while(data1.length() < data.length())
 				data1.insert(0,"0");
 			while (data1.length() > data.length())
@@ -1565,7 +1609,7 @@ bool OllyLang::DoFIND(string args)
 
 		if (tmem==NULL) {
 			// search in current mem block
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
 
@@ -1587,9 +1631,9 @@ bool OllyLang::DoFIND(string args)
 			delete [] membuf;
 
 			if(pos > -1)
-				variables["$RESULT"] = addr + pos;
+				variables[V_RES] = addr + pos;
 			else
-				variables["$RESULT"] = 0;
+				variables[V_RES] = 0;
 		}
 		else
 		{
@@ -1609,20 +1653,20 @@ bool OllyLang::DoFIND(string args)
 			delete[] membuf;
 
 			if(p < membuf + memlen)
-				variables["$RESULT"] = addr + p - membuf;
+				variables[V_RES] = addr + p - membuf;
 			else
-				variables["$RESULT"] = 0;
+				variables[V_RES] = 0;
 		}
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoFINDCALLS(string args)
+bool OllyLang::DoFINDCALLS(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 	if(!CreateOp(args, ops, 2))
-		if (args=="")
+		if (args.empty())
 			return false;
 
 	bool bRefVisible=false,bResetDisam=false;
@@ -1637,7 +1681,7 @@ bool OllyLang::DoFINDCALLS(string args)
 		bRefVisible=(tt->hw!=0);
 
 	t_dump* td;
-	td=(t_dump*) Plugingetvalue(VAL_CPUDASM);
+	td=Getcpudisasmdump();;
 	if (td==NULL)
 		return false;
 
@@ -1650,7 +1694,7 @@ bool OllyLang::DoFINDCALLS(string args)
 			bResetDisam=true;
 		}
 
-		variables["$RESULT"]=0;
+		variables[V_RES]=0;
 		if (Findalldllcalls(td,addr,NULL)>0) {
 			
 			if (tt==NULL)
@@ -1663,7 +1707,7 @@ bool OllyLang::DoFINDCALLS(string args)
 				if (tt->data.n > 1) 
 				{ 
 					//Filter results
-					string filter;
+					wstring filter;
 					if (GetSTROpValue(ops[1], filter) && filter!="") {
 						//filter=ToLower(filter);
 						(char*) buffer[TEXTLEN+1];
@@ -1673,7 +1717,7 @@ bool OllyLang::DoFINDCALLS(string args)
 								//ZeroMemory(buffer,TEXTLEN+1);
 								//Decodename(tr->dest,NM_LABEL,buffer);
 								Findlabel(tr->dest,buffer);
-								if (stricmp(buffer,filter.c_str())!=0)
+								if (_wcsicmp(buffer,filter.c_str())!=0)
 									Deletesorteddata(&tt->data,tr->addr);
 							}
 						}
@@ -1681,7 +1725,7 @@ bool OllyLang::DoFINDCALLS(string args)
 
 					tr=(t_ref*) Getsortedbyselection(&tt->data, 1); //0 is CPU initial
 					if (tr!=NULL)
-						variables["$RESULT"]=tr->addr;
+						variables[V_RES]=tr->addr;
 				}
 
 				if (tt->hw && !bRefVisible) {
@@ -1698,14 +1742,14 @@ bool OllyLang::DoFINDCALLS(string args)
 }
 
 //search for asm command in disasm window
-bool OllyLang::DoFINDCMD(string args)
+bool OllyLang::DoFINDCMD(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 	if(!CreateOp(args, ops, 2))
 		return false;
 
 	bool bRefVisible=false,bResetDisam=false;
-	string cmd, cmds;
+	wstring cmd, cmds;
 	int len,pos;
 	ulong addr,base,size,attempt,opsize=3,disamsel=0;
 	int startadr=0,endadr=0,lps=0,length,ncmd=0,cmdpos=0;
@@ -1720,7 +1764,7 @@ bool OllyLang::DoFINDCMD(string args)
 		bRefVisible=(tt->hw!=0);
 
 	t_dump* td;
-	td=(t_dump*) Plugingetvalue(VAL_CPUDASM);
+	td=Getcpudisasmdump();;
 	if (td==NULL)
 		return false;
 
@@ -1736,14 +1780,14 @@ bool OllyLang::DoFINDCMD(string args)
 			bResetDisam=true;
 		}
 
-		t_asmmodel model={0};
+		t_asmmod model={0};
 		t_extmodel models[NSEQ][NMODELS]={0};
 
 		length = cmds.length();
 		while (cmdpos<length && ncmd<NSEQ)
 		{
 
-			endadr= cmds.find(";",startadr);
+			endadr= cmds.find(L";",startadr);
 			if (endadr==-1)
 			{
 				endadr=length;
@@ -1765,9 +1809,9 @@ bool OllyLang::DoFINDCMD(string args)
 
 					pos=(cmd.length()+len);
 					if (pos>=0 && pos<cmd.length())
-						errorstr = "\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+						errorstr = L"\nFINDCMD error at \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
 					else
-						errorstr = "\nFINDCMD error !\n\n";
+						errorstr = L"\nFINDCMD error !\n\n";
 					errorstr.append(error);
 					goto return_false;
 				}
@@ -1782,7 +1826,7 @@ bool OllyLang::DoFINDCMD(string args)
 			ncmd++;
 		}
 
-		variables["$RESULT"]=0;
+		variables[V_RES]=0;
 		if (Findallsequences(td,models,addr,NULL)>0) {
 			
 			if (tt==NULL)
@@ -1795,7 +1839,7 @@ bool OllyLang::DoFINDCMD(string args)
 				{
 					tr=(t_ref*) Getsortedbyselection(&tt->data, 1); //0 is CPU initial
 					if (tr!=NULL)
-						variables["$RESULT"]=tr->addr;
+						variables[V_RES]=tr->addr;
 				}
 
 				if (tt->hw && !bRefVisible) {
@@ -1816,15 +1860,17 @@ return_false:
 	DelProcessMemoryBloc(tmpaddr);
 	return false;
 }
+*/
+
 /*
 //Buggy, could assemble different command code bytes, (from chinese code)
-bool OllyLang::DoFINDCMDS(string args)
+bool OllyLang::DoFINDCMDS(wstring args)
 {
 
-	string ops[2];
-	t_asmmodel model;
+	wstring ops[2];
+	t_asmmod model;
 	ulong addr;
-	string cmds,args1,cmd;
+	wstring cmds,args1,cmd;
 	char opcode[256]={0},buff[32]={0},tmp[64]={0},error[64]={0};
 	int i,pos,len=0,length=0,startadr=0,endadr=0,lps=0,codelen=0;
 	int attempt=0,opsize=3;
@@ -1836,7 +1882,7 @@ bool OllyLang::DoFINDCMDS(string args)
 		&& GetSTROpValue(ops[1], cmds))
 	{
 
-	  if (cmds.find(";")==-1)
+	  if (cmds.find(L";")==-1)
 	  {
 		nIgnoreNextValuesHist++;
 		return DoFINDoneCMD(args);
@@ -1848,7 +1894,7 @@ bool OllyLang::DoFINDCMDS(string args)
 
 	  while (len<length)
 	  {
-		endadr= cmds.find(";",startadr);
+		endadr= cmds.find(L";",startadr);
 		if (endadr==-1)
 		{
 			endadr=length;
@@ -1861,9 +1907,9 @@ bool OllyLang::DoFINDCMDS(string args)
 		{
 			pos=(cmd.length()+codelen);
 			if (pos>=0 && pos<cmd.length())
-				errorstr = "\nFINDCMDS error on \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
+				errorstr = L"\nFINDCMDS error on \""+cmd.substr(pos,cmd.length()-pos)+"\"!\n\n";
 			else
-				errorstr = "\nFINDCMDS error !\n\n";
+				errorstr = L"\nFINDCMDS error !\n\n";
 			errorstr.append(error);
 			DelProcessMemoryBloc(tmpaddr);
 			return false;
@@ -1876,7 +1922,7 @@ bool OllyLang::DoFINDCMDS(string args)
 		i=0;
 		while(i<codelen)
 		{
-			itoa(buff[i],tmp,16);
+			_itow(buff[i],tmp,16);
 			i++;
 			strcat(opcode,tmp);
 		}
@@ -1894,13 +1940,14 @@ bool OllyLang::DoFINDCMDS(string args)
 }
 */
 
-bool OllyLang::DoFINDMEM(string args)
+/*
+bool OllyLang::DoFINDMEM(wstring args)
 {
 
-	if (args=="")
+	if (args.empty())
 		return false;
 
-	string ops[2];
+	wstring ops[2];
 
 	if (args.find(',') == -1)
 		args+=",0";
@@ -1909,14 +1956,14 @@ bool OllyLang::DoFINDMEM(string args)
 		return false;
 
 	t_table* tt;
-	tt=(t_table*) Plugingetvalue(VAL_MEMORY);
+	tt=_memory;
 	if (tt==NULL)
 		return false;
 
 	t_memory* tm;
 	char szBase[9];
 	ulong start=0; 
-	string sArgs;
+	wstring sArgs;
 	bool bSkip;
 
 	if (!GetDWOpValue(ops[1], start))
@@ -1928,21 +1975,21 @@ bool OllyLang::DoFINDMEM(string args)
 			return false;
 		}
 
-		itoa(tm->base,szBase,16);
+		_itow(tm->base,szBase,16);
 
 		bSkip=false;
 
 		if (start > tm->base + tm->size)
 			bSkip=true;
 		else if (start >= tm->base) 
-			itoa(start,szBase,16);
+			_itow(start,szBase,16);
 
 		if (!bSkip) {
 			sArgs="";
 			sArgs.append(szBase);
 			sArgs+=","+ops[0];
 			if (DoFIND(sArgs)) {
-				if (variables["$RESULT"].dw!=0 || variables["$RESULT"].str!="") {
+				if (variables[V_RES].dw!=0 || variables[V_RES].str!="") {
 					var_logging=true;
 					return true;
 				}
@@ -1953,13 +2000,13 @@ bool OllyLang::DoFINDMEM(string args)
 	}
 
 	var_logging=true;
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 	return true;
 }
 
-bool OllyLang::DoFINDOP(string args)
+bool OllyLang::DoFINDOP(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong maxsize=0;
 	if(CreateOp(args, ops, 3)){
 		GetDWOpValue(ops[2], maxsize);
@@ -1968,22 +2015,22 @@ bool OllyLang::DoFINDOP(string args)
 		return false;
 
 	ulong addr, dw, endaddr;
-	string data=ops[1];
-	string finddata=ops[1];
+	wstring data=ops[1];
+	wstring finddata=ops[1];
 
 	if (UnquoteString(ops[1], '#', '#')) 
 	{
 		if(ops[1].length() % 2 != 0)
 		{
-			errorstr = "Hex string must have an even number of characters!";
+			errorstr = L"Hex wstring must have an even number of characters!";
 			return false;
 		}
 	}
 	else if (GetDWOpValue(ops[1], dw) && !is_variable(ops[1]))
 	{
 //		DoREV(ops[1]);
-		itoa(dw,buffer,16);
-        string data1=buffer;
+		_itow(dw,buffer,16);
+        wstring data1=buffer;
 		while(data1.length() < data.length())
 			data1.insert(0,"0");
 		while (data1.length() > data.length())
@@ -2000,14 +2047,14 @@ bool OllyLang::DoFINDOP(string args)
 		 }
    	    else if(GetSTROpValue(ops[1],data))
 		{
-			errorstr = "findop: incorrect data !";
+			errorstr = L"findop: incorrect data !";
 			return false;
 		}
         else if(GetDWOpValue(ops[1], dw))
 		{
 	//		DoREV(ops[1]);
-			itoa(dw,buffer,16);
-			string data1=buffer;
+			_itow(dw,buffer,16);
+			wstring data1=buffer;
 			while(data1.length() < data.length())
 				data1.insert(0,"0");
 			while (data1.length() > data.length())
@@ -2049,26 +2096,26 @@ bool OllyLang::DoFINDOP(string args)
 		} while(result != 0 && ok != 0);
 	}
 	if(ok != 0){
-		variables["$RESULT"] = addr - addrsize;
-	    variables["$RESULT_1"] = addrsize;
+		variables[V_RES] = addr - addrsize;
+	    variables[V_RES_1] = addrsize;
 	}
 
 
 	else
-		variables["$RESULT"] = 0;
+		variables[V_RES] = 0;
 	return true;
 }
 
-bool OllyLang::DoFINDOPREV(string args)
+bool OllyLang::DoFINDOPREV(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
 	if(ops[1].length() % 2 != 0)
 	{
-		errorstr = "Hex string must have an even number of characters!";
+		errorstr = L"Hex wstring must have an even number of characters!";
 		return false;
 	}
 
@@ -2094,17 +2141,17 @@ bool OllyLang::DoFINDOPREV(string args)
 		} while(result != 0 && ok != 0);
 	}
 	if(ok != 0)
-		variables["$RESULT"] = addr;
+		variables[V_RES] = addr;
 	else
-		variables["$RESULT"] = 0;
+		variables[V_RES] = 0;
 	return true;
 
 }
 
 
-bool OllyLang::DoFREE(string args)
+bool OllyLang::DoFREE(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2)) {
 		ops[1]="0";
@@ -2130,7 +2177,7 @@ bool OllyLang::DoFREE(string args)
 		else {
 			
 			HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
-			variables["$RESULT"] = (DWORD) VirtualFreeEx(hDbgPrc,hMem,size,MEM_DECOMMIT);
+			variables[V_RES] = (DWORD) VirtualFreeEx(hDbgPrc,hMem,size,MEM_DECOMMIT);
 			unregMemBlock(hMem);
 			Listmemory();
 			return true;
@@ -2139,9 +2186,9 @@ bool OllyLang::DoFREE(string args)
 	return false;
 }
 
-bool OllyLang::DoGAPI(string args)
+bool OllyLang::DoGAPI(wstring args)
 {
-    string ops[1];
+    wstring ops[1];
 	ulong addr,size,test,addr2;
 
 	if(!CreateOp(args, ops, 1))
@@ -2159,10 +2206,10 @@ bool OllyLang::DoGAPI(string args)
 			test=disasm.jmpaddr;
 
 			if (size>0) {
-//				variables["$RESULT"] = disasm.result; //asm command text
-//				variables["$RESULT_1"] = disasm.dump;     //command bytes
-				variables["$RESULT_3"] = disasm.addrdata;
-				variables["$RESULT_4"] = disasm.jmpaddr; 
+//				variables[V_RES] = disasm.result; //asm command text
+//				variables[V_RES_1] = disasm.dump;     //command bytes
+				variables[L"$RESULT_3"] = disasm.addrdata;
+				variables[L"$RESULT_4"] = disasm.jmpaddr; 
 
 			}
 		}
@@ -2175,34 +2222,34 @@ bool OllyLang::DoGAPI(string args)
             int res = Decodeaddress(addr2, 0, ADC_JUMP | ADC_STRING | ADC_ENTRY | ADC_OFFSET | ADC_SYMBOL, sym, 4096, buf);
 		    if(res)
 			{
-			variables["$RESULT"] = sym;
+			variables[V_RES] = sym;
 			char *tmp = strstr(sym, ".");
 			if(tmp)
 			{
 				strtok(sym, ">");                          //buxfix
 				*tmp = '\0';
-				variables["$RESULT_1"] = sym + 2;          //bugfix
-				variables["$RESULT_2"] = tmp + 1;
+				variables[V_RES_1] = sym + 2;          //bugfix
+				variables[V_RES_2] = tmp + 1;
 			}
 		}
 		    return true;
 		}
-		variables["$RESULT"] = NULL;
+		variables[V_RES] = NULL;
 		return true;
 	}
     return false;
 }
 
-bool OllyLang::DoGBPM(string args)
+bool OllyLang::DoGBPM(wstring args)
 {
-	variables["$RESULT"]=break_memaddr;
+	variables[V_RES]=break_memaddr;
 	return true;
 }
 
 //Get Breakpoint Reason
-bool OllyLang::DoGBPR(string args)
+bool OllyLang::DoGBPR(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if (break_reason == PP_MEMBREAK) {
 		//Mem Breakpoint Reason
@@ -2246,14 +2293,14 @@ bool OllyLang::DoGBPR(string args)
 			return true;
 		}
 	} 
-	variables["$RESULT"] = break_reason;
+	variables[V_RES] = break_reason;
 	return true;
 }
 
 //Get Code Information
-bool OllyLang::DoGCI(string args)
+bool OllyLang::DoGCI(wstring args)
 {
-    string ops[2], param;
+    wstring ops[2], param;
 	ulong addr,size;
 
 	if(!CreateOp(args, ops, 2))
@@ -2276,32 +2323,32 @@ bool OllyLang::DoGCI(string args)
 
 			if (size<=0)
 				return false;
-			else if (param == "COMMAND")
+			else if (param == L"COMMAND")
 			{
-				string s;
+				wstring s;
 				s.assign(disasm.result);
-				while (s.find("  ") != string::npos) ReplaceString(s,"  "," ");
-				variables["$RESULT"] = s; 
+				while (s.find(L"  ") != wstring::npos) ReplaceString(s,"  "," ");
+				variables[V_RES] = s; 
 				return true;
 			}
-			else if (param == "CONDITION") 
+			else if (param == L"CONDITION") 
 			{
-				variables["$RESULT"] = disasm.condition; 
+				variables[V_RES] = disasm.condition; 
 				return true;
 			}
-			else if (param == "DESTINATION") 
+			else if (param == L"DESTINATION") 
 			{
-				variables["$RESULT"] = disasm.jmpaddr; 
+				variables[V_RES] = disasm.jmpaddr; 
 				return true;
 			}
-			else if (param == "SIZE") 
+			else if (param == L"SIZE") 
 			{
-				variables["$RESULT"] = size; 
+				variables[V_RES] = size; 
 				return true;
 			}
-			else if (param == "TYPE") 
+			else if (param == L"TYPE") 
 			{
-				variables["$RESULT"] = disasm.cmdtype; 
+				variables[V_RES] = disasm.cmdtype; 
 				return true;
 			}
 		}
@@ -2309,9 +2356,9 @@ bool OllyLang::DoGCI(string args)
 	return false;
 }
 
-bool OllyLang::DoGCMT(string args)
+bool OllyLang::DoGCMT(wstring args)
 {
-	string comment;
+	wstring comment;
 	ulong addr,size;
 
 	if(GetDWOpValue(args, addr))
@@ -2325,19 +2372,19 @@ bool OllyLang::DoGCMT(string args)
 				size = Findname(addr, NM_ANALYSE, buffer);		
 			comment = buffer;
 			if(comment==""){
-			   variables["$RESULT"] = " ";
+			   variables[V_RES] = " ";
                return true;
 			}  
-			variables["$RESULT"] = comment;
+			variables[V_RES] = comment;
 			return true;
 		}
 	}
 	return false;
 }
 
-bool OllyLang::DoGFO(string args)
+bool OllyLang::DoGFO(wstring args)
 {
-	string comment;
+	wstring comment;
 	ulong addr;
 
 	if(GetDWOpValue(args, addr))
@@ -2346,9 +2393,9 @@ bool OllyLang::DoGFO(string args)
 		{
 			t_module* mod = (t_module*) Findmodule(addr);
 			if (mod!=NULL) {
-				variables["$RESULT"] = Findfileoffset(mod, addr);
+				variables[V_RES] = Findfileoffset(mod, addr);
 			} else {
-				variables["$RESULT"] = 0;
+				variables[V_RES] = 0;
 			}
 			return true;
 		}
@@ -2359,35 +2406,35 @@ bool OllyLang::DoGFO(string args)
 // Get Label
 // returns label from address
 // glbl 
-bool OllyLang::DoGLBL ( string args )
+bool OllyLang::DoGLBL ( wstring args )
 {
-	string comment;
+	wstring comment;
 	ulong addr, type;
 	char buffer[TEXTLEN]={0};
 
 	if (!GetDWOpValue(args, addr))
 		return false;
 	{
-		variables["$RESULT"] = 0;
+		variables[V_RES] = 0;
 
 		if (addr != 0)
 		{
 			if (Findlabel ( addr, buffer ) != NM_LABEL)
-				variables["$RESULT"] = 0;
+				variables[V_RES] = 0;
 
 			comment.assign(buffer);
-			if (comment == "")
-				variables["$RESULT"] = 0;
+			if (comment == L"")
+				variables[V_RES] = 0;
 
-			variables["$RESULT"] = comment;
+			variables[V_RES] = comment;
 		}
 	}
 	return true;
 }
 
-bool OllyLang::DoGMA(string args)
+bool OllyLang::DoGMA(wstring args)
 {
-	string str,ops[2];
+	wstring str,ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -2398,19 +2445,19 @@ bool OllyLang::DoGMA(string args)
 			str = str.substr(0,8);
 
 		//Module names : Spaces to underscores
-		while(str.find(" ")!=string::npos)
-			str.replace(str.find(" "),1,"_");
+		while(str.find(L" ")!=wstring::npos)
+			str.replace(str.find(L" "),1,"_");
 
 		Listmemory();
 
-		int t=Plugingetvalue(VAL_MEMORY);
+		int t=_memory;
 		if (t<=0)
 			return false;
 
 		t_table* ttab=(t_table*) t;
 		t_memory* mem;
 		t_module* mod;
-		string sMod;
+		wstring sMod;
 
 		for (int n=0;n<ttab->data.n;n++) {
 	
@@ -2418,7 +2465,7 @@ bool OllyLang::DoGMA(string args)
 			mod = (t_module*) Findmodule(mem->base);
 			if (mod!=NULL) {
 				sMod.assign(mod->name,SHORTLEN);
-				if (stricmp(sMod.c_str(),str.c_str())==0) {
+				if (_wcsicmp(sMod.c_str(),str.c_str())==0) {
 					Int2Hex(mem->base, str);
 					nIgnoreNextValuesHist++;
 					return DoGMI(str+","+ops[1]);		
@@ -2427,57 +2474,57 @@ bool OllyLang::DoGMA(string args)
 		}
 	}
 
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 
 	return true;
 
 }
 
-bool OllyLang::DoGMEMI(string args)
+bool OllyLang::DoGMEMI(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
 	ulong addr = 0;
-	string str;
+	wstring str;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
 	{
 		transform(str.begin(), str.end(), str.begin(), toupper);
 
 		t_memory* mem = Findmemory(addr);
-		if(str == "MEMORYBASE" && mem != NULL)
+		if(str == L"MEMORYBASE" && mem != NULL)
 		{
-			variables["$RESULT"] = (DWORD)mem->base;
+			variables[V_RES] = (DWORD)mem->base;
 			return true;
 		}
-		else if(str == "MEMORYSIZE" && mem != NULL)
+		else if(str == L"MEMORYSIZE" && mem != NULL)
 		{
-			variables["$RESULT"] = (DWORD)mem->size;
+			variables[V_RES] = (DWORD)mem->size;
 			return true;
 		}
-		else if(str == "MEMORYOWNER" && mem != NULL)
+		else if(str == L"MEMORYOWNER" && mem != NULL)
 		{
-			variables["$RESULT"] = (DWORD)mem->owner;
+			variables[V_RES] = (DWORD)mem->owner;
 			return true;
 		}
 		else if(mem == NULL)
 		{
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
 		else
 		{			
 			//DoGMI(Int2Str(mem->base)+" ops[1]);
-			variables["$RESULT"] = 0;
-			errorstr = "Second operand bad";
+			variables[V_RES] = 0;
+			errorstr = L"Second operand bad";
 			return false;
 		}
 	}
 
-	errorstr = "Bad operand";
+	errorstr = L"Bad operand";
 	return false;
 }
 
@@ -2487,29 +2534,29 @@ bool OllyLang::DoElse()
 	int pos = script_pos+1;
 	//goto to else or endif
 	while(ToLower(script[pos]) != "endif" || condlevel > 0) {
-		if (ToLower(script[pos]) == "endif") {
+		if (ToLower(script[pos]) == L"endif") {
 			condlevel--;
 		}
-		if (ToLower(script[pos]).substr(0,2) == "if") {
+		if (ToLower(script[pos]).substr(0,2) == L"if") {
 			condlevel++;
 		}
-		if (condlevel == 0 && ToLower(script[pos]) == "else") {
+		if (condlevel == 0 && ToLower(script[pos]) == L"else") {
 			pos++;
 			break;
 		}
 		pos++;
 		if (pos>script.size()) {
 			DoENDIF("");
-			errorstr = "IF needs ENDIF command !";
+			errorstr = L"IF needs ENDIF command !";
 			return false;
 		}
 	}
 	script_pos = pos-1;
-	setProgLineResult(pos,variables["$RESULT"]);
+	setProgLineResult(pos,variables[V_RES]);
 	return true;
 }
 
-bool OllyLang::DoIFA(string args)
+bool OllyLang::DoIFA(wstring args)
 {
 	conditions.push_back(args);
 	if (args != "" && !DoCMP(args)) {
@@ -2521,7 +2568,7 @@ bool OllyLang::DoIFA(string args)
 	return true;
 }
 
-bool OllyLang::DoIFAE(string args)
+bool OllyLang::DoIFAE(wstring args)
 {
 	conditions.push_back(args);
 	if (args != "" && !DoCMP(args)) {
@@ -2533,7 +2580,7 @@ bool OllyLang::DoIFAE(string args)
 	return true;
 }
 
-bool OllyLang::DoIFB(string args)
+bool OllyLang::DoIFB(wstring args)
 {
 	conditions.push_back(args);
 	if (args != "" && !DoCMP(args)) {
@@ -2545,7 +2592,7 @@ bool OllyLang::DoIFB(string args)
 	return true;
 }
 
-bool OllyLang::DoIFBE(string args)
+bool OllyLang::DoIFBE(wstring args)
 {
 	conditions.push_back(args);
 	if (args != "" && !DoCMP(args)) {
@@ -2557,7 +2604,7 @@ bool OllyLang::DoIFBE(string args)
 	return true;
 }
 
-bool OllyLang::DoIFEQ(string args)
+bool OllyLang::DoIFEQ(wstring args)
 {
 	conditions.push_back(args);
 	if (args != "" && !DoCMP(args)) {
@@ -2569,7 +2616,7 @@ bool OllyLang::DoIFEQ(string args)
 	return true;
 }
 
-bool OllyLang::DoIFNEQ(string args)
+bool OllyLang::DoIFNEQ(wstring args)
 {
 	conditions.push_back(args);
 	if (args != "" && !DoCMP(args)) {
@@ -2581,27 +2628,9 @@ bool OllyLang::DoIFNEQ(string args)
 	return true;
 }
 
-bool OllyLang::DoNAMES(string args)
+bool OllyLang::DoGMEXP(wstring args)
 {
-	string ops[1];
-	ulong addr;
-	if(!CreateOperands(args, ops, 1))
-		return false;
-
-	if(GetDWOpValue(ops[0], addr)) {
-		t_module* mod = Findmodule(addr);
-		Setdisasm(mod->codebase,1,0);
-		Sendshortcut(PM_DISASM, 0, WM_KEYDOWN, 1, 0, 'N');  //"Ctrl + N"
-		require_ollyloop = 1;
-		return true;
-	}
-
-	return false;
-}
-
-bool OllyLang::DoGMEXP(string args)
-{
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3)) {
 		ops[2]="0";
@@ -2610,7 +2639,7 @@ bool OllyLang::DoGMEXP(string args)
 	}
 
 	ulong i, num, addr, count=0;
-	string str;
+	wstring str;
 	bool cache=false, cached=false;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) && GetDWOpValue(ops[2], num) )
@@ -2619,13 +2648,13 @@ bool OllyLang::DoGMEXP(string args)
 
 		t_module * mod = Findmodule(addr);
 		if (!mod) {
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
 
 		t_export exp={0};
 
-		if (str == "COUNT") {
+		if (str == L"COUNT") {
 			cache = true;
 			tExportsCache.clear();
 			exportsCacheAddr = addr;
@@ -2652,46 +2681,46 @@ bool OllyLang::DoGMEXP(string args)
 
 		if (num > count) //no more
 		{
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
 
-		if(str == "COUNT")
+		if(str == L"COUNT")
 		{
-			variables["$RESULT"] = count;
+			variables[V_RES] = count;
 			return true;
 		}
-		else if(str == "ADDRESS")
+		else if(str == L"ADDRESS")
 		{
-			variables["$RESULT"] = exp.addr;
+			variables[V_RES] = exp.addr;
 			return true;
 		}
-		else if(str == "LABEL")
+		else if(str == L"LABEL")
 		{
-			variables["$RESULT"] = exp.label;
+			variables[V_RES] = exp.label;
 			return true;
 		}
 		else
 		{
-			variables["$RESULT"] = 0;
-			errorstr = "Second operand bad";
+			variables[V_RES] = 0;
+			errorstr = L"Second operand bad";
 			return false;
 		}
 	}
 
-	errorstr = "Bad operand";
+	errorstr = L"Bad operand";
 	return false;
 }
 
-bool OllyLang::DoGMI(string args)
+bool OllyLang::DoGMI(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
 	ulong addr = 0;
-	string str;
+	wstring str;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
 	{
@@ -2701,115 +2730,115 @@ bool OllyLang::DoGMI(string args)
 		
 		if(mod == NULL)
 		{
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
-		else if(str == "MODULEBASE")
+		else if(str == L"MODULEBASE")
 		{ 
-			variables["$RESULT"] = (DWORD)mod->base;
+			variables[V_RES] = (DWORD)mod->base;
 			return true;
 		}
-		else if(str == "MODULESIZE")
+		else if(str == L"MODULESIZE")
 		{
-			variables["$RESULT"] = (DWORD)mod->size;
+			variables[V_RES] = (DWORD)mod->size;
 			return true;
 		}
-		else if(str == "CODEBASE")
+		else if(str == L"CODEBASE")
 		{
-			variables["$RESULT"] = (DWORD)mod->codebase;
+			variables[V_RES] = (DWORD)mod->codebase;
 			return true;
 		}
-		else if(str == "CODESIZE")
+		else if(str == L"CODESIZE")
 		{
-			variables["$RESULT"] = (DWORD)mod->origcodesize;
+			variables[V_RES] = (DWORD)mod->origcodesize;
 			return true;
 		}
-		else if(str == "ENTRY")
+		else if(str == L"ENTRY")
 		{
-			variables["$RESULT"] = (DWORD)mod->entry;
+			variables[V_RES] = (DWORD)mod->entry;
 			return true;
 		}
-		else if(str == "NSECT")
+		else if(str == L"NSECT")
 		{
-			variables["$RESULT"] = (DWORD)mod->nsect;
+			variables[V_RES] = (DWORD)mod->nsect;
 			return true;
 		}
-		else if(str == "DATABASE")
+		else if(str == L"DATABASE")
 		{
-			variables["$RESULT"] = (DWORD)mod->database;
+			variables[V_RES] = (DWORD)mod->database;
 			return true;
 		}
-		else if(str == "EDATATABLE")
+		else if(str == L"EDATATABLE")
 		{
-			variables["$RESULT"] = (DWORD)mod->edatatable;
+			variables[V_RES] = (DWORD)mod->edatatable;
 			return true;
 		}
-		else if(str == "EDATASIZE")
+		else if(str == L"EDATASIZE")
 		{
-			variables["$RESULT"] = (DWORD)mod->edatasize;
+			variables[V_RES] = (DWORD)mod->edatasize;
 			return true;
 		}
-		else if(str == "IDATABASE")
+		else if(str == L"IDATABASE")
 		{
-			variables["$RESULT"] = (DWORD)mod->idatabase;
+			variables[V_RES] = (DWORD)mod->idatabase;
 			return true;
 		}
-		else if(str == "IDATATABLE")
+		else if(str == L"IDATATABLE")
 		{
-			variables["$RESULT"] = (DWORD)mod->idatatable;
+			variables[V_RES] = (DWORD)mod->idatatable;
 			return true;
 		}
-		else if(str == "RESBASE")
+		else if(str == L"RESBASE")
 		{
-			variables["$RESULT"] = (DWORD)mod->resbase;
+			variables[V_RES] = (DWORD)mod->resbase;
 			return true;
 		}
-		else if(str == "RESSIZE")
+		else if(str == L"RESSIZE")
 		{
-			variables["$RESULT"] = (DWORD)mod->ressize;
+			variables[V_RES] = (DWORD)mod->ressize;
 			return true;
 		}
-		else if(str == "RELOCTABLE")
+		else if(str == L"RELOCTABLE")
 		{
-			variables["$RESULT"] = (DWORD)mod->reloctable;
+			variables[V_RES] = (DWORD)mod->reloctable;
 			return true;
 		}
-		else if(str == "RELOCSIZE")
+		else if(str == L"RELOCSIZE")
 		{
-			variables["$RESULT"] = (DWORD)mod->relocsize;
+			variables[V_RES] = (DWORD)mod->relocsize;
 			return true;
 		}
-		else if(str == "NAME")
+		else if(str == L"NAME")
 		{
-			variables["$RESULT"] = (char*)mod->name;
-			if (variables["$RESULT"].str.length() >	SHORTLEN)
-				variables["$RESULT"].str = variables["$RESULT"].str.substr(0,SHORTLEN);
+			variables[V_RES] = (char*)mod->name;
+			if (variables[V_RES].str.length() >	SHORTLEN)
+				variables[V_RES].str = variables[V_RES].str.substr(0,SHORTLEN);
 			return true;
 		}
-		else if(str == "PATH")
+		else if(str == L"PATH")
 		{
-			variables["$RESULT"] = (char[MAX_PATH])mod->path;
+			variables[V_RES] = (char[MAX_PATH])mod->path;
 			return true;
 		}
-		else if(str == "VERSION")
+		else if(str == L"VERSION")
 		{
-			variables["$RESULT"] = (char*)mod->version;
+			variables[V_RES] = (char*)mod->version;
 			return true;
 		}
 		else
 		{
-			variables["$RESULT"] = 0;
-			errorstr = "Second operand bad";
+			variables[V_RES] = 0;
+			errorstr = L"Second operand bad";
 			return false;
 		}
 	}
-	errorstr = "Bad operand";
+	errorstr = L"Bad operand";
 	return false;
 }
 
-bool OllyLang::DoGMIMP(string args)
+bool OllyLang::DoGMIMP(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3)) {
 		ops[2]="0";
@@ -2818,7 +2847,7 @@ bool OllyLang::DoGMIMP(string args)
 	}
 
 	ulong i, num, addr, count=0;
-	string str;
+	wstring str;
 	bool cache=false, cached=false;
 
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) && GetDWOpValue(ops[2], num) )
@@ -2827,13 +2856,13 @@ bool OllyLang::DoGMIMP(string args)
 
 		t_module * mod = Findmodule(addr);
 		if (!mod) {
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
 
 		t_export exp={0};
 
-		if (str == "COUNT") {
+		if (str == L"COUNT") {
 			cache = true;
 			tImportsCache.clear();
 			importsCacheAddr = addr;
@@ -2860,61 +2889,61 @@ bool OllyLang::DoGMIMP(string args)
 
 		if (num > count) //no more
 		{
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 			return true;
 		}
 
-		if(str == "COUNT")
+		if(str == L"COUNT")
 		{
-			variables["$RESULT"] = count;
+			variables[V_RES] = count;
 			return true;
 		}
-		else if(str == "ADDRESS")
+		else if(str == L"ADDRESS")
 		{
-			variables["$RESULT"] = exp.addr;
+			variables[V_RES] = exp.addr;
 			return true;
 		}
-		else if(str == "LABEL")
+		else if(str == L"LABEL")
 		{
-			variables["$RESULT"] = exp.label;
+			variables[V_RES] = exp.label;
 			return true;
 		}
-		else if(str == "NAME")
+		else if(str == L"NAME")
 		{
-			string s = exp.label;
-			if (s.find(".") != string::npos) {
-				variables["$RESULT"] = s.substr(s.find(".")+1);
+			wstring s = exp.label;
+			if (s.find(L".") != wstring::npos) {
+				variables[V_RES] = s.substr(s.find(L".")+1);
 			}
 			else 
-				variables["$RESULT"] = exp.label;
+				variables[V_RES] = exp.label;
 
 			return true;
 		}
-		else if(str == "MODULE")
+		else if(str == L"MODULE")
 		{
-			string s = exp.label;
-			if (s.find(".") != string::npos) {
-				variables["$RESULT"] = s.substr(0,s.find("."));
+			wstring s = exp.label;
+			if (s.find(L".") != wstring::npos) {
+				variables[V_RES] = s.substr(0,s.find(L"."));
 			}
 			else 
-				variables["$RESULT"] = "";
+				variables[V_RES] = "";
 			return true;
 		}
 		else
 		{
-			variables["$RESULT"] = 0;
-			errorstr = "Second operand bad";
+			variables[V_RES] = 0;
+			errorstr = L"Second operand bad";
 			return false;
 		}
 	}
 
-	errorstr = "Bad operand";
+	errorstr = L"Bad operand";
 	return false;
 }
 
-bool OllyLang::DoGN(string args)
+bool OllyLang::DoGN(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong addr;
 
 	if(!CreateOperands(args, ops, 1))
@@ -2928,21 +2957,21 @@ bool OllyLang::DoGN(string args)
 		int res = Decodeaddress(addr, 0, ADC_JUMP | ADC_STRING | ADC_ENTRY | ADC_OFFSET | ADC_SYMBOL, sym, 4096, buf);
 		if(res)
 		{
-			variables["$RESULT"] = sym;
+			variables[V_RES] = sym;
 			char* tmp = strstr(sym, ".");
 			if(tmp)
 			{
 				strtok(sym, ">");                      
 				*tmp = '\0';
-				variables["$RESULT_1"] = sym; //+ 2 ... not a bug Charset pb ?
-				variables["$RESULT_2"] = tmp + 1;
+				variables[V_RES_1] = sym; //+ 2 ... not a bug Charset pb ?
+				variables[V_RES_2] = tmp + 1;
 			}
 		}
 		else
 		{
-			variables["$RESULT"] = 0;
-			variables["$RESULT_1"] = 0;
-			variables["$RESULT_2"] = 0;
+			variables[V_RES] = 0;
+			variables[V_RES_1] = 0;
+			variables[V_RES_2] = 0;
 		}
 
 		return true;
@@ -2951,9 +2980,9 @@ bool OllyLang::DoGN(string args)
 	return false;
 }
 
-bool OllyLang::DoGO(string args)
+bool OllyLang::DoGO(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong addr;
 
 	if(!CreateOperands(args, ops, 1))
@@ -2970,9 +2999,9 @@ bool OllyLang::DoGO(string args)
 }
 
 //Get Code Information
-bool OllyLang::DoGOPI(string args)
+bool OllyLang::DoGOPI(wstring args)
 {
-    string ops[3], param;
+    wstring ops[3], param;
 	ulong addr,size,index;
 
 	if(!CreateOp(args, ops, 3))
@@ -2985,7 +3014,7 @@ bool OllyLang::DoGOPI(string args)
 
 		index--;
 		if (index < 0 || index > 2) {
-			errorstr = "Bad operand index (1-3) !";
+			errorstr = L"Bad operand index (1-3) !";
 			return false;
 		}
 
@@ -3002,29 +3031,29 @@ bool OllyLang::DoGOPI(string args)
 
 			if (size<=0)
 				return false;
-			else if (param == "TYPE")
+			else if (param == L"TYPE")
 			{
-				variables["$RESULT"] = disasm.optype[index]; // Type of operand (extended set DEC_xxx)
+				variables[V_RES] = disasm.optype[index]; // Type of operand (extended set DEC_xxx)
 				return true;
 			}
-			else if (param == "SIZE") 
+			else if (param == L"SIZE") 
 			{
-				variables["$RESULT"] = disasm.opsize[index]; // Size of operand, bytes
+				variables[V_RES] = disasm.opsize[index]; // Size of operand, bytes
 				return true;
 			}
-			else if (param == "GOOD") 
+			else if (param == L"GOOD") 
 			{
-				variables["$RESULT"] = disasm.opgood[index]; // Whether address and data valid
+				variables[V_RES] = disasm.opgood[index]; // Whether address and data valid
 				return true;
 			}
-			else if (param == "ADDR") 
+			else if (param == L"ADDR") 
 			{
-				variables["$RESULT"] = disasm.opaddr[index]; // Address if memory, index if register
+				variables[V_RES] = disasm.opaddr[index]; // Address if memory, index if register
 				return true;
 			}
-			else if (param == "DATA") 
+			else if (param == L"DATA") 
 			{
-				variables["$RESULT"] = disasm.opdata[index]; // Actual value (only integer operands)
+				variables[V_RES] = disasm.opdata[index]; // Actual value (only integer operands)
 				return true;
 			}
 		}
@@ -3034,9 +3063,9 @@ bool OllyLang::DoGOPI(string args)
 
 
 //gpa "LoadLibraryA","kernel32.dll"
-bool OllyLang::DoGPA(string args)
+bool OllyLang::DoGPA(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong dontfree=0;
 
 	if(CreateOperands(args, ops, 3))
@@ -3045,11 +3074,11 @@ bool OllyLang::DoGPA(string args)
 		if(!CreateOperands(args, ops, 2))
 			return false;
 
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 	DropVariable("$RESULT_1");
 	DropVariable("$RESULT_2");
 
-	string proc, lib;
+	wstring proc, lib;
 	FARPROC p;
 
 	if(GetSTROpValue(ops[0], proc) && GetSTROpValue(ops[1], lib))
@@ -3057,8 +3086,8 @@ bool OllyLang::DoGPA(string args)
 		HMODULE hMod=LoadLibraryEx(lib.c_str(),NULL,LOAD_WITH_ALTERED_SEARCH_PATH);
 
 		if(hMod==0)	{
-			variables["$RESULT"] = 0;
-			errorstr = "GPA: "+StrLastError();
+			variables[V_RES] = 0;
+			errorstr = L"GPA: "+StrLastError();
 
 			if (dontfree) {
 
@@ -3069,13 +3098,13 @@ bool OllyLang::DoGPA(string args)
 
 				ulong pmem = AddProcessMemoryBloc(lib);
 
-				string tmp;
+				wstring tmp;
 				sprintf(buffer,"0%lX",pmem);
 				tmp.assign(buffer);
 
 				if (DoPUSH(tmp)) {
 
-					sprintf(buffer,"0%lX",variables["$RESULT"].dw);
+					sprintf(buffer,"0%lX",variables[V_RES].dw);
 
 					ExecuteASM("call "+tmp);
 				
@@ -3088,7 +3117,7 @@ bool OllyLang::DoGPA(string args)
 			return true;
 		}
 
-		variables["$RESULT_1"] = lib;
+		variables[V_RES_1] = lib;
 
 		//if (proc != "")
 		p = GetProcAddress(hMod, proc.c_str());
@@ -3101,96 +3130,96 @@ bool OllyLang::DoGPA(string args)
 		}
 
 		if(p == 0) {
-			errorstr = "GPA: No such procedure: " + proc;
+			errorstr = L"GPA: No such procedure: " + proc;
 			return true;
 		}
 
-		variables["$RESULT"] = (DWORD) p;
-		variables["$RESULT_2"] = proc;
+		variables[V_RES] = (DWORD) p;
+		variables[V_RES_2] = proc;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoGPI(string args)
+bool OllyLang::DoGPI(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	string str;
+	wstring str;
 
 	if(GetSTROpValue("\""+ops[0]+"\"", str))
 	{
  
-		if(str == "HPROCESS") //(HANDLE) Handle of debugged process 
+		if(str == L"HPROCESS") //(HANDLE) Handle of debugged process 
 		{
-			variables["$RESULT"] = (DWORD)Plugingetvalue(VAL_HPROCESS);
+			variables[V_RES] = (DWORD)Plugingetvalue(VAL_HPROCESS);
 			return true;
 		}
-		else if(str == "PROCESSID") //Process ID of debugged process 
+		else if(str == L"PROCESSID") //Process ID of debugged process 
 		{
-			variables["$RESULT"] = (DWORD)Plugingetvalue(VAL_PROCESSID);
+			variables[V_RES] = (DWORD)Plugingetvalue(VAL_PROCESSID);
 			return true;
 		}
-		else if(str == "HMAINTHREAD") //(HANDLE) Handle of main thread of debugged process 
+		else if(str == L"HMAINTHREAD") //(HANDLE) Handle of main thread of debugged process 
 		{
-			variables["$RESULT"] = (DWORD)Plugingetvalue(VAL_HMAINTHREAD);
+			variables[V_RES] = (DWORD)Plugingetvalue(VAL_HMAINTHREAD);
 			return true;
 		}
-		else if(str == "MAINTHREADID") //Thread ID of main thread of debugged process 
+		else if(str == L"MAINTHREADID") //Thread ID of main thread of debugged process 
 		{
-			variables["$RESULT"] = (DWORD)Plugingetvalue(VAL_MAINTHREADID);
+			variables[V_RES] = (DWORD)Plugingetvalue(VAL_MAINTHREADID);
 			return true;
 		}
-		else if(str == "MAINBASE") //Base of main module in the debugged process 
+		else if(str == L"MAINBASE") //Base of main module in the debugged process 
 		{
-			variables["$RESULT"] = (DWORD)Plugingetvalue(VAL_MAINBASE);
+			variables[V_RES] = (DWORD)Plugingetvalue(VAL_MAINBASE);
 			return true;
 		}
-		else if(str == "PROCESSNAME") //Name of the debugged process 
+		else if(str == L"PROCESSNAME") //Name of the debugged process 
 		{
-			variables["$RESULT"] = (char *)Plugingetvalue(VAL_PROCESSNAME);
+			variables[V_RES] = (char *)Plugingetvalue(VAL_PROCESSNAME);
 			return true;
 		}
-		else if(str == "EXEFILENAME") //Name of the main debugged file 
+		else if(str == L"EXEFILENAME") //Name of the main debugged file 
 		{
-			variables["$RESULT"] = (char *)Plugingetvalue(VAL_EXEFILENAME);
+			variables[V_RES] = _executable;
 			return true;
 		}
-		else if(str == "CURRENTDIR") //Current directory for debugged process 
+		else if(str == L"CURRENTDIR") //Current directory for debugged process 
 		{
-			variables["$RESULT"] = (char *)Plugingetvalue(VAL_CURRENTDIR);
-			if (variables["$RESULT"].str.length()==0) {
-				char spath[MAX_PATH];
-				strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-				string path = spath;
-				variables["$RESULT"] = path.substr(0, path.rfind('\\') + 1);				
+			variables[V_RES] = (char *)Plugingetvalue(VAL_CURRENTDIR);
+			if (variables[V_RES].str.length()==0) {
+				wchar_t spath[MAX_PATH];
+				wcscpy(spath, _executable);
+				wstring path = spath;
+				variables[V_RES] = path.substr(0, path.rfind('\\') + 1);				
 			}
 			return true;
 		}
-		else if(str == "SYSTEMDIR") //Windows system directory 
+		else if(str == L"SYSTEMDIR") //Windows system directory 
 		{
-			variables["$RESULT"] = (char *)Plugingetvalue(VAL_SYSTEMDIR);
+			variables[V_RES] = (char *)Plugingetvalue(VAL_SYSTEMDIR);
 			return true;
 		}
 	}
-	errorstr = "Bad operand";
+	errorstr = L"Bad operand";
 	return false;
 }
 
 //in dev... i try to find API parameters count and types
-bool OllyLang::DoGPP(string args)
+bool OllyLang::DoGPP(wstring args)
 {
 	if (!DoGPA(args))
 		return false;
 
-	ulong addr = variables["$RESULT"].dw;
+	ulong addr = variables[V_RES].dw;
 	if (addr==0)
 		return false;
 
-	string sAddr = itoa(addr,buffer,16);
+	wstring sAddr = _itow(addr,buffer,16);
 	if (!DoREF(sAddr))
 		return false;
 
@@ -3220,9 +3249,9 @@ bool OllyLang::DoGPP(string args)
             DbgMsg(disasm.nregstack,disasm.comment);
 
 			if (size>0) {
-				variables["$RESULT"] = ref->addr;
-				variables["$RESULT_1"] = disasm.result; //command text
-				variables["$RESULT_2"] = disasm.comment;
+				variables[V_RES] = ref->addr;
+				variables[V_RES_1] = disasm.result; //command text
+				variables[V_RES_2] = disasm.comment;
 				return true; 
 			}
 		}
@@ -3231,9 +3260,9 @@ bool OllyLang::DoGPP(string args)
 }
 
 //Get Reference Window Address at Offset
-bool OllyLang::DoGREF(string args)
+bool OllyLang::DoGREF(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong line;
 
 	CreateOperands(args, ops, 1);
@@ -3241,7 +3270,7 @@ bool OllyLang::DoGREF(string args)
 	t_table* tt;
 	tt=(t_table*) Plugingetvalue(VAL_REFERENCES);
 
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 
 	//Get Ref. Addr
 	if (tt!=NULL) 
@@ -3253,11 +3282,11 @@ bool OllyLang::DoGREF(string args)
 				t_ref* tr;
 				tr=(t_ref*) Getsortedbyselection(&tt->data, line); //0 is CPU initial sel.
 				if (tr!=NULL)
-					variables["$RESULT"]=tr->addr;
+					variables[V_RES]=tr->addr;
 			}
 		} else {
 			//Get Ref. Count
-			variables["$RESULT"] = tt->data.n-1;
+			variables[V_RES] = tt->data.n-1;
 		}
 		return true;
 	}
@@ -3265,9 +3294,9 @@ bool OllyLang::DoGREF(string args)
 }
 
 //Get Relative Offset
-bool OllyLang::DoGRO(string args)
+bool OllyLang::DoGRO(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong addr;
 
 	if(!CreateOperands(args, ops, 1))
@@ -3280,11 +3309,11 @@ bool OllyLang::DoGRO(string args)
 		int size = Decoderelativeoffset(addr, ADC_NONTRIVIAL, sym, 4096);
 		if (size > 0)
 		{
-			variables["$RESULT"] = sym;
+			variables[V_RES] = sym;
 		}
 		else
 		{
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 		}
 
 		return true;
@@ -3297,64 +3326,64 @@ bool OllyLang::DoGRO(string args)
 // returns START/END address from currently selected line in CPUASM | DUMP | STACK window in $RESULT & $RESULT_1
 // arg can be either : CPUDASM, CPUDUMP, CPUSTACK 
 // ex		:	gsl CPUDUMP
-bool OllyLang::DoGSL ( string args )
+bool OllyLang::DoGSL ( wstring args )
 {
-	string str;
+	wstring str;
 	t_dump* td;
 
-	variables["$RESULT"] = 0;
-	variables["$RESULT_1"] = 0;
-	variables["$RESULT_2"] = 0;
+	variables[V_RES] = 0;
+	variables[V_RES_1] = 0;
+	variables[V_RES_2] = 0;
 	
 	GetSTROpValue("\""+args+"\"", str);
-	if (str == "") str = "CPUDASM";
+	if (str == L"") str = "CPUDASM";
 
 	transform(str.begin(), str.end(), str.begin(), toupper);
 
-	if(str == "CPUDASM")
+	if(str == L"CPUDASM")
 		td = (t_dump*) Plugingetvalue (VAL_CPUDASM);
-	else if (str == "CPUDUMP")
+	else if (str == L"CPUDUMP")
 		td = (t_dump*) Plugingetvalue(VAL_CPUDDUMP);
-	else if (str == "CPUSTACK")
+	else if (str == L"CPUSTACK")
 		td = (t_dump*) Plugingetvalue(VAL_CPUDSTACK);
 	else
 		return false;
 	
 	if (td)
 	{
-		variables["$RESULT"] = (DWORD)td->sel0;
-		variables["$RESULT_1"] =  (DWORD)td->sel1-1;
-		variables["$RESULT_2"] =  (DWORD)td->sel1-(DWORD)td->sel0;
+		variables[V_RES] = (DWORD)td->sel0;
+		variables[V_RES_1] =  (DWORD)td->sel1-1;
+		variables[V_RES_2] =  (DWORD)td->sel1-(DWORD)td->sel0;
 	}
 	else
 	{
-		variables["$RESULT"] = 0;
-		variables["$RESULT_1"] = 0;
-		variables["$RESULT_2"] = 0;
+		variables[V_RES] = 0;
+		variables[V_RES_1] = 0;
+		variables[V_RES_2] = 0;
 	}
 
 	return true;
 }
 
 // Get String
-// returns a null terminated string from addr, the string is at least arg1 charachters
+// returns a null terminated wstring from addr, the wstring is at least arg1 charachters
 // gstr addr, [arg1]
 // returns in   :
-// - $RESULT    : the string
-// - $RESULT_1  : len of string
+// - $RESULT    : the wstring
+// - $RESULT_1  : len of wstring
 //
 // ex       : gstr 401000     ; arg1 in this case is set to default (5 chars)
 //          : gstr 401000, 20 ; must be at least 20 chars
-bool OllyLang::DoGSTR(string args)
+bool OllyLang::DoGSTR(wstring args)
 {
-	string str;
+	wstring str;
 	char buf[TEXTLEN]={0};
 	ulong addr, size, tmpSize;
 	char c;
 	bool bUseDef = false;
 	uint iDashNum;
 
-	string ops[2];
+	wstring ops[2];
 
 
 	if (!CreateOperands(args, ops, 2))
@@ -3367,8 +3396,8 @@ bool OllyLang::DoGSTR(string args)
 
 	if (GetDWOpValue (ops[0], addr))
 	{
-		variables["$RESULT"] = 0;
-		variables["$RESULT_1"] = 0;
+		variables[V_RES] = 0;
+		variables[V_RES_1] = 0;
 		if (addr != 0)
 		{
 			buffer[0] = '\0';
@@ -3395,26 +3424,10 @@ bool OllyLang::DoGSTR(string args)
 
 			if (tmpSize < size)
 				return true;
-/*
-			int i;
-			for (iDashNum=0,i=0; i < tmpSize; i++)
-			{
-				c = buffer[i];
-				if (isalnum(c))
-					continue;
-				else
-				{
-					buffer[i] = '_';
-					iDashNum++;
-				}
-			}
 
-			if (iDashNum >= tmpSize / 2)
-				return true;
-*/
 			str.assign(buffer);
-			variables["$RESULT"] = str;
-			variables["$RESULT_1"] = tmpSize;			
+			variables[V_RES] = str;
+			variables[V_RES_1] = tmpSize;			
 		}
 		return true;
 	}
@@ -3422,24 +3435,24 @@ bool OllyLang::DoGSTR(string args)
 }
 
 // Get String
-// returns a null terminated string from addr, the string is at least arg1 charachters
+// returns a null terminated wstring from addr, the wstring is at least arg1 charachters
 // gstr addr, [arg1]
 // returns in   :
-// - $RESULT    : the string
-// - $RESULT_1  : len of string
+// - $RESULT    : the wstring
+// - $RESULT_1  : len of wstring
 //
 // ex       : gstr 401000     ; arg1 in this case is set to default (5 chars)
 //          : gstr 401000, 20 ; must be at least 20 chars
-bool OllyLang::DoGSTRW(string args)
+bool OllyLang::DoGSTRW(wstring args)
 {
-	string str,wstr;
+	wstring str,wstr;
 	char buf[TEXTLEN*2]={0};
 	ulong addr, size, tmpSize;
 	char c;
 	bool bUseDef = false;
 	uint iDashNum;
 
-	string ops[2];
+	wstring ops[2];
 
 
 	if (!CreateOperands(args, ops, 2))
@@ -3452,8 +3465,8 @@ bool OllyLang::DoGSTRW(string args)
 
 	if (GetDWOpValue (ops[0], addr))
 	{
-		variables["$RESULT"] = 0;
-		variables["$RESULT_1"] = 0;
+		variables[V_RES] = 0;
+		variables[V_RES_1] = 0;
 		if (addr != 0)
 		{
 			buffer[0] = '\0';
@@ -3481,43 +3494,26 @@ bool OllyLang::DoGSTRW(string args)
 
 			if (tmpSize < size)
 				return true;
-/*
-			int i;
-			for (iDashNum=0,i=0; i < tmpSize; i++)
-			{
-				c = buffer[i];
-				if (isalnum(c))
-					continue;
-				else
-				{
-					buffer[i] = '_';
-					iDashNum++;
-				}
-			}
 
-			if (iDashNum >= tmpSize / 2)
-				return true;
-*/
-			
-			variables["$RESULT"] = str;
-			variables["$RESULT_1"] = tmpSize;
-			variables["$RESULT_2"] = wstr;
+			variables[V_RES] = str;
+			variables[V_RES_1] = tmpSize;
+			variables[V_RES_2] = wstr;
 		}
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoHANDLE(string args)
+bool OllyLang::DoHANDLE(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	bool useCaption=true;
 
 	if(!CreateOperands(args, ops, 3)) {
 			return false;
 	}
 
-	string sClassName;
+	wstring sClassName;
 	ulong x,y;
 	ulong thid = Plugingetvalue(VAL_MAINTHREADID);
 
@@ -3525,7 +3521,7 @@ bool OllyLang::DoHANDLE(string args)
 		&& GetDWOpValue(ops[1], y) 
 		&& GetSTROpValue(ops[2], sClassName)) 
 	{
-		variables["$RESULT"] = (DWORD) FindHandle(thid, sClassName, x, y);
+		variables[V_RES] = (DWORD) FindHandle(thid, sClassName, x, y);
 		return true;
 	}
 
@@ -3533,26 +3529,25 @@ bool OllyLang::DoHANDLE(string args)
 
 }
 
-bool OllyLang::DoINC(string args)
+bool OllyLang::DoINC(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
 	return DoADD(ops[0] + ", 1");
 }
-
-bool OllyLang::DoINIR(string args)
+*/
+bool OllyLang::DoINIR(wstring args)
 {
-	string ops[2],key,str;
-	ulong valdef;
-	char bufkey[256];
-	char bufdef[256];
-	HINSTANCE hinst = hinstModule(); //GetModuleHandle("ODbgScript.dll");
+	wstring ops[2],key,str;
+	ulong val,valdef;
+	wchar_t bufkey[256];
+	wchar_t bufdef[256];
 
 	if(!CreateOperands(args, ops, 2)) {
-		errorstr = TEXT("Default value needed to get type");
+		errorstr = L"Default value needed to get type";
 		return false;
 	}
 
@@ -3560,29 +3555,35 @@ bool OllyLang::DoINIR(string args)
 		return false;
 	}
 
-	strcpy(bufkey,key.c_str());
+	wcscpy(bufkey,key.c_str());
 
-	if(GetSTROpValue(ops[1], str)) {
-		strcpy(bufdef,str.c_str());
-		variables["$RESULT_1"] = Pluginreadstringfromini(hinst, bufkey, buffer, bufdef);
-		variables["$RESULT"] = buffer;
+	if(GetDWOpValue(ops[1], valdef)) {
+		variables[V_RES_1] = Getfromini(NULL,PLUGIN_NAME, bufkey, L"%i", &val);
+		if (0 == variables[V_RES_1].dw)
+			variables[V_RES] = val;
+		else
+			variables[V_RES] = valdef;
 		return true;
 	}
 
-	if(GetDWOpValue(ops[1], valdef)) {
-		variables["$RESULT"] = Pluginreadintfromini(hinst, bufkey, valdef);
+	if(GetSTROpValue(ops[1], str)) {
+		wcscpy(bufdef,str.c_str());
+		variables[V_RES_1] = Getfromini(NULL,PLUGIN_NAME, bufkey, L"%s", buffer);
+		if (0 == variables[V_RES_1].dw)
+			variables[V_RES] = buffer;
+		else
+			variables[V_RES] = bufdef;
 		return true;
 	}
 
 	return false;
 }
 
-bool OllyLang::DoINIW(string args)
+bool OllyLang::DoINIW(wstring args)
 {
-	string ops[2],key,str;
+	wstring ops[2],key,str;
 	ulong val;
-	char bufkey[256];
-	HINSTANCE hinst = hinstModule(); //GetModuleHandle("ODbgScript.dll");
+	wchar_t bufkey[256];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -3591,26 +3592,25 @@ bool OllyLang::DoINIW(string args)
 		return false;
 	}
 
-	strcpy(bufkey,key.c_str());
+	wcscpy(bufkey,key.c_str());
 	
 	if(GetDWOpValue(ops[1], val)) {
-		Pluginwriteinttoini(hinst, bufkey, val);
+		Writetoini(NULL,PLUGIN_NAME, bufkey, L"%i", val);
 		return true;
 	}
 
 	if(GetSTROpValue(ops[1], str)) {
-		strcpy(buffer,str.c_str());
-		Pluginwritestringtoini(hinst, bufkey, buffer);
+		wcscpy(buffer,str.c_str());
+		Writetoini(NULL,PLUGIN_NAME, bufkey, L"%s", buffer);
 		return true;
 	}
 
 	return false;
 }
-
-
-bool OllyLang::DoHISTORY(string args)
+/*
+bool OllyLang::DoHISTORY(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong dw;
 
 	if(!CreateOperands(args, ops, 1))
@@ -3624,9 +3624,9 @@ bool OllyLang::DoHISTORY(string args)
 	return false;
 }
 
-bool OllyLang::DoITOA(string args)
+bool OllyLang::DoITOA(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2)) {
 		ops[1] = "16.";
@@ -3640,51 +3640,51 @@ bool OllyLang::DoITOA(string args)
 		&& GetDWOpValue(ops[1], base) )
 	{
 		char buffer [20]={0};
-		itoa(dw,buffer,base);
-		variables["$RESULT"] = buffer;
+		_itow(dw,buffer,base);
+		variables[V_RES] = buffer;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoJA(string args)
+bool OllyLang::DoJA(wstring args)
 {
 	if(zf == 0 && cf == 0)
 		return DoJMP(args);
 	return true;
 }
 
-bool OllyLang::DoJAE(string args)
+bool OllyLang::DoJAE(wstring args)
 {
 	if(cf == 0)
 		return DoJMP(args);
 	return true;
 }
 
-bool OllyLang::DoJB(string args)
+bool OllyLang::DoJB(wstring args)
 {
 	if(cf == 1)
 		return DoJMP(args);
 	return true;
 }
 
-bool OllyLang::DoJBE(string args)
+bool OllyLang::DoJBE(wstring args)
 {
 	if(zf == 1 || cf == 1)
 		return DoJMP(args);
 	return true;
 }
 
-bool OllyLang::DoJE(string args)
+bool OllyLang::DoJE(wstring args)
 {
 	if(zf == 1)
 		return DoJMP(args);
 	return true;
 }
 
-bool OllyLang::DoJMP(string args)
+bool OllyLang::DoJMP(wstring args)
 {
-	string str, ops[1];
+	wstring str, ops[1];
 
 	if(!CreateOperands(args, ops, 1) )
 		return false;
@@ -3700,7 +3700,7 @@ bool OllyLang::DoJMP(string args)
 
 	//Store jump destination to display it
 	t_wndprog_data *pline;
-	pline = (t_wndprog_data *) Getsortedbyselection(&wndProg.data,pgr_scriptpos);
+	pline = (t_wndprog_data *) Getsortedbyselection(&wndProg.sorted,pgr_scriptpos);
 	if (pline != NULL) {
 		pline->jumpto = labels[str];
 	}
@@ -3709,7 +3709,7 @@ bool OllyLang::DoJMP(string args)
 	return true;
 }
 
-bool OllyLang::DoJNE(string args)
+bool OllyLang::DoJNE(wstring args)
 {
 	if(zf == 0)
 		return DoJMP(args);
@@ -3717,9 +3717,9 @@ bool OllyLang::DoJNE(string args)
 }
 
 
-bool OllyLang::DoKEY(string args)
+bool OllyLang::DoKEY(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong key,shift,ctrl;
 
 	if(!CreateOperands(args, ops, 3)) {
@@ -3742,14 +3742,14 @@ bool OllyLang::DoKEY(string args)
 	return false;
 }
 
-bool OllyLang::DoLBL(string args)
+bool OllyLang::DoLBL(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-	string lbl;
+	wstring lbl;
 	ulong addr;
 
 	if(GetDWOpValue(ops[0], addr) 
@@ -3759,48 +3759,48 @@ bool OllyLang::DoLBL(string args)
 		{
 			strcpy(buffer, lbl.c_str());
 			Insertname(addr, NM_LABEL, buffer);
-			Broadcast(WM_USER_CHALL, 0, 0);
+			Broadcast(WM_USER_CHGALL, 0, 0);
 		}
 		else
 		{
 			Deletenamerange(addr, addr + 1, NM_COMMENT);
-			Broadcast(WM_USER_CHALL, 0, 0);
+			Broadcast(WM_USER_CHGALL, 0, 0);
 		}
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoLM(string args)
+bool OllyLang::DoLM(wstring args)
 {
-    string ops[3];
+    wstring ops[3];
     if(!CreateOperands(args, ops, 3))
         return false;
 
     streamsize sum = 0;
 
-    char spath[MAX_PATH];
-    strcpy(spath, (char*)Plugingetvalue(VAL_EXEFILENAME));
-    string path = spath;
+    wchar_t spath[MAX_PATH];
+    wcscpy(spath, _executable);
+    wstring path = spath;
 
     path = path.substr(0, path.rfind('\\') + 1);
 
     ulong addr, size;
-    string filename;
+    wstring filename;
     if(GetDWOpValue(ops[0], addr) 
 		&& GetDWOpValue(ops[1], size) 
 		&& GetSTROpValue(ops[2], filename))
     {
 
-        if (filename.find(":\\") != string::npos)
+        if (filename.find(L":\\") != wstring::npos)
 			path = filename;
 		else
 			path += filename;
 
-		std::ifstream fin(path.c_str(),ios::in | ios::binary);
+		std::wifstream fin(path.c_str(),ios::in | ios::binary);
 
 		if(fin.fail()) {
-	        variables["$RESULT"] = 0;
+	        variables[V_RES] = 0;
             errorstr = TEXT("Couldn't open file!");
 			fin.close();
             return false;
@@ -3820,19 +3820,19 @@ bool OllyLang::DoLM(string args)
         fin.close();
 
 		if (sum) {
-	        variables["$RESULT"] = sum;
+	        variables[V_RES] = sum;
             return true;
         }
         else
         {
-            errorstr = "Couldn't load file!";
+            errorstr = L"Couldn't load file!";
             return false;
         }
     }
     return false;
 }
 
-bool OllyLang::DoLC(string args)
+bool OllyLang::DoLC(wstring args)
 {
 	//Clear Main Log Window
 
@@ -3847,15 +3847,15 @@ bool OllyLang::DoLC(string args)
 	return true;
 }
 
-bool OllyLang::DoLCLR(string args)
+bool OllyLang::DoLCLR(wstring args)
 {
 	clearLogLines();
 	return true;
 }
 
-bool OllyLang::DoLEN(string args)
+bool OllyLang::DoLEN(wstring args)
 {
-	string ops[1],str;
+	wstring ops[1],str;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -3863,13 +3863,13 @@ bool OllyLang::DoLEN(string args)
 	if(!GetSTROpValue(ops[0], str))
 		return false;
 
-	variables["$RESULT"] = (int) str.length();
+	variables[V_RES] = (int) str.length();
 	return true;
 }
 
-bool OllyLang::DoLOADLIB(string args)
+bool OllyLang::DoLOADLIB(wstring args)
 {
-	string ops[1],str;
+	wstring ops[1],str;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -3880,10 +3880,10 @@ bool OllyLang::DoLOADLIB(string args)
 	ulong fnload;
 
 	SaveRegisters(true);
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 
 	DoGPA("\"LoadLibraryA\",\"kernel32.dll\"");
-	fnload = variables["$RESULT"].dw;
+	fnload = variables[V_RES].dw;
 
 	//alloc memory bloc to store DLL name
 	HANDLE hDbgPrc = (HANDLE) Plugingetvalue(VAL_HPROCESS);
@@ -3898,14 +3898,14 @@ bool OllyLang::DoLOADLIB(string args)
 
 		char bffnloadlib[10]={0};
 		sprintf(bffnloadlib,"0%lX",fnload);
-		string libPtrToLoad = bffnloadlib;
+		wstring libPtrToLoad = bffnloadlib;
 
 		ExecuteASM("call "+libPtrToLoad);	
 
-		variables["$RESULT"] = 0;
+		variables[V_RES] = 0;
 
 		// result returned after process
-		// variables["$RESULT"] = pt->reg.r[REG_EAX];
+		// variables[V_RES] = pt->reg.r[REG_EAX];
 		t_dbgmemblock block={0};
 		block.hmem = hMem;
 		block.size = 0x1000;
@@ -3928,10 +3928,10 @@ bool OllyLang::DoLOADLIB(string args)
 
 	return false;
 }
-
-bool OllyLang::DoLOG(string args)
+*/
+bool OllyLang::DoLOG(wstring args)
 {
-	string prefix, ops[2];
+	wstring prefix, ops[2];
 
 	if(CreateOp(args, ops, 2))
 	{
@@ -3940,26 +3940,26 @@ bool OllyLang::DoLOG(string args)
 	} 
 	else 
 	{
-		prefix="DEFAULT";
+		prefix=L"DEFAULT";
 		if(!CreateOperands(args, ops, 1))
 			return false;
 	}
 
 	ulong dw=0;
-	string str;
+	wstring str;
 	long double flt=0;
 
 	if(UnquoteString(ops[0], '"', '"'))
 	{
-		//string constant
-		if (prefix.compare("DEFAULT") == 0) 
+		//wstring constant
+		if (prefix.compare(L"DEFAULT") == 0) 
 		{
-			strncpy(buffer, ops[0].c_str(),TEXTLEN-1);
+			wcsncpy(buffer, ops[0].c_str(),TEXTLEN-1);
 		} 
 		else 
 		{
 			prefix = prefix + ops[0];
-			strncpy(buffer, prefix.c_str(),TEXTLEN-1);
+			wcsncpy(buffer, prefix.c_str(),TEXTLEN-1);
 		}
 		buffer[TEXTLEN-1]=0;
 		Infoline(buffer);
@@ -3977,29 +3977,29 @@ bool OllyLang::DoLOG(string args)
 			if(GetDWOpValue(ops[0], dw))
 			{
 				//ulong constant
-				if (prefix.compare("DEFAULT") == 0) {
+				if (prefix.compare(L"DEFAULT") == 0) {
 
-					char sym[4096] = {0};
-					char buf[TEXTLEN-1] = {0};
-					int res = Decodeaddress(dw, 0, ADC_JUMP | ADC_STRING | ADC_ENTRY | ADC_OFFSET | ADC_SYMBOL, sym, 4096, buf);
-					sprintf(buffer, "%s: %08lX", ops[0].c_str(), dw);
+					wchar_t sym[4096] = {0};
+					wchar_t buf[TEXTLEN-1] = {0};
+					int res = Decodeaddress(dw, 0, DM_JUMPIMP | DM_STRING | DM_ENTRY | DM_OFFSET | DM_SYMBOL, sym, 4096, buf);
+					wsprintf(buffer, L"%s: %08lX", ops[0].c_str(), dw);
 
-					if(strcmp(buf, ""))
-						sprintf(buffer, "%s | %s", buffer, buf);
+					if(wcscmp(buf, L""))
+						wsprintf(buffer, L"%s | %s", buffer, buf);
 
-					if(strcmp(sym, "") && dw !=  strtoul(sym, 0, 16))
-						sprintf(buffer, "%s | %s", buffer, sym);
+					if(wcscmp(sym, L"") && dw !=  wcstoul(sym, 0, 16))
+						wsprintf(buffer, L"%s | %s", buffer, sym);
 				
 				} 
 				else 
 				{
-					sprintf(buffer, "%s%08lX", prefix.c_str(), dw);
+					wsprintf(buffer, L"%s%08lX", prefix.c_str(), dw);
 				}
 
 				buffer[TEXTLEN-1]=0;
 				str.assign(buffer);
-				//Infoline and Addtolist need parameters if %s %d... is present in string
-				if (str.find("%") == string::npos) {
+				//Infoline and Addtolist need parameters if %s %d... is present in wstring
+				if (str.find(L"%") == wstring::npos) {
 					Infoline(buffer);
 					Addtolist(0, 1, buffer);
 				}
@@ -4012,10 +4012,10 @@ bool OllyLang::DoLOG(string args)
 			if(GetFLTOpValue(ops[0], flt))
 			{
 				//ulong constant
-				if (prefix.compare("DEFAULT") == 0) {
-					sprintf(buffer, "%s: %2lf", ops[0].c_str(), flt);				
+				if (prefix == L"DEFAULT") {
+					wsprintf(buffer, L"%s: %2lf", ops[0].c_str(), flt);				
 				} else {
-					sprintf(buffer, "%s%2lf", prefix.c_str(), flt);
+					wsprintf(buffer, L"%s%2lf", prefix.c_str(), flt);
 				}
 
 				buffer[TEXTLEN-1]=0;
@@ -4026,7 +4026,7 @@ bool OllyLang::DoLOG(string args)
 			}
 		}
 
-		if (vt==STR || vt==EMP) {		
+		if (vt==STR || vt==EMP) {
 			if(GetSTROpValue(ops[0], str))
 			{
 				var v=str;
@@ -4034,40 +4034,40 @@ bool OllyLang::DoLOG(string args)
 				if(v.isbuf) {
 
 					//log a buffer
-					if (prefix.compare("DEFAULT") == 0) 
+					if (prefix.compare(L"DEFAULT") == 0) 
 					{
 						if (str.length()+ops[0].length() < 4094)
-							sprintf(buffer, "%s: %s", ops[0].c_str(), str.c_str());
+							wsprintf(buffer, L"%s: %s", ops[0].c_str(), str.c_str());
 						else
-							strncpy(buffer, variables[ops[0]].str.c_str(), TEXTLEN-1);
+							wcsncpy(buffer, variables[ops[0]].str.c_str(), TEXTLEN-1);
 					} 
 					else 
 					{
 						prefix = prefix + str;
-						strncpy(buffer, prefix.c_str(), TEXTLEN-1);
+						wcsncpy(buffer, prefix.c_str(), TEXTLEN-1);
 					}
 				} 
 				else 
 				{
 
-					//log a string
-					if (prefix.compare("DEFAULT") == 0) 
+					//log a wstring
+					if (prefix.compare(L"DEFAULT") == 0) 
 					{
 						if (variables[ops[0]].str.length()+ops[0].length() < 4094)
-							sprintf(buffer, "%s: %s", ops[0].c_str(), variables[ops[0]].strclean().c_str());
+							wsprintf(buffer, L"%s: %s", ops[0].c_str(), variables[ops[0]].strclean().c_str());
 						else
-							strncpy(buffer, variables[ops[0]].strclean().c_str(), TEXTLEN-1);
+							wcsncpy(buffer, variables[ops[0]].strclean().c_str(), TEXTLEN-1);
 					} 
 					else 
 					{
 						prefix = prefix + CleanString(str);
-						strncpy(buffer, prefix.c_str(), TEXTLEN-1);
+						wcsncpy(buffer, prefix.c_str(), TEXTLEN-1);
 					}
 				}
 				buffer[TEXTLEN-1]=0;
 				str.assign(buffer);
-				//Infoline and Addtolist need parameters if %s %d... is present in string
-				if (str.find("%") == string::npos) {
+				//Infoline and Addtolist need parameters if %s %d... is present in wstring
+				if (str.find(L"%") == wstring::npos) {
 					Addtolist(0, 1, buffer);
 				}
 				add2log(str);
@@ -4078,15 +4078,15 @@ bool OllyLang::DoLOG(string args)
 	return false;
 }
 
-bool OllyLang::DoLOGBUF(string args)
+bool OllyLang::DoLOGBUF(wstring args)
 {
-	string sSep,ops[3];
+	wstring sSep,ops[3];
 
 	if(!CreateOperands(args, ops, 3)) {
-		ops[2]="\" \"";
+		ops[2]=L"\" \"";
 		if(!CreateOperands(args, ops, 2)) {
 			ops[0]=args;
-			ops[1]="0";
+			ops[1]=L"0";
 		}
 	}
 
@@ -4100,37 +4100,37 @@ bool OllyLang::DoLOGBUF(string args)
 	{
 		if (dw==0) dw=16;
 
-		string sLine="";
-		string data = variables[ops[0]].strbuffhex();
+		wstring sLine=L"";
+		wstring data = variables[ops[0]].strbuffhex();
 		for (int n=0; n < variables[ops[0]].size; n++)
 		{
-			sLine=sLine+data.substr(n*2,2)+sSep;
+			sLine=sLine + data.substr(n*2,2) + sSep;
 			if (n>0 && !((n+1) % dw)) { 
-				DoLOG("\""+sLine+"\",\"\"");
-				sLine="";
+				DoLOG(L"\"" +sLine+ L"\",\"\"");
+				sLine=L"";
 			}
 		}
-		if (sLine!="") DoLOG("\""+sLine+"\",\"\"");
+		if (sLine.length()) DoLOG(L"\"" +sLine+ L"\",\"\"");
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoMEMCOPY(string args)
+bool OllyLang::DoMEMCOPY(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3))
 		return false;
 
-	args="["+ops[0]+"],["+ops[1]+"],"+ops[2];
+	args=L"["+ ops[0] +L"],["+ ops[1] +L"],"+ ops[2];
 
 	return DoMOV(args);
 }
 
-bool OllyLang::DoMOV(string args)
+bool OllyLang::DoMOV(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	bool bDeclared=false;
 	ulong addr=0,maxsize=0;
 
@@ -4145,13 +4145,13 @@ bool OllyLang::DoMOV(string args)
 	if(UnquoteString(ops[1], '[', ']')) {
 		if (!CreateOperands(ops[1],&ops[1],1))
 			return false;
-		ops[1]="["+ops[1]+"]";
+		ops[1]=L"["+ops[1]+L"]";
 	}
 
 	// Check source
 	ulong dw = 0; addr=0;
-	string str = "";
-	string tmpops=ops[0];
+	wstring str = L"";
+	wstring tmpops=ops[0];
 	long double flt;
 
 	// Used to retry after automatic variable declaration 
@@ -4229,15 +4229,16 @@ bool OllyLang::DoMOV(string args)
 				}
 			}
 			else
-				if(ops[0] == "eip") {
+				if(ops[0] == L"eip") {
 					pt->reg.ip = dw;
 					//synch disasm window position
-					Setdisasm(dw,1,CPU_ASMHIST);
+					//2.Setdisasm(dw,1,CPU_ASMHIST);
+					Redrawcpudisasm();
 				}
 
-			pt->reg.modified = 1;
+			pt->reg.status = RV_MODIFIED;
 			pt->regvalid = 1;
-			Broadcast(WM_USER_CHREG, 0, 0);
+			Redrawcpureg();
 			require_ollyloop = 1;
 			dw = resizeDW(dw,maxsize);
 			return true;
@@ -4251,7 +4252,7 @@ bool OllyLang::DoMOV(string args)
 		{
 			if(dw != 0 && dw != 1)
 			{
-				errorstr = "Invalid flag value";
+				errorstr = L"Invalid flag value";
 				return false;
 			}
 
@@ -4260,25 +4261,25 @@ bool OllyLang::DoMOV(string args)
 			t_thread* pt = Findthread(Getcputhreadid());
 			flags.dwFlags = pt->reg.flags;
 
-			if(stricmp(ops[0].c_str(), "!af") == 0)
+			if(_wcsicmp(ops[0].c_str(), L"!af") == 0)
 				flags.bitFlags.AF = dw;
-			else if(stricmp(ops[0].c_str(), "!cf") == 0)
+			else if(_wcsicmp(ops[0].c_str(), L"!cf") == 0)
 				flags.bitFlags.CF = dw;
-			else if(stricmp(ops[0].c_str(), "!df") == 0)
+			else if(_wcsicmp(ops[0].c_str(), L"!df") == 0)
 				flags.bitFlags.DF = dw;
-			else if(stricmp(ops[0].c_str(), "!of") == 0)
+			else if(_wcsicmp(ops[0].c_str(), L"!of") == 0)
 				flags.bitFlags.OF = dw;
-			else if(stricmp(ops[0].c_str(), "!pf") == 0)
+			else if(_wcsicmp(ops[0].c_str(), L"!pf") == 0)
 				flags.bitFlags.PF = dw;
-			else if(stricmp(ops[0].c_str(), "!sf") == 0)
+			else if(_wcsicmp(ops[0].c_str(), L"!sf") == 0)
 				flags.bitFlags.SF = dw;
-			else if(stricmp(ops[0].c_str(), "!zf") == 0)
+			else if(_wcsicmp(ops[0].c_str(), L"!zf") == 0)
 				flags.bitFlags.ZF = dw;
 
 			pt->reg.flags = flags.dwFlags;
-			pt->reg.modified = 1;
+			pt->reg.status = RV_MODIFIED;
 			pt->regvalid = 1;
-			Broadcast(WM_USER_CHREG, 0, 0);
+			Redrawcpureg();
 			require_ollyloop = 1;
 			return true;
 		}
@@ -4291,9 +4292,9 @@ bool OllyLang::DoMOV(string args)
 		{
 			t_thread* pt = Findthread(Getcputhreadid());
 			pt->reg.f[(ops[0][3]-0x30)] = flt;
-			pt->reg.modified = 1;
+			pt->reg.status = RV_MODIFIED;
 			pt->regvalid = 1;
-			Broadcast(WM_USER_CHREG, 0, 0);
+			Redrawcpureg();
 			require_ollyloop = 1;
 			return true;
 		}
@@ -4310,7 +4311,7 @@ bool OllyLang::DoMOV(string args)
 		{ 
 			if (addr==0)
 			{
-				DoLOG("\"WARNING: writing to address 0 !\"");
+				DoLOG(L"\"WARNING: writing to address 0 !\"");
 				return true;
 			}
 
@@ -4323,7 +4324,7 @@ bool OllyLang::DoMOV(string args)
 				//Optimized Mem Copy
 				ulong src;
 				if (!GetDWOpValue(ops[1], src) || src==0) {
-					DoLOG("\"WARNING: copy from address 0 !\"");
+					DoLOG(L"\"WARNING: copy from address 0 !\"");
 					return true;
 				}
 				char* copybuffer= new char[maxsize];
@@ -4333,14 +4334,14 @@ bool OllyLang::DoMOV(string args)
 				}
 				Writememory((void*) copybuffer, addr, maxsize, MM_DELANAL);
 				delete[] copybuffer;
-				Broadcast(WM_USER_CHALL, 0, 0);
+				Broadcast(WM_USER_CHGALL, 0, 0);
 			}
 			else if (GetDWOpValue(ops[1], dw) && maxsize <= 4)
 			{
 				if (maxsize==0) maxsize=4;
 				dw = resizeDW(dw,maxsize);
 				Writememory(&dw, addr, maxsize, MM_DELANAL|MM_SILENT);
-				Broadcast(WM_USER_CHALL, 0, 0);
+				Broadcast(WM_USER_CHGALL, 0, 0);
 			}
 			else if (GetSTROpValue(ops[1], str, maxsize))
 			{
@@ -4348,19 +4349,19 @@ bool OllyLang::DoMOV(string args)
 				if (maxsize==0) maxsize=v.size;
 				maxsize=min(maxsize,v.size);
 				Writememory((void*)v.strbuff().c_str(), addr, maxsize, MM_DELANAL|MM_SILENT);			
-				Broadcast(WM_USER_CHALL, 0, 0);
+				Broadcast(WM_USER_CHGALL, 0, 0);
 			}
 			else if (GetFLTOpValue(ops[1], flt))
 			{
 				Writememory(&flt, addr, 8, MM_DELANAL|MM_SILENT);				
-				Broadcast(WM_USER_CHALL, 0, 0);
+				Broadcast(WM_USER_CHGALL, 0, 0);
 			}
 			else
 			{
-				errorstr = "Bad operator \"" + ops[1] + "\"";
+				errorstr = L"Bad operator \"" + ops[1] + L"\"";
 				return false;
 			}
-			Broadcast(WM_USER_CHMEM, 0, 0);
+			Broadcast(WM_USER_CHGMEM, 0, 0);
 			return true;
 		}
 		return false;
@@ -4371,30 +4372,31 @@ bool OllyLang::DoMOV(string args)
 
 		bDeclared=true;
 		DoVAR(ops[0]);
-		//DoLOG("\"automatic declaration of variable "+ops[0]+"\"");
+		//DoLOG(L"\"automatic declaration of variable "+ops[0]+L"\"");
 		goto retry_DoMOV;
 
 	}
 
-	//errorstr = "Variable '" + ops[0] + "' is not declared";
+	//errorstr = L"Variable '" + ops[0] + L"' is not declared";
 	return false;
 }
 
-bool OllyLang::DoMSG(string args)
+bool OllyLang::DoMSG(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOp(args, ops, 1))
 		return false;
 
-	string msg;
+	wstring msg;
 	if(GetANYOpValue(ops[0], msg))
 	{
 		if (wndProg.hw!=NULL)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 		
-		//hwndOllyDbg() or 0: modal or not
-		int ret = MessageBox(0, msg.c_str(), TEXT("MSG ODbgScript"), MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
+		//_hwollymain or 0: modal or not
+		HWND hw = _hwollymain;
+		int ret = MessageBox(hw, msg.c_str(), L"MSG ODbgScript", MB_ICONINFORMATION | MB_OKCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
 		FocusProgWindow();
 		if(ret == IDCANCEL) {
 			return Pause();
@@ -4404,108 +4406,109 @@ bool OllyLang::DoMSG(string args)
 	return false;
 }
 
-bool OllyLang::DoMSGYN(string args)
+bool OllyLang::DoMSGYN(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	string msg;
+	wstring msg;
 	if(GetSTROpValue(ops[0], msg))
 	{
 		if (wndProg.hw!=NULL)
 			InvalidateRect(wndProg.hw, NULL, FALSE);
 
-		int ret = MessageBox(0, msg.c_str(), "MSG ODbgScript", MB_ICONQUESTION | MB_YESNOCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
+		HWND hw = _hwollymain;
+		int ret = MessageBox(hw, msg.c_str(), L"MSG " PLUGIN_NAME, MB_ICONQUESTION | MB_YESNOCANCEL | MB_TOPMOST | MB_SETFOREGROUND);
 		FocusProgWindow();
 		if(ret == IDCANCEL)
 		{
-			variables["$RESULT"] = 2;
+			variables[V_RES] = 2;
 			return Pause();
 		}
 		else if(ret == IDYES)
-			variables["$RESULT"] = 1;
+			variables[V_RES] = 1;
 		else
-			variables["$RESULT"] = 0;
+			variables[V_RES] = 0;
 
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoOLLY(string args)
+bool OllyLang::DoOLLY(wstring args)
 {
-    string ops[1], param;
-	char buf[MAX_PATH];
+    wstring ops[1], param;
+	wchar_t buf[MAX_PATH];
 	ulong value;
-	string str;
+	wstring str;
 
 	if(!CreateOp(args, ops, 1))
 		return false;
 
-	if ( GetSTROpValue("\""+ops[0]+"\"", param) )
+	if ( GetSTROpValue(L"\"" +ops[0]+ L"\"", param) )
 	{
 
 		transform(param.begin(), param.end(), param.begin(), toupper);
 
-		if (param == "PID")
+		if (param == L"PID")
 		{
 			value = GetCurrentProcessId();
-			variables["$RESULT"] = value; 
+			variables[V_RES] = value; 
 			return true;
 		}
-		else if (param == "HWND")
+		else if (param == L"HWND")
 		{
-			value = (ulong) hwndOllyDbg();
-			variables["$RESULT"] = value;
+			value = (ulong) _hwollymain;
+			variables[V_RES] = value;
 			return true;
 		}
-		else if (param == "THREADID")
+		else if (param == L"THREADID")
 		{
 			value = GetCurrentThreadId();
-			variables["$RESULT"] = value;
+			variables[V_RES] = value;
 			return true;
 		}
-		else if (param == "THREAD")
+		else if (param == L"THREAD")
 		{
 			value = (ulong) GetCurrentThread();
-			variables["$RESULT"] = value;
+			variables[V_RES] = value;
 			return true;
 		}
-		else if (param == "PATH")
+		else if (param == L"PATH")
 		{
 			buffer[0] = 0;
 			GetModuleFileName(0,buffer,sizeof(buffer));
 			str = buffer;
-			variables["$RESULT"] = str;
+			variables[V_RES] = str;
 			return true;
 		}
-		else if (param == "EXE")
+		else if (param == L"EXE")
+		{
+			//buffer[0] = 0;
+			//GetModuleFileName(0,buffer,sizeof(buffer));
+			//_wsplitpath(buffer,NULL,NULL,buf,NULL);
+			str = _ollyfile;
+			variables[V_RES] = str + L".EXE";
+			return true;
+		}
+		else if (param == L"INI")
 		{
 			buffer[0] = 0;
 			GetModuleFileName(0,buffer,sizeof(buffer));
-			_splitpath(buffer,NULL,NULL,buf,NULL);
+			_wsplitpath(buffer,NULL,NULL,buf,NULL);
 			str = buf;
-			variables["$RESULT"] = str + TEXT(".EXE");
+			variables[V_RES] = str + L".ini";
 			return true;
 		}
-		else if (param == "INI")
+		else if (param == L"DIR")
 		{
-			buffer[0] = 0;
-			GetModuleFileName(0,buffer,sizeof(buffer));
-			_splitpath(buffer,NULL,NULL,buf,NULL);
-			str = buf;
-			variables["$RESULT"] = str + TEXT(".INI");
-			return true;
-		}
-		else if (param == "DIR")
-		{
-			buffer[0] = 0;
-			GetModuleFileName(0,buffer,sizeof(buffer));
-			_splitpath(buffer,NULL,buf,NULL,NULL);
-			str = buf;
-			variables["$RESULT"] = str;
+			//buffer[0] = 0;
+			//GetModuleFileName(0,buffer,sizeof(buffer));
+			//_wsplitpath(buffer,NULL,buf,NULL,NULL);
+			str = _ollydir;
+			variables[V_RES] = str;
 			return true;
 		}
 		
@@ -4514,10 +4517,9 @@ bool OllyLang::DoOLLY(string args)
 	return false;
 }
 
-
-bool OllyLang::DoOR(string args)
+bool OllyLang::DoMUL(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -4525,33 +4527,35 @@ bool OllyLang::DoOR(string args)
 	ulong dw1, dw2;
 	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", 0" + ultoa(dw1 | dw2, buffer, 16);
+		args = ops[0] + L", 0" + _ultow(dw1 * dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoMUL(string args)
+bool OllyLang::DoNAMES(wstring args)
 {
-	string ops[2];
-
-	if(!CreateOperands(args, ops, 2))
+	wstring ops[1];
+	ulong addr;
+	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	ulong dw1, dw2;
-	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
-	{
-		args = ops[0] + ", 0" + ultoa(dw1 * dw2, buffer, 16);
-		nIgnoreNextValuesHist++;
-		return DoMOV(args);
+	if(GetDWOpValue(ops[0], addr)) {
+		t_module* mod = Findmodule(addr);
+//2.	Setdisasm(mod->codebase,1,0);
+		Setcpu(0,mod->codebase,0,0,0, CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+		Sendshortcut(PWM_DISASM, 0, WM_KEYDOWN, 1, 0, 'N');  //"Ctrl + N"
+		require_ollyloop = 1;
+		return true;
 	}
+
 	return false;
 }
 
-bool OllyLang::DoNEG(string args)
+bool OllyLang::DoNEG(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -4567,7 +4571,7 @@ bool OllyLang::DoNEG(string args)
 			mov dw1,eax
 			pop eax
 		}
-		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
+		args = ops[0] + L", " +_ultow(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -4575,9 +4579,9 @@ bool OllyLang::DoNEG(string args)
 }
 
 
-bool OllyLang::DoNOT(string args)
+bool OllyLang::DoNOT(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -4593,17 +4597,34 @@ bool OllyLang::DoNOT(string args)
 			mov dw1,eax
 			pop eax
 		}
-		args = ops[0] + ", " +ultoa(dw1, buffer, 16);
+		args = ops[0] + L", " +_ultow(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-//see also GCI
-bool OllyLang::DoOPCODE(string args)
+bool OllyLang::DoOR(wstring args)
 {
-	string ops[1];
+	wstring ops[2];
+
+	if(!CreateOperands(args, ops, 2))
+		return false;
+
+	ulong dw1, dw2;
+	if(GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2))
+	{
+		args = ops[0] + L", 0" + _ultow(dw1 | dw2, buffer, 16);
+		nIgnoreNextValuesHist++;
+		return DoMOV(args);
+	}
+	return false;
+}
+/*
+//see also GCI
+bool OllyLang::DoOPCODE(wstring args)
+{
+	wstring ops[1];
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
@@ -4621,24 +4642,24 @@ bool OllyLang::DoOPCODE(string args)
 
 			if (size>0) 
 			{
-				variables["$RESULT"] = disasm.dump;     //command bytes
-				variables["$RESULT_1"] = disasm.result; //asm command text
-				variables["$RESULT_2"] = size;
+				variables[V_RES] = disasm.dump;     //command bytes
+				variables[V_RES_1] = disasm.result; //asm command text
+				variables[V_RES_2] = size;
 				return true;
 			}
 		}
-		variables["$RESULT"] = 0;
-		variables["$RESULT_1"] = 0;
-		variables["$RESULT_2"] = 0;
+		variables[V_RES] = 0;
+		variables[V_RES_1] = 0;
+		variables[V_RES_2] = 0;
 		return true;
 
 	}
 	return false;
 }
 
-bool OllyLang::DoOPENDUMP(string args)
+bool OllyLang::DoOPENDUMP(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3))
 	if(!CreateOperands(args, ops, 2))
@@ -4653,7 +4674,7 @@ bool OllyLang::DoOPENDUMP(string args)
 	if(!GetDWOpValue(ops[2], size))
 		return false;
 
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 
 	if (addr==0)
 		return true; //do nothing
@@ -4672,14 +4693,14 @@ bool OllyLang::DoOPENDUMP(string args)
 	if (wndDump!=NULL) {
 		ulong res = SendMessage(wndDump,WM_KEYDOWN,VK_F5,0);
 		//can now grab (t_dump *) dumpWindows[wndDump];
-		variables["$RESULT"] = (ulong) wndDump;		
+		variables[V_RES] = (ulong) wndDump;		
 	}
 	return true;
 
 	return false;
 }
 
-bool OllyLang::DoOPENTRACE(string args)
+bool OllyLang::DoOPENTRACE(wstring args)
 {
 	ulong threadid = Getcputhreadid();
 	if(threadid == 0)
@@ -4694,43 +4715,43 @@ bool OllyLang::DoOPENTRACE(string args)
 
 	return true;
 }
-
-bool OllyLang::DoPAUSE(string args)
+*/
+bool OllyLang::DoPAUSE(wstring args)
 {
 	Pause();
 	FocusProgWindow();
 	return true;
 }
 
-bool OllyLang::DoPOP(string args)
+bool OllyLang::DoPOP(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	nIgnoreNextValuesHist++;
 	var_logging=false;
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
-	args = ops[0] + ", [esp], 4";
+	args = ops[0] + L", [esp], 4";
 	nIgnoreNextValuesHist+=2;
 	DoMOV(args);
 
-	args = "esp, esp+4";
+	args = L"esp, esp+4";
 	nIgnoreNextValuesHist+=1;
 	return DoMOV(args);
 }
 
-bool OllyLang::DoPOPA(string args)
+bool OllyLang::DoPOPA(wstring args)
 {
 	bool result = RestoreRegisters(true);
 	if (result)
 		require_ollyloop=1;
 	return result;
 }
-
-bool OllyLang::DoPREOP(string args)
+/*
+bool OllyLang::DoPREOP(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	CreateOperands(args, ops, 1);
 	if (ops[0]=="")
@@ -4743,20 +4764,20 @@ bool OllyLang::DoPREOP(string args)
 	t_memory* mem = Findmemory(addr);
 	if(mem != NULL)	
 	{
-		variables["$RESULT"] = Disassembleback(NULL,mem->base,mem->size,addr,1,true);
+		variables[V_RES] = Disassembleback(NULL,mem->base,mem->size,addr,1,true);
 		return true;
 	} 
 	else 
 	{
-		variables["$RESULT"] = 0;
+		variables[V_RES] = 0;
 		return true;
 	}
 	return false;
 }
-
-bool OllyLang::DoPUSH(string args)
+*/
+bool OllyLang::DoPUSH(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -4766,11 +4787,11 @@ bool OllyLang::DoPUSH(string args)
 	//var_logging=false;
 	if(GetDWOpValue(ops[0], dw1))
 	{
-		args = "esp, esp-4";
+		args = L"esp, esp-4";
 		nIgnoreNextValuesHist+=2;
 		DoMOV(args);
 
-		args = "[esp], " + ops[0];
+		args = L"[esp], " + ops[0];
 		nIgnoreNextValuesHist++;
 		DoMOV(args);
 
@@ -4784,24 +4805,24 @@ bool OllyLang::DoPUSH(string args)
 	return false;
 }
 
-bool OllyLang::DoPUSHA(string args)
+bool OllyLang::DoPUSHA(wstring args)
 {
 	return SaveRegisters(true);
 }
-
-bool OllyLang::DoREADSTR(string args)
+/*
+bool OllyLang::DoREADSTR(wstring args)
 {
-	string ops[2],s;
+	wstring ops[2],s;
     ulong maxsize=0;
 
 	ulong dw = 0, addr = 0;
-	string str = "";
+	wstring str = "";
 	if(CreateOperands(args, ops, 2)) 
 	{
 		GetDWOpValue(ops[1], maxsize);
         GetSTROpValue(ops[0], str, maxsize);
 
-        variables["$RESULT"] = str;
+        variables[V_RES] = str;
 		return true;
 	}
     return false;
@@ -4822,40 +4843,43 @@ bool OllyLang::DoREADSTR(string args)
 
 // ex     : rbp
 //        : rbp STRICT
-bool OllyLang::DoRBP ( string args )
+bool OllyLang::DoRBP ( wstring args )
 {
 	t_table* bpt = 0;
 	t_bpoint* bpoint = 0;
 	uint n,i=0;
-	string ops[1];
+	wstring ops[1];
 
 	CreateOperands ( args, ops, 1 );
 	
-	variables["$RESULT"] = 0;
+	variables[V_RES] = 0;
 
 	if ( saved_bp )
 	{
-		bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
+		bpt = _bpoint;
 		if ( bpt != NULL )
 		{
 			bpoint = ( t_bpoint * ) bpt->data.data;
 
-			if ( ops[0] == "STRICT" )
+			if ( ops[0] == L"STRICT" )
 			{
 				int dummy;
 				dummy = bpt->data.n;
 				for ( n = 0; n < dummy; n++ )
 				{
 					Deletebreakpoints ( bpoint->addr, ( bpoint->addr ) + 1, 1 );
+					//Removemembreakpoint
 				}
 			}
 
-			for ( n=0; n < sortedsoftbp_t.n; n++ )
-				Setbreakpoint ( softbp_t[n].addr, ( softbp_t[n].type | TY_KEEPCODE ) ^ TY_KEEPCODE, 0 );
+			for ( n=0; n < sortedsoftbp_t.n; n++ ) {
+				//Setbreakpoint ( softbp_t[n].addr, ( softbp_t[n].type | TY_KEEPCODE ) ^ TY_KEEPCODE, 0 );
+				Membreakpoint(0, softbp_t[n].addr,0, 0,0, 0, BP_MANUAL);
+			}
 
-			variables["$RESULT"] = ( DWORD ) sortedsoftbp_t.n;
+			variables[V_RES] = ( DWORD ) sortedsoftbp_t.n;
 
-			Broadcast ( WM_USER_CHALL, 0, 0 );
+			Broadcast ( WM_USER_CHGALL, 0, 0 );
 		}
 
 	}
@@ -4863,18 +4887,21 @@ bool OllyLang::DoRBP ( string args )
 	//Hardware Bps
 	for ( n=0; n < 4; n++ ) {
 		if (hwbp_t[n].addr) {
-			Sethardwarebreakpoint ( hwbp_t[n].addr, hwbp_t[n].size, hwbp_t[n].type );
+			//Sethardwarebreakpoint ( hwbp_t[n].addr, hwbp_t[n].size, hwbp_t[n].type );
+			Sethardbreakpoint(n, softbp_t[n].size, hwbp_t[n].type , hwbp_t[n].fnindex, 
+				hwbp_t[n].addr, hwbp_t[n].limit, hwbp_t[n].count,
+				NULL,NULL,NULL);
 			i++;
 		}
 	}
-	variables["$RESULT_1"] = ( DWORD ) i;
+	variables[V_RES_1] = ( DWORD ) i;
 
 	return true;
 }
 
-bool OllyLang::DoREF(string args)
+bool OllyLang::DoREF(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 	if (!CreateOperands(args, ops, 2)){
 		ops[1]="MEMORY"; 
 		if(!CreateOperands(args, ops, 1))
@@ -4883,12 +4910,12 @@ bool OllyLang::DoREF(string args)
 
 	char title[256]="Reference to Command - ODbgScript REF";	
 	ulong addr,size;
-	string str;
+	wstring str;
 	if(GetDWOpValue(ops[0], addr) && GetSTROpValue("\""+ops[1]+"\"", str) )
 	{
-		variables["$RESULT"] = 0;
-		variables["$RESULT_1"] = 0; //command bytes
-		variables["$RESULT_2"] = 0;
+		variables[V_RES] = 0;
+		variables[V_RES_1] = 0; //command bytes
+		variables[V_RES_2] = 0;
 
 		if (adrREF!=addr) 
 		{
@@ -4913,7 +4940,7 @@ bool OllyLang::DoREF(string args)
 			transform(str.begin(), str.end(), str.begin(), toupper);
 
 			//Search for references
-			if(str == "MEMORY") // Compatibility (before v1.71) Search in the memory bloc
+			if(str == L"MEMORY") // Compatibility (before v1.71) Search in the memory bloc
 			{
 				t_memory* mem = Findmemory(addr);
 
@@ -4922,7 +4949,7 @@ bool OllyLang::DoREF(string args)
 				else
 					return true;
 			}
-			else if(str == "CODE") // Search in the code part of module
+			else if(str == L"CODE") // Search in the code part of module
 			{
 				t_module* mod = Findmodule(addr);
 
@@ -4931,7 +4958,7 @@ bool OllyLang::DoREF(string args)
 				else
 					return true;
 			}
-			else if(str == "MODULE") // Search in the whole module
+			else if(str == L"MODULE") // Search in the whole module
 			{
 				t_module* mod = Findmodule(addr);
 
@@ -4971,9 +4998,9 @@ bool OllyLang::DoREF(string args)
 
 						if (size>0) 
 						{
-							variables["$RESULT"] = ref->addr;
-							variables["$RESULT_1"] = disasm.result; //command text
-							variables["$RESULT_2"] = disasm.comment;
+							variables[V_RES] = ref->addr;
+							variables[V_RES_1] = disasm.result; //command text
+							variables[V_RES_2] = disasm.comment;
 							return true;
 						}
 					}
@@ -4985,42 +5012,43 @@ bool OllyLang::DoREF(string args)
 	}
 	return false;
 }
+*/
 
-bool OllyLang::DoREFRESH(string args)
+bool OllyLang::DoREFRESH(wstring args)
 {
 	//Refresh Memory Map
 	Listmemory();
 
 	//Refresh Executable Modules (no other way found to do this)
-	t_table* tt = (t_table*)Plugingetvalue(VAL_MODULES);
-	if (tt->hw!=0) {
+/*	if (_module.hw!=0) {
 		//was visible
 		Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'E');
 	} else {
 		//was hidden, hide it after
 		Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'E');
-		tt = (t_table*)Plugingetvalue(VAL_MODULES);
-		if (tt->hw!=0)
-			DestroyWindow(tt->hw);
+		if (_module.hw!=0)
+			DestroyWindow(_module.hw);
 	}
-
+*/
 	//Refresh DISASM
-	Redrawdisassembler();
+	Redrawcpudisasm();
+	Redrawcpureg();
+	Redrawlist();
 
 	require_ollyloop=1;
-	Broadcast(WM_USER_CHALL, 0, 0);
 	return true;
 }
 
-bool OllyLang::DoREPL(string args)
+/*
+bool OllyLang::DoREPL(wstring args)
 {
-	string ops[4];
+	wstring ops[4];
 	if(!CreateOperands(args, ops, 4))
 		return false;
 
 	if(ops[1].length() % 2 != 0 || ops[2].length() % 2 != 0)
 	{
-		errorstr = "Hex string must have an even number of characters!";
+		errorstr = L"Hex wstring must have an even number of characters!";
 		return false;
 	}
 
@@ -5053,7 +5081,7 @@ bool OllyLang::DoREPL(string args)
 		if(replaced)
 		{
 			Writememory(membuf, addr, len, MM_DELANAL | MM_SILENT);
-			Broadcast(WM_USER_CHALL, 0, 0);
+			Broadcast(WM_USER_CHGALL, 0, 0);
 		}
 
 		delete [] membuf;
@@ -5064,13 +5092,13 @@ bool OllyLang::DoREPL(string args)
 	return false;
 }
 
-bool OllyLang::DoRESET(string args)
+bool OllyLang::DoRESET(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F2); 
 	return true;
 }
 
-bool OllyLang::DoRET(string args)
+bool OllyLang::DoRET(wstring args)
 {
 	if (calls.size() > 0) {
 		script_pos = calls[calls.size()-1];
@@ -5083,11 +5111,10 @@ bool OllyLang::DoRET(string args)
 	return true;
 }
 
-bool OllyLang::DoREV(string args)
+bool OllyLang::DoREV(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong dw;
-//	BYTE b, tb[4];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -5097,18 +5124,13 @@ bool OllyLang::DoREV(string args)
 
 	dw=rev(dw);
 
-/*	memcpy(&tb[0],&dw,4);
-	dw=tb[3]; tb[3]=tb[0]; tb[0]=dw;
-	dw=tb[2]; tb[2]=tb[1]; tb[1]=dw;
-	memcpy(&dw,&tb[0],4);
-*/
-	variables["$RESULT"] = dw;
+	variables[V_RES] = dw;
 	return true;
 }
 
-bool OllyLang::DoROL(string args)
+bool OllyLang::DoROL(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5128,16 +5150,16 @@ bool OllyLang::DoROL(string args)
 			pop ecx
 			pop eax
 		}
-		args = ops[0] + ", 0" + ultoa(dw1, buffer, 16);
+		args = ops[0] + ", 0" + _ultow(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoROR(string args)
+bool OllyLang::DoROR(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5158,7 +5180,7 @@ bool OllyLang::DoROR(string args)
 			pop ecx
 			pop eax
 		}
-		args = ops[0] + ", 0" + ultoa(dw1, buffer, 16);
+		args = ops[0] + ", 0" + _ultow(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
@@ -5166,21 +5188,21 @@ bool OllyLang::DoROR(string args)
 }
 
 
-bool OllyLang::DoRTR(string args)
+bool OllyLang::DoRTR(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F9); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoRTU(string args)
+bool OllyLang::DoRTU(wstring args)
 {
 	Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,VK_F9);
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoRUN(string args)
+bool OllyLang::DoRUN(wstring args)
 {
 	Go(Getcputhreadid(), 0, STEP_RUN, 0, 1);
 	require_ollyloop = 1;
@@ -5196,17 +5218,17 @@ bool OllyLang::DoRUN(string args)
 
 // ex 	: sbp
 // 		: no argument
-bool OllyLang::DoSBP ( string args )
+bool OllyLang::DoSBP ( wstring args )
 {
 	uint n = 0, i;
 	bool success;
 	t_table *bpt;
 	t_bpoint *bpoint;
 
-	variables["$RESULT"] = 0;
-	variables["$RESULT_1"] = 0;
+	variables[V_RES] = 0;
+	variables[V_RES_1] = 0;
 
-	bpt = ( t_table * ) Plugingetvalue ( VAL_BREAKPOINTS );
+	bpt = _bpoint;
 	if ( bpt != NULL )
 	{
 		bpoint = ( t_bpoint * ) ( bpt->data.data );
@@ -5221,7 +5243,7 @@ bool OllyLang::DoSBP ( string args )
 			}
 
 			if ( n > alloc_bp && !success ) {
-				errorstr = "Can't allocate enough memory to copy all breakpoints";
+				errorstr = L"Can't allocate enough memory to copy all breakpoints";
 				return false;
 			}
 			else if (n > 0)
@@ -5232,7 +5254,7 @@ bool OllyLang::DoSBP ( string args )
 			} 
 
 			saved_bp = n;
-			variables["$RESULT"] =  ( DWORD ) n;
+			variables[V_RES] =  ( DWORD ) n;
 		}
 	}
 
@@ -5245,16 +5267,16 @@ bool OllyLang::DoSBP ( string args )
 			i++;
 		n++;
 	}
-	variables["$RESULT_1"] =  ( DWORD ) i;
+	variables[V_RES_1] =  ( DWORD ) i;
 
 	return true;
 }
 
-bool OllyLang::DoSCMP(string args)
+bool OllyLang::DoSCMP(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong size=0;
-	string s1, s2;
+	wstring s1, s2;
 
 	if(!CreateOperands(args, ops, 3)) {
 		if(!CreateOperands(args, ops, 2))
@@ -5287,11 +5309,11 @@ bool OllyLang::DoSCMP(string args)
 	return false;
 }
 
-bool OllyLang::DoSCMPI(string args)
+bool OllyLang::DoSCMPI(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 	ulong size=0;
-	string s1, s2;
+	wstring s1, s2;
 
 	if(!CreateOperands(args, ops, 3)) {
 		if(!CreateOperands(args, ops, 2))
@@ -5303,7 +5325,7 @@ bool OllyLang::DoSCMPI(string args)
 	if(GetSTROpValue(ops[0], s1, size) 
 		&& GetSTROpValue(ops[1], s2, size) )
 	{
-		int res = stricmp (s1.c_str(), s2.c_str());//s1.compare(s2,false);
+		int res = _wcsicmp (s1.c_str(), s2.c_str());//s1.compare(s2,false);
 		if(res == 0)		
 		{
 			zf = 1;
@@ -5324,16 +5346,16 @@ bool OllyLang::DoSCMPI(string args)
 	return false;
 }
 
-bool OllyLang::DoSETOPTION(string args)
+bool OllyLang::DoSETOPTION(wstring args)
 {
     Sendshortcut(PM_MAIN,0,WM_SYSKEYDOWN,0,0,'O');
 	require_ollyloop = 1;
     return true;
 }
 
-bool OllyLang::DoSHL(string args)
+bool OllyLang::DoSHL(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5342,16 +5364,16 @@ bool OllyLang::DoSHL(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", 0" + ultoa(dw1 << dw2, buffer, 16);
+		args = ops[0] + ", 0" + _ultow(dw1 << dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoSHR(string args)
+bool OllyLang::DoSHR(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5360,30 +5382,32 @@ bool OllyLang::DoSHR(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", 0" + ultoa(dw1 >> dw2, buffer, 16);
+		args = ops[0] + ", 0" + _ultow(dw1 >> dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
-
-bool OllyLang::DoSTI(string args)
+*/
+bool OllyLang::DoSTI(wstring args)
 {
-	Go(Getcputhreadid(), 0, STEP_IN, 0, 1);
+	//Go(Getcputhreadid(), 0, STEP_IN, 0, 1);
+	Run(STAT_STEPIN,1);
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoSTO(string args)
+bool OllyLang::DoSTO(wstring args)
 {
-	Go(Getcputhreadid(), 0, STEP_OVER, 0, 1);
+	//Go(Getcputhreadid(), 0, STEP_OVER, 0, 1);
+	Run(STAT_STEPOVER,1);
 	require_ollyloop = 1;
 	return true;
 }
-
-bool OllyLang::DoSTR(string args)
+/*
+bool OllyLang::DoSTR(wstring args)
 {
-	string op[1];
+	wstring op[1];
 
 	if(!CreateOp(args, op, 1))
 		return false;
@@ -5408,9 +5432,9 @@ bool OllyLang::DoSTR(string args)
 	return false;
 }
 
-bool OllyLang::DoSUB(string args)
+bool OllyLang::DoSUB(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5419,23 +5443,23 @@ bool OllyLang::DoSUB(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", 0" + ultoa(dw1 - dw2, buffer, 16);
+		args = ops[0] + ", 0" + _ultow(dw1 - dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoTC(string args)
+bool OllyLang::DoTC(wstring args)
 {
 	Deleteruntrace();
 	return true;
 }
 
 
-bool OllyLang::DoTEST(string args)
+bool OllyLang::DoTEST(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5456,22 +5480,22 @@ bool OllyLang::DoTEST(string args)
 }
 
 
-bool OllyLang::DoTI(string args)
+bool OllyLang::DoTI(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F11); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoTICK(string args)
+bool OllyLang::DoTICK(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 	if(!CreateOperands(args, ops, 2))
 		if(args=="" || !CreateOperands(args, ops, 1)) {
 			char tmpbuf[256]={0};
 			sprintf(tmpbuf,"%u ms",this->tickcount/1000);
-			string s; s.assign(tmpbuf);
-			variables["$RESULT"]=s;
+			wstring s; s.assign(tmpbuf);
+			variables[V_RES]=s;
 			return true;
 		}
 
@@ -5485,16 +5509,16 @@ bool OllyLang::DoTICK(string args)
 	if (is_variable(ops[0])) {
 		variables[ops[0]] = tickcount;
 		if (timeref)
-			variables["$RESULT"]=tickcount-timeref;
+			variables[V_RES]=tickcount-timeref;
 		return true;
 	}
 	return false;
 }
 
-bool OllyLang::DoTICND(string args)
+bool OllyLang::DoTICND(wstring args)
 {
-	string ops[1];
-	string condition;
+	wstring ops[1];
+	wstring condition;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -5520,17 +5544,17 @@ bool OllyLang::DoTICND(string args)
 	return false;
 }
 
-bool OllyLang::DoTO(string args)
+bool OllyLang::DoTO(wstring args)
 {
 	Sendshortcut(PM_MAIN, 0, WM_KEYDOWN, 1, 0, VK_F12); 
 	require_ollyloop = 1;
 	return true;
 }
 
-bool OllyLang::DoTOCND(string args)
+bool OllyLang::DoTOCND(wstring args)
 {
-	string ops[1];
-	string condition;
+	wstring ops[1];
+	wstring condition;
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
@@ -5556,10 +5580,9 @@ bool OllyLang::DoTOCND(string args)
 	return false;
 }
 
-
-bool OllyLang::DoUNICODE(string args)
+bool OllyLang::DoUNICODE(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 	ulong dw;
 
 	if(!CreateOperands(args, ops, 1))
@@ -5572,25 +5595,25 @@ bool OllyLang::DoUNICODE(string args)
 
 	return false;
 }
-
-bool OllyLang::DoVAR(string args)
+*/
+bool OllyLang::DoVAR(wstring args)
 {
-	string ops[1];
+	wstring ops[1];
 
 	if(!CreateOperands(args, ops, 1))
 		return false;
 
 	if(reg_names.find(ops[0]) == reg_names.end()){
-		variables.insert(pair<string, var> (ops[0], 0));
+		variables.insert(pair<wstring, var> (ops[0], 0));
 		return true;
 	}
-	errorstr = "Bad variable name: " + ops[0];
+	errorstr = L"Bad variable name: " + ops[0];
 	return false;
 }
 
-bool OllyLang::DoXCHG(string args)
+bool OllyLang::DoXCHG(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if (!CreateOperands(args, ops, 2))
 		return false;
@@ -5598,10 +5621,10 @@ bool OllyLang::DoXCHG(string args)
 	ulong dw1, dw2;
 
 	if (GetDWOpValue(ops[0], dw1) && GetDWOpValue(ops[1], dw2)) {
-		args = ops[0] + ", 0" + ultoa(dw2, buffer, 16);
+		args = ops[0] + L", 0" + _ultow(dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		DoMOV(args);
-		args = ops[1] + ", 0" + ultoa(dw1, buffer, 16);
+		args = ops[1] + L", 0" + _ultow(dw1, buffer, 16);
 		nIgnoreNextValuesHist++;
 		DoMOV(args);
 		return true;
@@ -5610,10 +5633,9 @@ bool OllyLang::DoXCHG(string args)
 
 }
 
-
-bool OllyLang::DoXOR(string args)
+bool OllyLang::DoXOR(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
@@ -5622,31 +5644,31 @@ bool OllyLang::DoXOR(string args)
 	if(GetDWOpValue(ops[0], dw1) 
 		&& GetDWOpValue(ops[1], dw2))
 	{
-		args = ops[0] + ", 0" + ultoa(dw1 ^ dw2, buffer, 16);
+		args = ops[0] + L", 0" + _ultow(dw1 ^ dw2, buffer, 16);
 		nIgnoreNextValuesHist++;
 		return DoMOV(args);
 	}
 	return false;
 }
 
-bool OllyLang::DoWRT(string args)
+bool OllyLang::DoWRT(wstring args)
 {
-	string ops[2];
+	wstring ops[2];
 
 	if(!CreateOperands(args, ops, 2))
 		return false;
 
-    string path;
-	path.assign((char*)Plugingetvalue(VAL_EXEFILENAME));
+    wstring path;
+	path.assign(_executable);
 
     path = path.substr(0, path.rfind('\\') + 1);
  
-	string filename,data;
+	wstring filename,data;
 
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetANYOpValue(ops[1], data))
 	{
-        if ((filename.find(":\\") != string::npos) || (filename.find("\\\\") != string::npos)) //hard disk or network
+        if ((filename.find(L":\\") != wstring::npos) || (filename.find(L"\\\\") != wstring::npos)) //hard disk or network
 		  path = filename;
 		else
 		  path += filename;
@@ -5671,27 +5693,27 @@ bool OllyLang::DoWRT(string args)
 	return false;
 }
 
-bool OllyLang::DoWRTA(string args)
+bool OllyLang::DoWRTA(wstring args)
 {
-	string ops[3];
+	wstring ops[3];
 
 	if(!CreateOperands(args, ops, 3)) {
-		ops[2]="\"\r\n\"";
+		ops[2]=L"\"\r\n\"";
 		if(!CreateOperands(args, ops, 2))
 			return false;
 	}
 	
-    string path;
-	path.assign((char*)Plugingetvalue(VAL_EXEFILENAME));
+    wstring path;
+	path.assign(_executable);
 
     path = path.substr(0, path.rfind('\\') + 1);
 
-	string filename,data,sSep;
+	wstring filename,data,sSep;
 
 	if(GetSTROpValue(ops[0], filename) 
 		&& GetANYOpValue(ops[1], data))
 	{
-        if ((filename.find(":\\") != string::npos) || (filename.find("\\\\") != string::npos))
+        if ((filename.find(L":\\") != wstring::npos) || (filename.find(L"\\\\") != wstring::npos))
 		  path = filename;
 		else
 		  path += filename;

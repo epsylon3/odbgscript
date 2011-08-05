@@ -1,4 +1,8 @@
+long wndprog_func(t_table *pt,HWND hw,UINT msg,WPARAM wp,LPARAM lp) {
+  return 0;
+}
 
+/*
 LRESULT CALLBACK wndprog_winproc(HWND hw,UINT msg,WPARAM wp,LPARAM lp) {
 int i,m,shiftkey,controlkey;
 BYTE keystate;
@@ -7,12 +11,14 @@ ulong u;
 HMENU menu,mLoad,mCmd,mRun,mLabels=NULL,mVars=NULL;
 t_wndprog_data *ppl;
 
-	switch (msg) 
+	//HWND hw = _hwollymain;
+
+	switch (msg)
 	{
 		case WM_LBUTTONDBLCLK:
-			i=ollylang->wndProg.data.selected;
-			//ppl=(t_wndprog_data *)Getsortedbyselection(&ollylang->wndProg.data,ollylang->wndProg.data.selected);
-			if (i > 0) 
+			i=ollylang->wndProg.sorted.selected;
+			//ppl=(t_wndprog_data *)Getsortedbyselection(&ollylang->wndProg.sorted,ollylang->wndProg.sorted.selected);
+			if (i > 0)
 			{
 				i=ollylang->GetFirstCodeLine(i-1)+1;
 				ollylang->jumpToLine(i);
@@ -30,80 +36,80 @@ t_wndprog_data *ppl;
 		case WM_VSCROLL:
 		case WM_TIMER:
 		case WM_SYSKEYDOWN:
-			Tablefunction(&ollylang->wndProg,hw,msg,wp,lp);
+			Tablefunction(&(ollylang->wndProg),hw,msg,wp,lp);
 			break;                           // Pass message to DefMDIChildProc()
 			// Custom messages responsible for scrolling and selection. User-drawn
 			// windows must process them, standard OllyDbg windows without extra
 			// functionality pass them to Tablefunction()
-		case WM_USER_SCR:
-		case WM_USER_VABS:
-		case WM_USER_VREL:
+//2		case WM_USER_SCR:
+//2		case WM_USER_VABS:
+//2		case WM_USER_VREL:
+//2		case WM_USER_STS:
+//2		case WM_USER_CHGS:
 		case WM_USER_VBYTE:
-		case WM_USER_STS:
 		case WM_USER_CNTS:
-		case WM_USER_CHGS:
 		case WM_WINDOWPOSCHANGED:
-			return Tablefunction(&ollylang->wndProg,hw,msg,wp,lp);
+			return Tablefunction(&(ollylang->wndProg),hw,msg,wp,lp);
 		case WM_USER_MENU:
 			menu=CreatePopupMenu();
 
 			mRun=CreatePopupMenu();
-			AppendMenu(menu,MF_POPUP,(DWORD) mRun,"Run Script"); 
-			AppendMenu(mRun,MF_MENUBREAK,20,"Open...");
-			AppendMenu(mRun,MF_SEPARATOR,0,"-");
+			AppendMenu(menu,MF_POPUP,(DWORD) mRun,L"Run Script");
+			AppendMenu(mRun,MF_MENUBREAK,20,L"Open...");
+			AppendMenu(mRun,MF_SEPARATOR,0,L"-");
 			mruGetCurrentMenu(mRun,20);
 
 			mLoad=CreatePopupMenu();
-			AppendMenu(menu,MF_POPUP,(DWORD) mLoad,"Load Script"); 
-			AppendMenu(mLoad,MF_MENUBREAK,10,"Open...");
-			AppendMenu(mLoad,MF_SEPARATOR,0,"-");
+			AppendMenu(menu,MF_POPUP,(DWORD) mLoad,L"Load Script");
+			AppendMenu(mLoad,MF_MENUBREAK,10,L"Open...");
+			AppendMenu(mLoad,MF_SEPARATOR,0,L"-");
 			mruGetCurrentMenu(mLoad,10);
 
-			AppendMenu(menu,MF_SEPARATOR,0,"-");
-			AppendMenu(menu,MF_STRING, 1,"&Help");
+			AppendMenu(menu,MF_SEPARATOR,0,L"-");
+			AppendMenu(menu,MF_STRING, 1,L"&Help");
 
 			//mCmd=CreatePopupMenu();
 			//AppendMenu(mCmd,MF_SEPARATOR,0,"-");
 			//mruCmdMenu(mCmd,50);
 
-			ppl=(t_wndprog_data *)Getsortedbyselection(&ollylang->wndProg.data,ollylang->wndProg.data.selected);
-			if (menu!=NULL && ppl!=NULL) 
+			ppl=(t_wndprog_data *)Getsortedbyselection(&ollylang->wndProg.sorted,ollylang->wndProg.sorted.selected);
+			if (menu!=NULL && ppl!=NULL)
 			{
-				AppendMenu(menu,MF_STRING, 30,"Edit Script...");
-				AppendMenu(menu,MF_SEPARATOR,0,"-"); 
-				AppendMenu(menu,MF_DEFAULT,31,"&Follow\tEnter");
-				AppendMenu(menu,MF_STRING, 32,"Toggle Script BP\tF2");
-				AppendMenu(menu,MF_STRING, 36,"Run until cursor\tF4");
-				AppendMenu(menu,MF_STRING, 33,"Step\tTAB");
-				
-				if (script_state==SS_PAUSED)
-					AppendMenu(menu,MF_STRING, 34,"Resume\tSPC");
-				else
-					AppendMenu(menu,MF_STRING, 34,"Pause\tSPC");
-				
-				AppendMenu(menu,MF_STRING, 35,"Abort\tESC");
+				AppendMenu(menu,MF_STRING, 30,L"Edit Script...");
+				AppendMenu(menu,MF_SEPARATOR,0,L"-");
+				AppendMenu(menu,MF_DEFAULT,31,L"&Follow\tEnter");
+				AppendMenu(menu,MF_STRING, 32,L"Toggle Script BP\tF2");
+				AppendMenu(menu,MF_STRING, 36,L"Run until cursor\tF4");
+				AppendMenu(menu,MF_STRING, 33,L"Step\tTAB");
 
-				AppendMenu(menu,MF_DEFAULT,37,"&Edit line\tE");
+				if (script_state==SS_PAUSED)
+					AppendMenu(menu,MF_STRING, 34,L"Resume\tSPC");
+				else
+					AppendMenu(menu,MF_STRING, 34,L"Pause\tSPC");
+
+				AppendMenu(menu,MF_STRING, 35,L"Abort\tESC");
+
+				AppendMenu(menu,MF_DEFAULT,37,L"&Edit line\tE");
 			}
-			if (ollylang->labels.size() > 0) 
+			if (ollylang->labels.size() > 0)
 			{
 				mLabels=CreatePopupMenu();
-				AppendMenu(menu,MF_SEPARATOR,0,"-");
-				AppendMenu(menu,MF_POPUP,(DWORD) mLabels,"Scroll to Label"); 
+				AppendMenu(menu,MF_SEPARATOR,0,L"-");
+				AppendMenu(menu,MF_POPUP,(DWORD) mLabels,L"Scroll to Label");
 				ollylang->menuListLabels(mLabels,MASK_POPUP_LABEL);
 			}
 
-			if (ollylang->variables.size() > 0) 
+			if (ollylang->variables.size() > 0)
 			{
 				mVars=CreatePopupMenu();
-				AppendMenu(menu,MF_SEPARATOR,0,"-");
-				AppendMenu(menu,MF_POPUP,(DWORD) mVars,"Edit Variables"); 
+				AppendMenu(menu,MF_SEPARATOR,0,L"-");
+				AppendMenu(menu,MF_POPUP,(DWORD) mVars,L"Edit Variables");
 				ollylang->menuListVariables(mVars,MASK_POPUP_VAR);
 			}
-			if (Getstatus() == STAT_STOPPED) 
+			if (Getstatus() == STAT_STOPPED)
 			{
-				AppendMenu(menu,MF_SEPARATOR,0,"-");
-				AppendMenu(menu,MF_STRING, 39,"Execute Command...\tX");
+				AppendMenu(menu,MF_SEPARATOR,0,L"-");
+				AppendMenu(menu,MF_STRING, 39,L"Execute Command...\tX");
 			}
 
 			// Even when menu is NULL, call to Tablefunction is still meaningful.
@@ -115,15 +121,15 @@ t_wndprog_data *ppl;
 			if (mRun!=NULL) DestroyMenu(mRun);
 			if (mLabels!=NULL) DestroyMenu(mLabels);
 			if (mVars!=NULL) DestroyMenu(mVars);
-			
-			if (i>10 && i<=29 && i!=20) 
+
+			if (i>10 && i<=29 && i!=20)
 			{
 
-				char key[5]="NRU ";
+				wchar_t key[5]=L"NRU ";
 				key[3]=(i%10)+0x30;
-							
+
 				ZeroMemory(&buff, sizeof(buff));
-				Pluginreadstringfromini(hinstModule(),key,buff,0);
+				Getfromini(NULL,PLUGIN_NAME, key, L"%s", buff);
 
 				// Load script
 				ollylang->LoadScript(buff);
@@ -131,19 +137,19 @@ t_wndprog_data *ppl;
 				mruAddFile(buff);
 
 				// Save script directory
-				char* buf2;
-				GetFullPathName(buff,sizeof(buff),buff,&buf2); 
-				*buf2=0;			
-				Pluginwritestringtoini(hinstModule(), "ScriptDir", buff);
+				wchar_t* buf2;
+				GetFullPathName(buff,sizeof(buff),buff,&buf2);
+				*buf2=0;
+				Pluginwritestringtoini(0, L"ScriptDir", buff);
 
 				// Pause script (From Load Script MRU)
-				if (i<20) 
+				if (i<20)
 				{
 					ollylang->Pause();
 				}
 				return 1;
-			} 
-			else if (i & MASK_POPUP_VAR) 
+			}
+			else if (i & MASK_POPUP_VAR)
 			{
 				if (i & CMD_POPUP_MASK)
 					ollylang->followVariable(i-MASK_POPUP_VAR);
@@ -151,8 +157,8 @@ t_wndprog_data *ppl;
 					ollylang->editVariable(i-MASK_POPUP_VAR);
 				InvalidateRect(hw, NULL, FALSE);
 				return 1;
-			} 
-			else if (i & MASK_POPUP_LABEL) 
+			}
+			else if (i & MASK_POPUP_LABEL)
 			{
 				Selectandscroll(&ollylang->wndProg,i-MASK_POPUP_LABEL,2);
 				InvalidateRect(hw, NULL, FALSE);
@@ -160,28 +166,28 @@ t_wndprog_data *ppl;
 			}
 			else
 
-			switch (i) 
-			{ 
-				case 1: 
+			switch (i)
+			{
+				case 1:
 				{
-					string directory, helpfile;
+					wstring directory, helpfile;
 					getPluginDirectory(directory);
-					helpfile = directory + "\\ODbgScript.txt";			
-					ShellExecute(hwndOllyDbg(),"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
+					helpfile = directory + L"\\ODbgScript.txt";
+					ShellExecuteW(hw,L"open",helpfile.c_str(),NULL,directory.c_str(),SW_SHOWDEFAULT);
 				}
 				break;
 				case 20: // Open Run
 					ODBG_Pluginaction(PM_MAIN,0,NULL);
 					return 1;
 				case 10: // Open Load
-					ODBG_Pluginaction(PM_MAIN,0,NULL); 
+					ODBG_Pluginaction(PM_MAIN,0,NULL);
 					ollylang->Pause();
 					return 1;
 				case 30: // Edit Script
-					ShellExecute(hwndOllyDbg(),"open",ollylang->scriptpath.c_str(),NULL,ollylang->currentdir.c_str(),SW_SHOWDEFAULT);
+					ShellExecute(hw,L"open",ollylang->scriptpath.c_str(),NULL,ollylang->currentdir.c_str(),SW_SHOWDEFAULT);
 					return 1;
-				case 31: // Follow in Disassembler 
-					if (ppl!=NULL) Setcpu(0,ppl->eip,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+				case 31: // Follow in Disassembler
+					if (ppl!=NULL) Setcpu(0,ppl->eip,0,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					InvalidateRect(hw, NULL, FALSE);
 					return 1;
 				case 32: // Toggle Script BP
@@ -189,12 +195,12 @@ t_wndprog_data *ppl;
 					InvalidateRect(hw, NULL, FALSE);
 					return 1;
 				case 36:
-                    if (ppl!=NULL) ppl->pause=1;
-                    ollylang->Resume();
-				    return 1;
+					if (ppl!=NULL) ppl->pause=1;
+					ollylang->Resume();
+					return 1;
 				case 37:
 					if (ppl!=NULL) editProgLine(ppl);
-				    return 1;
+					return 1;
 				case 33: // Step
 					ollylang->Pause(); //for right click step when running
 					ollylang->Step(1);
@@ -202,11 +208,11 @@ t_wndprog_data *ppl;
 					focusonstop=5;
 					return 1;
 				case 34: // Pause/Resume
-					if (script_state==SS_PAUSED) 
+					if (script_state==SS_PAUSED)
 					{
 						ollylang->Resume();
-					} 
-					else 
+					}
+					else
 					{
 						ollylang->Pause();
 						script_state = ollylang->script_state;
@@ -216,8 +222,8 @@ t_wndprog_data *ppl;
 					ollylang->Reset();
 					ollylang->Pause();
 					return 1;
-				case 39: // Execute Command
-					if (Getstatus() == STAT_STOPPED) 
+			case 39: // Execute Command
+					if (Getstatus() == STAT_STOPPED)
 					{
 						ollylang->execCommand();
 						InvalidateRect(hw, NULL, FALSE);
@@ -234,10 +240,10 @@ t_wndprog_data *ppl;
 			return 0;
 
 		case WM_USER_DBLCLK:
-			ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
-			if (ppl!=NULL) 
+			ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.sorted),ollylang->wndProg.sorted.selected);
+			if (ppl!=NULL)
 			{
-				if (ppl->eip) Setcpu(0,ppl->eip,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+				if (ppl->eip) Setcpu(0,ppl->eip,0,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 				InvalidateRect(hw, NULL, FALSE);
 				return 1;
 			}
@@ -245,51 +251,50 @@ t_wndprog_data *ppl;
 		case WM_KEYDOWN:
 			shiftkey=GetKeyState(VK_SHIFT) & 0x8000;
 			controlkey=GetKeyState(VK_CONTROL) & 0x8000;
-			if (wp==VK_RETURN && shiftkey==0 && controlkey==0) 
+			if (wp==VK_RETURN && shiftkey==0 && controlkey==0)
 			{
 				// Return key follows in Disassembler.
-				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
-				if (ppl!=NULL) 
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.sorted),ollylang->wndProg.sorted.selected);
+				if (ppl!=NULL)
 				{
-					if (ppl->eip) Setcpu(0,ppl->eip,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
+					if (ppl->eip) Setcpu(0,ppl->eip,0,0,0,CPU_ASMHIST|CPU_ASMCENTER|CPU_ASMFOCUS);
 					InvalidateRect(hw, NULL, FALSE);
 				}
-			} 
-			else if (wp==VK_F2) 
+			}
+			else if (wp==VK_F2)
 			{ // && shiftkey==0 && controlkey==0) {
 				// Toggle Script BP
-				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
-				if (ppl!=NULL) 
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.sorted),ollylang->wndProg.sorted.selected);
+				if (ppl!=NULL)
 				{
 					if (ppl->pause) ppl->pause=0; else ppl->pause=1;
 					InvalidateRect(hw, NULL, FALSE);
 				}
 			}
-			else if (wp==VK_F4) 
+			else if (wp==VK_F4)
 			{
 				// go Script BP
-				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
-				if (ppl!=NULL) 
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.sorted),ollylang->wndProg.sorted.selected);
+				if (ppl!=NULL)
 				{
 					if (ppl->pause) ppl->pause=0; else ppl->pause=1;
 					InvalidateRect(hw, NULL, FALSE);
-                   ollylang->Resume();
+				   ollylang->Resume();
 				}
-            }
-			else if (wp==VK_TAB || wp=='S') 
+			}
+			else if (wp==VK_TAB || wp=='S')
 			{
-			
+
 				// Step
 				ollylang->Pause();
 				ollylang->Step(1);
 				script_state = ollylang->script_state;
 				focusonstop=4;
 				return 1;
-			
+
 			}
-			else if (wp=='X') 
+			else if (wp=='X')
 			{
-			
 				// Command
 				if (Getstatus() == STAT_STOPPED)
 				{
@@ -297,38 +302,37 @@ t_wndprog_data *ppl;
 					InvalidateRect(hw, NULL, FALSE);
 				}
 				return 1;
-			
 			}
-			else if (wp=='E') 
+			else if (wp=='E')
 			{
-				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
-				if (ppl!=NULL) 
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.sorted),ollylang->wndProg.sorted.selected);
+				if (ppl!=NULL)
 					editProgLine(ppl);
 				return 1;
-			
+
 			}
-			else if (wp==' ') 
+			else if (wp==' ')
 			{ // Pause/Resume
 
-				if (script_state==SS_PAUSED) 
+				if (script_state==SS_PAUSED)
 				{
-					ollylang->Resume();					
-				} 
-				else 
+					ollylang->Resume();
+				}
+				else
 				{
 					ollylang->Pause();
 					script_state = ollylang->script_state;
 				}
 				return 1;
-			} 
-			else if (wp==VK_ESCAPE) 
+			}
+			else if (wp==VK_ESCAPE)
 			{
 				// Resume
 				ollylang->Reset();
 				ollylang->Pause();
 				return 1;
-			} 
-			else if (wp==VK_LEFT) 
+			}
+			else if (wp==VK_LEFT)
 			{
 				if (ollylang->execCursor > 0) {
 					ollylang->execCursor--;
@@ -337,8 +341,8 @@ t_wndprog_data *ppl;
 					InvalidateRect(hw, NULL, FALSE);
 				}
 				return 1;
-			} 
-			else if (wp==VK_RIGHT) 
+			}
+			else if (wp==VK_RIGHT)
 			{
 				if (ollylang->execCursor < ollylang->execHistory.size() -1 ) {
 					ollylang->execCursor++;
@@ -347,16 +351,17 @@ t_wndprog_data *ppl;
 					InvalidateRect(hw, NULL, FALSE);
 				}
 				return 1;
-			} 
+			}
 			else if (wp=='F' && controlkey) //Search
-			{				
-				char buffer[TEXTLEN]={0};
+			{
+				wchar_t buffer[TEXTLEN]={0};
 				Findname(1,NM_SOURCE,buffer);
-				i = Gettext("Search in script...",buffer,0,NM_SOURCE,FIXEDFONT);
+				//i = Gettext("Search in script...",buffer,0,NM_SOURCE,FIXEDFONT);
+				i = Getstring(hw, L"Search in script...", buffer,TEXTLEN, 0,0, 0,0, 0,0);
 				if (i != -1) {
 					Insertname(1,NM_SOURCE,buffer);
-					string s; s.assign(buffer);
-					m = ollylang->SearchInScript(s,ollylang->wndProg.data.selected);
+					wstring s; s.assign(buffer);
+					m = ollylang->SearchInScript(s,ollylang->wndProg.sorted.selected);
 					if (m >= 0) {
 						Selectandscroll(&ollylang->wndProg,m+1,1);
 						InvalidateRect(hw, NULL, FALSE);
@@ -367,7 +372,7 @@ t_wndprog_data *ppl;
 			else if (wp=='G' && controlkey) //Goto Line
 			{
 				u = 0;
-				Getline("Goto line...",&u);
+				Getinteger(hw, L"Goto line...", &u,0,0,0,0,0);
 				if (u != 0) {
 					Selectandscroll(&ollylang->wndProg,u,1);
 					InvalidateRect(hw, NULL, FALSE);
@@ -379,36 +384,36 @@ t_wndprog_data *ppl;
 		case WM_CHAR:
 			if (wp==';')
 			{
-				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.data),ollylang->wndProg.data.selected);
+				ppl=(t_wndprog_data *)Getsortedbyselection(&(ollylang->wndProg.sorted),ollylang->wndProg.sorted.selected);
 				if (ppl!=NULL) {
-					string cmd = ppl->command;
+					wstring cmd = ppl->command;
 					int lvl = ppl->type & PROG_ATTR_IFLEVELS;
 					if (! (ppl->type & PROG_TYPE_COMMENT) ) {
-						cmd = " ;"+trim(cmd);
+						cmd = L" ;"+w_trim(cmd);
 					} else {
-						cmd = trim(cmd);
-						cmd = " "+trim(cmd.substr(1));
+						cmd = w_trim(cmd);
+						cmd = L" "+w_trim(cmd.substr(1));
 					}
 					ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
 					ollylang->script.insert(ollylang->script.begin()+ppl->line-1,cmd);
 
-					strcpy(ppl->command, cmd.c_str());
+					wcscpy(ppl->command, cmd.c_str());
 
-					cmd=trim(cmd);
+					cmd=w_trim(cmd);
 					ppl->type = analyseProgLineType(cmd,ppl->line);
 					ppl->type |= lvl;
 					InvalidateProgWindow();
 				}
 				return 1;
-			
+
 			}
 			Tablefunction(&ollylang->wndProg,hw,msg,wp,lp);
 			break;
-        case WM_USER_CHALL:
-        case WM_USER_CHMEM:
-            InvalidateRect(hw, NULL, FALSE);
-            return 0;
-        case WM_PAINT:
+		case WM_USER_CHGALL:
+		case WM_USER_CHGMEM:
+			InvalidateRect(hw, NULL, FALSE);
+			return 0;
+		case WM_PAINT:
 			ollylang->pgr_scriptpos_paint=ollylang->pgr_scriptpos;
 			Painttable(hw, &ollylang->wndProg, wndprog_get_text);
 			return 0;
@@ -417,116 +422,137 @@ t_wndprog_data *ppl;
 	}
 	return DefMDIChildProc(hw,msg,wp,lp);
 }
-
+*/
 void initProgTable() {
 
-  	if (ollylang->wndProg.bar.nbar==0) 
+	HINSTANCE hinst;
+
+	if (ollylang->wndProg.bar.nbar==0)
 	{
 
-	ollylang->wndProg.bar.name[0]="Line";
-    ollylang->wndProg.bar.defdx[0]=5;
-    ollylang->wndProg.bar.mode[0]=BAR_NOSORT;
+	ollylang->wndProg.bar.name[0]=L"Line";
+	ollylang->wndProg.bar.defdx[0]=5;
+	ollylang->wndProg.bar.mode[0]=BAR_NOSORT;
 
-	ollylang->wndProg.bar.name[1]="Command"; 
-    ollylang->wndProg.bar.defdx[1]=40;
-    ollylang->wndProg.bar.mode[1]=BAR_NOSORT;
+	ollylang->wndProg.bar.name[1]=L"Command";
+	ollylang->wndProg.bar.defdx[1]=40;
+	ollylang->wndProg.bar.mode[1]=BAR_NOSORT;
 
-	ollylang->wndProg.bar.name[2]="Result";
-    ollylang->wndProg.bar.defdx[2]=15;
-    ollylang->wndProg.bar.mode[2]=BAR_NOSORT;
+	ollylang->wndProg.bar.name[2]=L"Result";
+	ollylang->wndProg.bar.defdx[2]=15;
+	ollylang->wndProg.bar.mode[2]=BAR_NOSORT;
 
-    ollylang->wndProg.bar.name[3]="EIP";
-    ollylang->wndProg.bar.defdx[3]=9;
-    ollylang->wndProg.bar.mode[3]=BAR_NOSORT;
+	ollylang->wndProg.bar.name[3]=L"EIP";
+	ollylang->wndProg.bar.defdx[3]=9;
+	ollylang->wndProg.bar.mode[3]=BAR_NOSORT;
 
-    ollylang->wndProg.bar.name[4]="Values <---";
-    ollylang->wndProg.bar.defdx[4]=100;
-    ollylang->wndProg.bar.mode[4]=BAR_NOSORT;
+	ollylang->wndProg.bar.name[4]=L"Values <---";
+	ollylang->wndProg.bar.defdx[4]=100;
+	ollylang->wndProg.bar.mode[4]=BAR_NOSORT;
 
 	//ollylang->wndProg.bar.name[5]="Comments";
 	//ollylang->wndProg.bar.defdx[5]=40;
 	//ollylang->wndProg.bar.mode[5]=BAR_NOSORT;
 
 	ollylang->wndProg.bar.nbar=5;
-    ollylang->wndProg.mode=TABLE_COPYMENU|TABLE_APPMENU|TABLE_SAVEPOS|TABLE_ONTOP|TABLE_HILMENU|TABLE_WIDECOL;
-    ollylang->wndProg.drawfunc=wndprog_get_text;
-	}
-	
-	Quicktablewindow(&ollylang->wndProg,15,5,wndprogclass,"Script Execution");
+	ollylang->wndProg.mode=TABLE_COPYMENU|TABLE_APPMENU|TABLE_SAVEPOS|TABLE_ONTOP|TABLE_HILMENU|TABLE_WIDECOL;
+	ollylang->wndProg.drawfunc = wndprog_get_text;
+	ollylang->wndProg.tabfunc  = wndprog_func;
+	ollylang->wndProg.bar.visible=1;
 
-	if (ollylang->wndProg.hw) 
-	{
-		HICON ico=LoadIcon(hinstModule(),MAKEINTRESOURCE(IDI_ICON_SCRIPT)); 
-		SendMessage(ollylang->wndProg.hw,WM_SETICON,false,(long)ico); 
-		//CloseHandle(ico);
+	ollylang->wndProg.menu = mainmenu;
+
+	hinst = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
+	Createtablewindow(&ollylang->wndProg, 15,5, hinst, L"ICO_P", L"Script Execution");
 	}
 
+	if (ollylang->wndProg.hw) {
+		Activatetablewindow(&ollylang->wndProg);
+		hinst = (HINSTANCE)GetModuleHandleW(PLUGIN_NAME L".dll");
+		HICON ico=LoadIcon(hinst,MAKEINTRESOURCE(IDI_ICON_SCRIPT));
+		SendMessage(ollylang->wndProg.hw,WM_SETICON,false,(long)ico);
+	}
 }
 
-int wndprog_sort_function(const t_sortheader *p1,const t_sortheader *p2,const int sort) 
+int __cdecl wndprog_sort_function(const t_sorthdr *p1,const t_sorthdr *p2,const int sort)
 {
 	t_wndprog_data *pline1 = (t_wndprog_data *)p1;
 	t_wndprog_data *pline2 = (t_wndprog_data *)p2;
 
-	if (pline1->line > pline2->line) 
+	if (pline1->line > pline2->line)
 		return 1;
-	else if (pline1->line < pline2->line) 
+	else if (pline1->line < pline2->line)
 		return -1;
 	return 0;
 }
 
-int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int column) 
-{
+// destructor
+void __cdecl wndprog_dest_function(t_sorthdr *p) {
+}
 
+
+//int wndprog_get_text(char *s, char *mask, int *select, t_sorthdr *ph, int column)
+int __cdecl wndprog_get_text(wchar_t *s,uchar *mask,int *select,struct t_table *tb, t_sorthdr *ph,int column,void *cache)
+{
 	unsigned int ret;
 	t_wndprog_data * pline = (t_wndprog_data *)ph;
 	t_wndprog_data * plineBf;
 	t_dump * cpuasm;
-	
+
 	if (column == 2 || column == 3) {
-		plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line-1);
+		plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),pline->line-1);
 		if (plineBf != NULL)
 			while (plineBf->type == PROG_TYPE_COMMENT && plineBf->line > 1)
-				plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineBf->line-1);
+				plineBf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),plineBf->line-1);
 
-		//t_wndprog_data *plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),pline->line+1);
+		//t_wndprog_data *plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),pline->line+1);
 		//if (plineAf != NULL)
 		//	while (plineAf->type == PROG_TYPE_COMMENT && plineAf->line < ollylang->script.size())
-		//		plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),plineAf->line+1);
+		//		plineAf = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),plineAf->line+1);
 	}
 
 	int p;
 
-    ret = sprintf(s,"");
+	ret = wsprintf(s,L"");
 
-	switch (column) 
+	switch (column)
 	{
+		case DF_CACHESIZE:                 // Request for draw cache size
+			return 0;
+		case DF_FILLCACHE:                 // Request to fill draw cache
+			return 0;
+		case DF_FREECACHE:                 // Request to free cached resources
+			// We don't need to free cached resources when drawing ends.
+			return 0;
+		case DF_NEWROW:                    // Request to start new row in window
+			return 0;
+
 		case 0:
 			if (pline->line>0)
-			  ret = sprintf(s, "%d", pline->line);
+			  ret = wsprintf(s, L"%d", pline->line);
 			else if (pline->line==-1)
-			  ret = sprintf(s, "LOAD");
+			  ret = wsprintf(s, L"LOAD");
 
 			if (pline->type & PROG_TYPE_COMMENT) //comment
 			{
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
 			}
-			if (pline->pause) 
+			if (pline->pause)
 			{
 				//Hilite Breakpoint
 				*select=DRAW_MASK;
 				memset(mask,DRAW_BREAK,ret);
 
 			}
-			else if (pline->line == ollylang->pgr_scriptpos) 
+			else if (pline->line == ollylang->pgr_scriptpos)
 			{
-				//Hilite Current Line	
+				//Hilite Current Line
 				*select=DRAW_MASK;
 				memset(mask,DRAW_EIP,ret);
-				
+
 			}
-			else if (pline->type & PROG_TYPE_LABEL) 
+			else if (pline->type & PROG_TYPE_LABEL)
 			{
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
@@ -535,42 +561,42 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 		case 1:
 			if (pline->type & PROG_TYPE_COMMENT)
 			{
-				ret = sprintf(s, "%s", &pline->command);
+				ret = wsprintf(s, L"%s", &pline->command);
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
 			}
 			else if ((pline->type & PROG_TYPE_LABEL) || pline->line == 0)
 			{
-				ret = sprintf(s, "%s", &pline->command[1]);
+				ret = wsprintf(s, L"%s", &pline->command[1]);
 				memset(&s[ret],'_',PROG_CMD_LEN-ret);
 				ret=PROG_CMD_LEN;
 				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);				
+				memset(mask,DRAW_GRAY,ret);
 			}
 			else if (pline->type & PROG_TYPE_ASM) {
-				ret = sprintf(s, " %s", pline->command);
+				ret = wsprintf(s, L" %s", pline->command);
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
 			}
 			else
-			{	
+			{
 				if (pline->type & PROG_ATTR_IFLEVEVN) {
-					ret = sprintf(s, " %s", pline->command);
+					ret = wsprintf(s, L" %s", pline->command);
 				} else if (pline->type & PROG_ATTR_IFLEVODD) {
-					ret = sprintf(s, "  %s", pline->command);
+					ret = wsprintf(s, L"  %s", pline->command);
 				} else
-					ret = sprintf(s, "%s", pline->command);
+					ret = wsprintf(s, L"%s", pline->command);
 				*select=DRAW_MASK;
 				memset(mask,DRAW_NORMAL,ret);
 			}
 
-			if (pline->line == ollylang->pgr_scriptpos && ret>0) 
+			if (pline->line == ollylang->pgr_scriptpos && ret>0)
 			{
-				//Hilite Current Line	
+				//Hilite Current Line
 				*select=DRAW_MASK;
-				memset(mask,DRAW_EIP,ret);			
+				memset(mask,DRAW_EIP,ret);
 			}
-			else if ((pline->type & PROG_ATTR_EXECUTED) && !(pline->type & PROG_TYPE_COMMENT) && ret>0) 
+			else if ((pline->type & PROG_ATTR_EXECUTED) && !(pline->type & PROG_TYPE_COMMENT) && ret>0)
 			{
 				//Hilite executed lines
 				*select=DRAW_MASK;
@@ -591,46 +617,36 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				*mask=DRAW_BREAK;
 			}
 
-			//DRAW JUMP ARROWS 
-			if (pline->jumpto > 0) 
+			//DRAW JUMP ARROWS
+			if (pline->jumpto > 0)
 			{
-				
-				if (pline->jumpto < pline->line) 
+
+				if (pline->jumpto < pline->line)
 				{
-					*s='U'; 
-				} 
-				else 
+					*s='U';
+				}
+				else
 				{
 					*s='D';
 				}
 				*select=DRAW_MASK;
 				*mask=DRAW_GRAPH;
 
-			} 
+			}
 			break;
 		case 2:
-			if (pline->type & PROG_TYPE_LABEL) 
+			if (pline->type & PROG_TYPE_LABEL)
 			{
 				ret=PROG_RES_LEN;
 				memset(s,'_',ret);
 				*select=DRAW_MASK;
 				memset(mask,DRAW_GRAY,ret);
-				
-				//to draw all special chars
-				//ret=30;strcpy(s,"N .BIJKESTU<Duvdeijrsfgahztbcl");
-				//ret=30;strcpy(s,"Duvdeijrsfgahztbcl");
-				//ret=30;strcpy(s,"abcdefghijklmnopqrstuvwxyz");
-				//ret=30;strcpy(s,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-				//ret=30;strcpy(s,"0123456789.&é'(-è_çà)^$ù*!;,");
-				//ret=30;strcpy(s,"?./§%µ¨£°+^@`|[]¤~\"");
-				//ret=30;strcpy(s,"?./§%µ¨£°");
-				//memset(mask,DRAW_GRAPH,ret);
 			}
-			else if (*pline->result != NULL) 
+			else if (*pline->result != NULL)
 			{
 				if (plineBf)
 				{
-					if (strcmp(plineBf->result,pline->result)==0) 
+					if (wcscmp(plineBf->result,pline->result)==0)
 					{
 						//Same result as previous line
 						*select=DRAW_MASK;
@@ -640,11 +656,11 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 						break;
 					}
 				}
-				ret = sprintf(s, "%s", pline->result);
+				ret = wsprintf(s, L"%s", pline->result);
 			}
 			else if ((plineBf != NULL) && pline->type == PROG_TYPE_COMMENT)
 			{
-				if (*plineBf->result != NULL) 
+				if (*plineBf->result != NULL)
 				{
 					//Same result as previous line
 					*select=DRAW_MASK;
@@ -652,34 +668,34 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 					ret=2;
 					memset(mask,DRAW_GRAPH,ret);
 					break;
-				}			
+				}
 			}
 			break;
 		case 3:
-			if (pline->type & PROG_TYPE_LABEL) 
+			if (pline->type & PROG_TYPE_LABEL)
 			{
 				memset(s,'_',9);
 				ret=9;
 				*select=DRAW_MASK;
-				memset(mask,DRAW_GRAY,ret);				
+				memset(mask,DRAW_GRAY,ret);
 			}
-			else if (pline->eip != 0) 
+			else if (pline->eip != 0)
 			{
-				cpuasm = (t_dump*) Plugingetvalue(VAL_CPUDASM);
+				cpuasm =  Getcpudisasmdump();
 
-				if (plineBf) 
+				if (plineBf)
 				{
-					if (plineBf->eip == pline->eip) 
+					if (plineBf->eip == pline->eip)
 					{
-						
+
 						//if (plineAf)
 						//	if (plineAf->eip != pline->eip) goto draw_normal_eip;
-						
+
 						*select=DRAW_MASK;
 						*s=' ';
-						if (cpuasm->sel0 == pline->eip) 
+						if (cpuasm->sel0 == pline->eip)
 							s[1]=D_PATH;
-						else 
+						else
 							s[1]=D_GRAYPATH;
 						ret=2;
 						memset(mask,DRAW_GRAPH,ret);
@@ -688,36 +704,36 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 				}
 
 				//draw_normal_eip:
-				ret = sprintf(s, "%08X", pline->eip);
-				
-				if (cpuasm->sel0 == pline->eip) 
+				ret = wsprintf(s, L"%08X", pline->eip);
+
+				if (cpuasm->sel0 == pline->eip)
 				{
 					//Hilite current eip
 					*select=DRAW_MASK;
-					memset(mask,DRAW_HILITE,ret);				
+					memset(mask,DRAW_HILITE,ret);
 				}
 			}
 			else if ((plineBf != NULL) && pline->type == PROG_TYPE_COMMENT)
 			{
-				if (plineBf->eip != 0) 
+				if (plineBf->eip != 0)
 				{
 					//Same result as previous line
 					*select=DRAW_MASK;
 					*s=' ';
-					cpuasm = (t_dump*) Plugingetvalue(VAL_CPUDASM);
-					if (cpuasm->sel0 == plineBf->eip) 
+					cpuasm = Getcpudisasmdump();;
+					if (cpuasm->sel0 == plineBf->eip)
 						s[1]=D_PATH;
-					else 
+					else
 						s[1]=D_GRAYPATH;
 					ret=2;
 					memset(mask,DRAW_GRAPH,ret);
 					break;
-				}			
-			}		
+				}
+			}
 			break;
 		case 4:
 			if (pline->type & PROG_TYPE_LABEL)
-			{   
+			{
 				memset(s,'_',PROG_VAL_LEN);
 				ret=PROG_VAL_LEN;
 				*select=DRAW_MASK;
@@ -725,32 +741,32 @@ int wndprog_get_text(char *s, char *mask, int *select, t_sortheader *ph, int col
 			}
 			else if (*pline->values != NULL)
 			{
-				if (pline->values[0] != ',') 
-					ret = sprintf(s, "%s", pline->values);
-				else 
+				if (pline->values[0] != ',')
+					ret = wsprintf(s, L"%s", pline->values);
+				else
 				{
-					ret = sprintf(s, "%s", &pline->values[1]);
-					p = strchr(&pline->values[1],',')-pline->values;
-					if (p>0) 
+					ret = wsprintf(s, L"%s", &pline->values[1]);
+					p = wcschr(&pline->values[1],',') - pline->values;
+					if (p>0)
 					{
 						*select=DRAW_MASK;
 						memset(mask,DRAW_NORMAL,ret);
 						memset(mask,DRAW_HILITE,p-1);
 					}
 				}
-			}  
+			}
 			break;
 
 	}
 
-    if (!ret) ret=strlen(s);
+	if (!ret) ret=wcslen(s);
 
   return ret;
 }
 
 void InvalidateProgWindow(void)
 {
-	if (ollylang->wndProg.hw!=NULL)	
+	if (ollylang->wndProg.hw!=NULL)
 		InvalidateRect(ollylang->wndProg.hw, NULL, FALSE);
 }
 
@@ -762,18 +778,18 @@ void FocusProgWindow(void)
 	}
 }
 
-bool editProgLine(t_wndprog_data *ppl) 
+bool editProgLine(t_wndprog_data *ppl)
 {
-	char buffer[PROG_CMD_LEN]={0};
-	string s=ollylang->script[ppl->line-1];
+	wchar_t buffer[PROG_CMD_LEN]={0};
+	wstring s=ollylang->script[ppl->line-1];
 
-	strcpy(buffer,(char*)trim(s).c_str());
+	wcscpy(buffer,(wchar_t*)w_trim(s).c_str());
 
-	if (Gettext("Edit script line...",buffer,0,0,FIXEDFONT) != -1) {
+	if (Gettext(L"Edit script line...",buffer,0,0,FIXEDFONT) != -1) {
 
 		int lvl = ppl->type & PROG_ATTR_IFLEVELS;
-		strcpy(ppl->command," ");
-		strncat(ppl->command,buffer,PROG_CMD_LEN-2);
+		wcscpy(ppl->command, L" ");
+		wcsncat(ppl->command, buffer, PROG_CMD_LEN-2);
 		s.assign(buffer);
 
 		ollylang->script.erase(ollylang->script.begin()+ppl->line-1);
@@ -782,10 +798,10 @@ bool editProgLine(t_wndprog_data *ppl)
 		ppl->type = analyseProgLineType(s,ppl->line);
 		ppl->type |= lvl;
 		if (ppl->type & PROG_TYPE_COMMAND) {
-			s=trim(s);
+			s=w_trim(s);
 		}
 		if (ppl->type & PROG_ATTR_IFLEVELS) {
-			s=" "+trim(s);
+			s=L" "+w_trim(s);
 		}
 
 		InvalidateProgWindow();
@@ -794,30 +810,30 @@ bool editProgLine(t_wndprog_data *ppl)
 	return false;
 }
 
-int analyseProgLineType(string &scriptline, int linenumber) 
+int analyseProgLineType(wstring &scriptline, int linenumber)
 {
 
 	bool bComment=false;
 	int p, result;
 
-	string cleanline=scriptline;
-	p=scriptline.find("//");
+	wstring cleanline=scriptline;
+	p=scriptline.find(L"//");
 	if (p > 0) {
-		if (scriptline.find("\"")!=string::npos) {
+		if (scriptline.find(L"\"")!=wstring::npos) {
 
-			if (p > scriptline.rfind("\"") || p < scriptline.find("\""))
+			if (p > scriptline.rfind(L"\"") || p < scriptline.find(L"\""))
 				scriptline.erase(p,scriptline.length()-p);
 
 		} else
 			scriptline.erase(p,scriptline.length()-p);
 	}
-	if (trim(scriptline) == "") {
+	if (w_trim(scriptline).empty()) {
 		scriptline = cleanline;
 		bComment = true;
 	}
 
-	if (scriptline.find(";")==0) {
-		bComment = true;		
+	if (scriptline.find(L";")==0) {
+		bComment = true;
 	}
 
 	if (bComment) {
@@ -826,7 +842,7 @@ int analyseProgLineType(string &scriptline, int linenumber)
 	else {
 		if (scriptline.length() > 0) {
 			if(scriptline.at(scriptline.length() - 1) == ':') {
-				ollylang->labels.insert(pair<string, int>(scriptline.substr(0, scriptline.length() - 1), linenumber));
+				ollylang->labels.insert(pair<wstring, int>(scriptline.substr(0, scriptline.length() - 1), linenumber));
 				result = PROG_TYPE_LABEL;
 			}
 		}
@@ -838,17 +854,17 @@ int analyseProgLineType(string &scriptline, int linenumber)
 	return result;
 }
 
-int addProgLine(int line, string & command, int type) 
+int addProgLine(int line, wstring & command, int type)
 {
 
 	t_wndprog_data pline={0};
 
 	pline.line = line;
 	pline.size = 1;
-	strcpy(pline.command," ");
-	strncat(pline.command,command.c_str(),PROG_CMD_LEN-2);
-	strcpy(pline.result,"");	
-	strcpy(pline.values,"");
+	wcscpy(pline.command,L" ");
+	wcsncat(pline.command,command.c_str(),PROG_CMD_LEN-2);
+	wcscpy(pline.result,L"");
+	wcscpy(pline.values,L"");
 
 	pline.type = type;
 
@@ -856,25 +872,25 @@ int addProgLine(int line, string & command, int type)
 		pline.type |= PROG_TYPE_COMMAND;
 
 	pline.eip = 0;
-		
+
 	ollylang->tProgLines.push_back(pline);
 
-	Addsorteddata(&(ollylang->wndProg.data),&(ollylang->tProgLines.back()));
-	
+	Addsorteddata(&(ollylang->wndProg.sorted),&(ollylang->tProgLines.back()));
+
 	InvalidateProgWindow();
 
 	return 1;
 }
 
 //Change type to 2 to hilite executed commands
-int setProgLineEIP(int line, int eip) 
+int setProgLineEIP(int line, int eip)
 {
 
 	if (line>ollylang->script.size()) return false;
 
 	t_wndprog_data *ppl;
 
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
 
 	if (!(ppl->type & PROG_TYPE_ASM))
 		ppl->type |= PROG_ATTR_EXECUTED;
@@ -882,9 +898,9 @@ int setProgLineEIP(int line, int eip)
 	//if (!(ppl->type & PROG_TYPE_COMMAND)
 	//	return true;
 
-    ppl->eip = eip;
-	
-	if (ollylang->wndProg.hw!=NULL)	
+	ppl->eip = eip;
+
+	if (ollylang->wndProg.hw!=NULL)
 	{
 		if (!ollylang->require_ollyloop) {
 			Selectandscroll(&ollylang->wndProg,ollylang->pgr_scriptpos,2);
@@ -895,59 +911,59 @@ int setProgLineEIP(int line, int eip)
 	return true;
 }
 
-int setProgLineValue(int line, DWORD value) 
+int setProgLineValue(int line, DWORD value)
 {
-	char buf[17];
-	sprintf(buf, "%X", value);
-	string str(buf);
+	wchar_t buf[17];
+	wsprintf(buf, L"%X", value);
+	wstring str(buf);
 	return setProgLineValue(line, str);
 }
 
-int setProgLineValue(int line, string  &value) 
+int setProgLineValue(int line, wstring  &value)
 {
 
 	if (line>ollylang->script.size()) return 0;
 
 	t_wndprog_data *ppl;
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
 
 	if (!(ppl->type & PROG_TYPE_COMMAND))
 		return 1;
 
-	string values;
+	wstring values;
 
 	values = CleanString(value);
 
 	//Variable History
 
-	if (ollylang->showVarHistory && strcmp(ppl->values,"")) {
+	if (ollylang->showVarHistory && wcscmp(ppl->values,L"")) {
 		if ( values.length() < PROG_VAL_LEN-2) {
-			if (ppl->values[0] != ',' && ppl->values[0] != '®' && value.compare("®") != 0)
-				values += " ";
+			if (ppl->values[0] != ',' && ppl->values[0] != '®' && value.compare(L"®") != 0)
+				values += L" ";
 			values.append(ppl->values);
 		}
 	}
 
-	strncpy(ppl->values,values.c_str(),PROG_VAL_LEN-1);
+	wcsncpy(ppl->values,values.c_str(),PROG_VAL_LEN-1);
 
 	ppl->values[PROG_VAL_LEN-1] = 0;
- 
+
 	InvalidateProgWindow();
 
 	return 1;
 }
 
-int setProgLineValueFloat(int line, long double value) 
+int setProgLineValueFloat(int line, long double value)
 {
-	char buf[128];
-	sprintf(buf, "%lf", value);
-	string str(buf);
-	while (true) 
+	wchar_t buf[128];
+	wsprintf(buf, L"%lf", value);
+	wstring str(buf);
+	while (true)
 	{
-		if (str.length() <= 3) break; 
+		if (str.length() <= 3) break;
 		if (str[str.length()-1] == '0')
 			str.erase(str.length()-1,1);
-		else 
+		else
 			break;
 	}
 	return setProgLineValue(line, str);
@@ -961,7 +977,7 @@ int setProgLineResult(int line, var& result)
 		setProgLineResultFloat(line,result.flt);
 	else {
 		if(result.str.length() && !result.isbuf)
-			setProgLineResult(line,"\""+result.str+"\"");
+			setProgLineResult(line,L"\""+result.str+L"\"");
 		else {
 			setProgLineResult(line,result.str);
 		}
@@ -970,49 +986,49 @@ int setProgLineResult(int line, var& result)
 	return true;
 }
 
-int setProgLineResult(int line, DWORD result) 
+int setProgLineResult(int line, DWORD result)
 {
-	char buf[17];
-	sprintf(buf, "%X", result);
-	string str(buf);
+	wchar_t buf[17];
+	wsprintf(buf, L"%X", result);
+	wstring str(buf);
 	return setProgLineResult(line, str);
 }
 
 int setProgLineResultFloat(int line, long double result) {
-	char buf[128];
-	sprintf(buf, "%lf", result);
-	string str(buf);
-	while (true) 
+	wchar_t buf[128];
+	wsprintf(buf, L"%lf", result);
+	wstring str(buf);
+	while (true)
 	{
-		if (str.length() <= 3) break; 
+		if (str.length() <= 3) break;
 		if (str[str.length()-1] == '0')
 			str.erase(str.length()-1,1);
-		else 
+		else
 			break;
 	}
 	return setProgLineResult(line, str);
 }
 
-int setProgLineResult(int line, string& result)
+int setProgLineResult(int line, wstring& result)
 {
 
-	if (line>ollylang->script.size()) return 0;
-	
-	char values[PROG_VAL_LEN];
+	if (line > ollylang->script.size()) return 0;
+
+	wchar_t values[PROG_VAL_LEN];
 	t_wndprog_data *ppl;
-	
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
-	
+
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
+
 	if (ppl->type & PROG_TYPE_LABEL)
 		return false;
 
-	strncpy(ppl->result,CleanString(result).c_str(),PROG_RES_LEN);
-	if (strcmp(ppl->values,"")) 
+	wcsncpy(ppl->result,CleanString(result).c_str(),PROG_RES_LEN);
+	if (wcscmp(ppl->values,L""))
 	{
-		if (ppl->values[0] != ',') 
+		if (ppl->values[0] != ',')
 		{
-			strcpy(values,ppl->values);
-			strncpy(&ppl->values[1],values,PROG_VAL_LEN-2);
+			wcscpy(values,ppl->values);
+			wcsncpy(&ppl->values[1],values,PROG_VAL_LEN-2);
 			ppl->values[0]=',';
 		}
 	}
@@ -1025,7 +1041,7 @@ void clearProgLines()
 	ollylang->pgr_scriptpos=0;
 	if (!ollylang->tProgLines.empty())
 	{
-		Deletesorteddatarange(&(ollylang->wndProg.data),0,0xffffffff);
+		Deletesorteddatarange(&(ollylang->wndProg.sorted),0,0xffffffff);
 		ollylang->tProgLines.clear();
 		InvalidateProgWindow();
 	}
@@ -1038,16 +1054,16 @@ void resetProgLines()
 	t_wndprog_data *ppl;
 
 	while (iter!=ollylang->tProgLines.end())
-	{	
-		ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
-		
+	{
+		ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
+
 		//reset executed color
 		if ((ppl->type & PROG_TYPE_COMMAND)) //ignore labels/comments
 			ppl->type &= PROG_TYPE_COMMAND | PROG_ATTR_IFLEVELS;
-		
-		strcpy(ppl->result,"");	
-		strcpy(ppl->values,"");
-		
+
+		wcscpy(ppl->result,L"");
+		wcscpy(ppl->values,L"");
+
 		//ppl->jumpto = 0;
 		ppl->eip = 0;
 
@@ -1058,21 +1074,21 @@ void resetProgLines()
 }
 
 
-int getProgLineType(int line) 
+int getProgLineType(int line)
 {
 	t_wndprog_data *ppl;
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
 	if (ppl==NULL)
-		return false; 
+		return false;
 
 	return (ppl->type & PROG_TYPE);
 
 }
 
-int setProgLineAttr(int line,int attr) 
+int setProgLineAttr(int line,int attr)
 {
 	t_wndprog_data *ppl;
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
 	if (ppl==NULL)
 		return false;
 
@@ -1082,15 +1098,15 @@ int setProgLineAttr(int line,int attr)
 	return true;
 }
 
-int isProgLineComment(int line) 
+int isProgLineComment(int line)
 {
 
 	t_wndprog_data *ppl;
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
 	if (ppl==NULL)
 		return false;
 
-	if (ppl->type & PROG_TYPE_COMMENT) 
+	if (ppl->type & PROG_TYPE_COMMENT)
 	{
 		return true;
 	}
@@ -1099,15 +1115,15 @@ int isProgLineComment(int line)
 
 }
 
-int isProgLineBP(int line) 
+int isProgLineBP(int line)
 {
 
 	t_wndprog_data *ppl;
-	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.data),line);
+	ppl = (t_wndprog_data *) Getsortedbyselection(&(ollylang->wndProg.sorted),line);
 	if (ppl==NULL)
 		return false;
-	
-	if (ppl->pause && ollylang->wndProg.hw) 
+
+	if (ppl->pause && ollylang->wndProg.hw)
 	{
 		focusonstop=4;
 	}
