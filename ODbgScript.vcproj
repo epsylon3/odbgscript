@@ -55,8 +55,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zc:wchar_t-"
-				Optimization="3"
-				InlineFunctionExpansion="0"
+				Optimization="2"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="C:\WinDDK\7600.16385.1\inc\api\crt\stl60;C:\WinDDK\7600.16385.1\inc\api;C:\WinDDK\7600.16385.1\inc\crt;C:\WinDDK\7600.16385.1\inc\crt\sys;C:\WinDDK\7600.16385.1\inc\mfc42"
@@ -288,6 +288,15 @@
 				RelativePath="HelperFunctions.cpp"
 				>
 				<FileConfiguration
+					Name="ReleaseWDK|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						FavorSizeOrSpeed="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="ToDebug|Win32"
 					>
 					<Tool
@@ -305,7 +314,8 @@
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						Optimization="2"
+						Optimization="0"
+						FavorSizeOrSpeed="0"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ODBGSCRIPT_EXPORTS;_WINDLL;UNICODE;_UNICODE;$(NoInherit)"
 					/>
 				</FileConfiguration>
@@ -321,6 +331,14 @@
 			<File
 				RelativePath="OllyLang.cpp"
 				>
+				<FileConfiguration
+					Name="ReleaseWDK|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="ToDebug|Win32"
 					>
