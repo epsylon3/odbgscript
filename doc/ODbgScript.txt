@@ -1069,13 +1069,13 @@ Examples:
 	findop 401000, #6A??# // find next PUSH of something
 
 
-FINDOPPREV addr, what
+FINDOPREV addr, what
 -----------------
 Searches code backwards starting at addr for an instruction that begins with the specified bytes. 
 It sets the reserved $RESULT variable to the start of the found instruction. If $RESULT == 0 nothing was found.
 The search string can also use the wildcard "??" (see below).
 Example:
-	FINDOPPREV, #68??????00# // find next PUSH 00xxxxxx backwards
+	FINDOPREV, #68??????00# // find next PUSH 00xxxxxx backwards
 
 
 
